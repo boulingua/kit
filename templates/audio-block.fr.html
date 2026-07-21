@@ -1,0 +1,26 @@
+{{- /* Section audio d'une unité. Lit data/audio/<fichier>.json (généré par
+       _scripts/build_audio.py avec une voix française native) et affiche une
+       section « Écouter » accessible : un lecteur par segment, avec sa
+       transcription. Ne rend rien tant qu'aucun audio n'existe pour l'unité. */ -}}
+{{- $key := .File.ContentBaseName -}}
+{{- with (index site.Data.audio $key) -}}
+<section class="audio-section" id="audio">
+  <h2>Écouter</h2>
+  <p class="audio-intro">Le vocabulaire, les dialogues et les textes de cette
+    unité en audio, dits par une voix native. Le texte parlé figure en dessous.</p>
+  {{- range . }}
+  <div class="audio-item">
+    <div class="audio-item-head">
+      <span class="audio-label">{{ .label }}</span>
+      <audio controls preload="none" src="{{ .file | relURL }}">
+        Votre navigateur ne prend pas en charge l'audio.
+      </audio>
+    </div>
+    <details class="audio-transcript">
+      <summary>Afficher le texte</summary>
+      <p>{{ .transcript | replaceRE "\n" "<br>" | safeHTML }}</p>
+    </details>
+  </div>
+  {{- end }}
+</section>
+{{- end -}}

@@ -1,0 +1,27 @@
+{{- /* Audio section for a unit. Reads data/audio/<filename>.json (generated
+       by scripts/build_audio.py with a native German voice) and renders an
+       accessible "Hören" section: one player per segment with its transcript.
+       Degrades to nothing when no audio exists for the unit yet. */ -}}
+{{- $key := .File.ContentBaseName -}}
+{{- with (index site.Data.audio $key) -}}
+<section class="audio-section" id="audio">
+  <h2>Hören</h2>
+  <p class="audio-intro">Wortschatz, Dialoge und Texte dieser Einheit als Audio,
+    gesprochen von einer muttersprachlichen Stimme. Der gesprochene Text steht
+    jeweils darunter.</p>
+  {{- range . }}
+  <div class="audio-item">
+    <div class="audio-item-head">
+      <span class="audio-label">{{ .label }}</span>
+      <audio controls preload="none" src="{{ .file | relURL }}">
+        Ihr Browser unterstützt kein Audio.
+      </audio>
+    </div>
+    <details class="audio-transcript">
+      <summary>Text anzeigen</summary>
+      <p>{{ .transcript | replaceRE "\n" "<br>" | safeHTML }}</p>
+    </details>
+  </div>
+  {{- end }}
+</section>
+{{- end -}}
