@@ -11,7 +11,7 @@ Usage:
     e.g. build_audio.py .../daf voices/de_DE-thorsten-medium.onnx de 'content/kurs_*/units/*.md'
 Local, LLM-free. Idempotent (skips segments whose text hash is unchanged).
 """
-import sys, re, json, hashlib, subprocess, tempfile, glob
+import sys, re, json, hashlib, subprocess, tempfile, glob, os
 from pathlib import Path
 
 repo = Path(sys.argv[1]); VOICE = sys.argv[2]; LANG = sys.argv[3]; UNITS_GLOB = sys.argv[4]
@@ -109,11 +109,17 @@ def main():
         if not m: continue
         fm, body = m.group(1), m.group(2)
         # Only voice ENRICHED units — their presentation is an .odp deck.
-        # (Un-authored units still point at a placeholder .pptx.)
-        if '.odp' not in fm:
+        # (Un-authored units still point at a placeholder .pptx.) Set
+        # AUDIO_ALL=1 for sites whose units are already rich (e.g. efl).
+        if os.environ.get('AUDIO_ALL') != '1' and '.odp' not in fm:
             continue
-        slug_m = re.search(r'unit_slug:\s*["\']?([\w-]+)', fm) or re.search(r'^slug:\s*["\']?([\w-]+)', fm, re.M)
-        slug = uf.stem  # filename stem is the stable key
+        # For leaf bundles (index.md in a per-unit folder, e.g. efl) the
+        # stable key is the FOLDER name (== Hugo's .File.ContentBaseName);
+        # for single-file units it's the filename stem.
+        slug = uf.parent.name if uf.name == 'index.md' else uf.stem
+        # Skip separate exam pages (assessment); voice the teaching units.
+        if slug.endswith('-exam') or slug.endswith('_exam'):
+            continue
         segs = extract_segments(body)
         if not segs: continue
         outdir = AUDIO / slug
