@@ -102,3 +102,9 @@
   hover: "#A01C82"
   dark: "#E77ECE"
   dark_hover: "#EFA9DE"
+- code: pfa
+  language: Persian
+  accent: "#B5892B"
+  hover: "#8C6A21"
+  dark: "#E7C97E"
+  dark_hover: "#EFDCA9"
