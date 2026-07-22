@@ -1,0 +1,29 @@
+{{/*
+  Override of Coder's page.html. The paired download block is rendered
+  ONCE, as the last section of the article — never inline above or
+  twice. The shortcode {{< downloads >}} is a no-op for the same reason
+  (any leftover calls in content render nothing).
+*/}}
+<section class="container page">
+  <article>
+    <header>
+      <h1 class="title">
+        <a class="title-link" href="{{ .Permalink | safeURL }}">
+          {{ .Title }}
+        </a>
+      </h1>
+    </header>
+
+    {{ .Content }}
+
+    {{ $links := partial "material-links.html" . }}
+    {{- with $links }}
+    <section class="downloads-section" id="downloads">
+      <h2>Downloads</h2>
+      {{ . | safeHTML }}
+    </section>
+    {{- end }}
+
+    {{ partial "audio-block.html" . }}
+  </article>
+</section>

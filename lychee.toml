@@ -1,0 +1,18 @@
+# lychee config — keep here so the lychee-action's bash entrypoint
+# doesn't shell-expand `$1` from remap patterns. Lychee's pattern
+# language uses `$1`, `$2`, ... for regex backrefs.
+
+no_progress = true
+offline = true
+
+# Preconnect-only domains return 404 on a bare-domain GET (the browser
+# uses them for DNS warmup, not as documents). Don't fail the build on
+# these; they're not real broken links.
+exclude = [
+  # VG Wort: the counting-pixel host (vgNN.met.vgwort.de) and www.vgwort.de
+  # (linked from /datenschutz/) reject automated requests; the pixels are the
+  # author's statutory marks, not navigational links — never link-check them.
+  '^https?://([a-z0-9-]+\.)*vgwort\.de',
+  '^https?://fonts\.googleapis\.com/?$',
+  '^https?://fonts\.gstatic\.com/?$',
+]

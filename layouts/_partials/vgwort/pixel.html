@@ -1,0 +1,12 @@
+{{- /* VG Wort counting pixel (body copy). Uses the shared resolver
+       (_partials/vgwort/url.html) so it can never disagree with the <head>
+       preload. Rendered EAGERLY — never lazy, no scrolling needed — and hidden
+       off-screen with visibility:hidden, which still loads (unlike
+       display:none). The pixel is the author's statutory VG Wort remuneration
+       and is emitted unconditionally, gated by no user setting or consent. */ -}}
+{{- with (partial "vgwort/url.html" .) -}}
+<div style="display:inline"><img src="{{ . | safeURL }}" width="1" height="1" alt=""
+  loading="eager" fetchpriority="high" decoding="async" referrerpolicy="no-referrer"
+  aria-hidden="true"
+  style="position:absolute!important;width:1px;height:1px;left:-9999px;top:auto;visibility:hidden" /></div>
+{{- end -}}

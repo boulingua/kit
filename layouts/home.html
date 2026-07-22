@@ -1,0 +1,18 @@
+{{/*
+  Override of Coder's home.html. The DaF site is a curriculum site,
+  not a personal blog with avatar/author/social — so we render the
+  content of _index.md directly, just like a single.html.
+*/}}
+{{ define "title" }}{{ .Site.Title }}{{ end }}
+{{ define "content" }}
+<section class="container">
+  <article class="post post-page">
+    <header class="post-header">
+      <h1 class="post-title">{{ .Title }}</h1>
+    </header>
+    <div class="post-content">
+      {{ .Content }}
+    </div>
+  </article>
+</section>
+{{ end }}

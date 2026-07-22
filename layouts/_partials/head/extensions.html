@@ -1,0 +1,26 @@
+{{- /* Data-driven accent: pick this course's signature colour from
+       data/accents.yaml by the site `code` param. Overrides the fallback in
+       custom.css, so a new course only sets `code` — never edits CSS. */ -}}
+{{- $code := site.Params.code -}}
+{{- range hugo.Data.accents -}}{{- if eq .code $code -}}
+<style>:root{--boulingua-accent:{{ .accent }};--boulingua-accent-hover:{{ .hover }}}
+@media (prefers-color-scheme:dark){:root{--boulingua-accent:{{ .dark }};--boulingua-accent-hover:{{ .dark_hover }}}}
+body.colorscheme-dark{--boulingua-accent:{{ .dark }};--boulingua-accent-hover:{{ .dark_hover }}}</style>
+{{- end -}}{{- end -}}
+{{- $p := .Site.Params.plausible -}}
+<link rel="preload" as="font" type="font/woff2" crossorigin href="{{ "fonts/source-sans-3-v19-latin_latin-ext-regular.woff2" | relURL }}">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="{{ "fonts/jetbrains-mono-v24-latin_latin-ext-regular.woff2" | relURL }}">
+<link rel="stylesheet" href="{{ "css/fonts.css" | relURL }}">
+{{- if and $p $p.domain }}
+<script defer data-domain="{{ $p.domain }}" src="{{ or $p.src "https://plausible.io/js/script.js" }}"></script>
+<script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
+{{- end }}
+{{- /* VG Wort Zählmarke preload — fires the counting request during <head>
+       parsing, before the body renders: the pixel loads immediately on page
+       open, with no lazy-loading and no scroll to the foot of the page. The
+       author's statutory remuneration must not be restricted by any user
+       setting, so this is an unconditional static resource hint (no JS, no
+       cookie/consent gate). Same resolver as the body <img>, so they agree. */ -}}
+{{- with (partial "vgwort/url.html" .) }}
+<link rel="preload" as="image" href="{{ . | safeURL }}" fetchpriority="high">
+{{- end }}

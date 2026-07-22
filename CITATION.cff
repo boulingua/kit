@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+message: "If you use this course, please cite it."
+title: "boulingua language course"
+authors:
+  - family-names: "Le Boulanger"
+    given-names: "S."
+license: "CC-BY-SA-4.0"
+repository-code: "https://github.com/boulingua/pagegen"

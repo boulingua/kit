@@ -1,0 +1,137 @@
+# ─────────────────────────────────────────────────────────────────────────
+# pagegen — canonical boulingua language-course template (Hugo + hugo-coder).
+#
+# TO INSTANTIATE A NEW LANGUAGE COURSE, change only the marked values:
+#   • baseURL, title, languageCode, defaultContentLanguage, [params].navTitle,
+#     description, keywords
+#   • the [[params.social]] repo URL and [params.plausible].domain
+#   • the [[menu.main]] section entries (mirror your content/<course>/ sections)
+#   • data/accents.yaml already carries every language's signature colour; the
+#     accent is selected by the site `code` (see assets/css/custom.css).
+# Everything else is the shared standard and should NOT be edited per course.
+# ─────────────────────────────────────────────────────────────────────────
+
+baseURL = "https://boulingua.github.io/pagegen/"   # CHANGE per course
+title = "Course Template — S. Le Boulanger"        # CHANGE per course
+languageCode = "en"                                # CHANGE per course
+defaultContentLanguage = "en"                      # CHANGE per course
+enableEmoji = false
+enableRobotsTXT = true
+
+[pagination]
+  pagerSize = 20
+
+[markup.highlight]
+  noClasses = false
+
+[markup.goldmark.renderer]
+  unsafe = true
+
+[markup.tableOfContents]
+  startLevel = 2
+  endLevel = 3
+  ordered = false
+
+# Tags are DECLARED, not implicit — derive them from structured fields.
+[taxonomies]
+  tag = "tags"
+  skill = "skills"
+  level = "levels"
+  topic = "topics"
+
+[params]
+  navTitle = "Course"                              # CHANGE per course (navbar brand)
+  author = "S. Le Boulanger"
+  description = "A boulingua language course — curriculum-aligned units, exams, materials and audio." # CHANGE
+  keywords = "language,course,CEFR,curriculum,OER"  # CHANGE per course
+  dateFormat = "2006-01-02"
+  since = 2025
+  colorScheme = "auto"
+  hideCredits = true
+  # The colour-scheme toggle is a labelled control in the navbar
+  # (layouts/_partials/header.html); disable the theme's floating duplicate
+  # so there is exactly one toggle on the page.
+  hideColorSchemeToggle = true
+  customCSS = ["css/custom.css"]
+  # Site code — selects this course's accent from data/accents.yaml.
+  code = "efl"                                     # CHANGE per course (efl/fle/daf/…)
+  # Content licence, surfaced by pdf attribution + legal pages.
+  license = "CC BY-SA 4.0"
+
+  # IMPORTANT — every sub-table under [params] MUST come AFTER all bare
+  # [params] keys. TOML scopes everything after a header to that header, so
+  # opening [params.plausible] before the keys above would silently move them
+  # under params.plausible and leave the site unstyled. Keep this block LAST.
+  [params.plausible]
+    # Privacy-friendly, cookieless analytics. Set domain to enable; leave
+    # empty to disable (the head partial is guarded on domain).
+    domain = ""                                    # CHANGE per course, e.g. "boulingua.github.io/efl"
+    src = "https://plausible.io/js/script.js"
+
+[[params.social]]
+  name = "GitHub"
+  icon = "fa-brands fa-github fa-2x"
+  weight = 1
+  url = "https://github.com/boulingua/pagegen"     # CHANGE per course
+
+# ── Navigation — mirror your content/<course>/ sections here. ──────────────
+# Start lives behind the navbar brand. Groups have an identifier; children set
+# `parent`. This is the standard menu shape every course follows.
+[[menu.main]]
+  name = "Levels"
+  weight = 2
+  identifier = "levels"
+[[menu.main]]
+  parent = "levels"
+  weight = 21
+  name = "A1 — Beginner (example)"
+  url = "/level-a1/"
+
+[[menu.main]]
+  name = "Materials"
+  weight = 3
+  identifier = "materials"
+[[menu.main]]
+  parent = "materials"
+  weight = 31
+  name = "Slide decks"
+  url = "/materials/presentations/"
+[[menu.main]]
+  parent = "materials"
+  weight = 32
+  name = "Worksheets"
+  url = "/materials/worksheets/"
+
+[[menu.main]]
+  name = "About"
+  weight = 4
+  identifier = "about"
+[[menu.main]]
+  parent = "about"
+  weight = 41
+  name = "About this course"
+  url = "/about/"
+
+[[menu.main]]
+  name = "Legal"
+  weight = 9
+  identifier = "legal"
+[[menu.main]]
+  parent = "legal"
+  weight = 91
+  name = "Impressum"
+  url = "/impressum/"
+[[menu.main]]
+  parent = "legal"
+  weight = 92
+  name = "Datenschutz"
+  url = "/datenschutz/"
+[[menu.main]]
+  parent = "legal"
+  weight = 93
+  name = "Haftungsausschluss"
+  url = "/haftungsausschluss/"
+
+[module]
+  [[module.imports]]
+    path = "github.com/luizdepra/hugo-coder"

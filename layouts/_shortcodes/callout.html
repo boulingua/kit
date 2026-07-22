@@ -1,0 +1,18 @@
+{{/*
+  callout — Quarto-equivalent admonition.
+  Args:
+    type   = note | tip | warning | important | caution   (positional 0 or named)
+    title  = optional heading text (named)
+  Inner Markdown is rendered.
+  Example:
+    {{< callout type="note" >}}**Modell:** Einstieg → Input → ...{{< /callout >}}
+    {{< callout type="warning" title="Achtung" >}}…{{< /callout >}}
+*/}}
+{{- $type := or (.Get "type") (.Get 0) "note" -}}
+{{- $title := .Get "title" -}}
+<div class="callout callout-{{ $type }}">
+  {{- with $title -}}
+  <div class="callout-title">{{ . }}</div>
+  {{- end -}}
+  {{ .Inner | .Page.RenderString (dict "display" "block") }}
+</div>

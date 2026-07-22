@@ -1,0 +1,29 @@
+# Hugo build output + module cache
+/public/
+/resources/
+.hugo_build.lock
+
+# Node (only if a course adds the optional discovery-network graph)
+/node_modules/
+
+# LaTeX build artifacts (materials are generated locally, committed as PDF)
+_materials/build/
+*.aux
+*.log
+*.out
+*.toc
+*.nav
+*.snm
+*.vrb
+
+# TTS/audio cache (audio OGG is committed; hashes are not)
+*.hash
+
+# OS / editor / Python cruft
+.DS_Store
+Thumbs.db
+*.swp
+*~
+__pycache__/
+*.pyc
+.venv/

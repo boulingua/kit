@@ -1,0 +1,74 @@
+{{/*
+  Override of hugo-coder's header.html.
+  Adds support for nested submenus via [[menu.main]] entries that carry
+  a `parent` key. Top-level entries with children render as a hover/click
+  dropdown; childless entries render as plain links — same as upstream.
+*/}}
+<nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="{{ absLangURL "" }}">
+      {{ .Site.Params.navTitle | default .Site.Title }}
+    </a>
+    {{ if or .Site.Menus.main hugo.IsMultilingual }}
+      <input type="checkbox" id="menu-toggle" aria-label="Hauptmenü öffnen / schließen" />
+      <label class="menu-button float-right" for="menu-toggle" aria-hidden="true">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        {{ with .Site.Menus.main }}
+          {{ range sort . }}
+            {{ if not .Parent }}
+              {{ $hasChildren := gt (len .Children) 0 }}
+              <li class="navigation-item{{ if $hasChildren }} has-children{{ end }}">
+                {{ if $hasChildren }}
+                  <span class="navigation-link navigation-parent">{{ .Name }}</span>
+                  <ul class="navigation-submenu">
+                    {{ range sort .Children }}
+                      <li class="navigation-subitem">
+                        <a class="navigation-link" href="{{ index (apply (slice .URL) (.Params.urlFunc | default "relLangURL") ".") 0 }}">{{ .Name }}</a>
+                      </li>
+                    {{ end }}
+                  </ul>
+                {{ else }}
+                  <a class="navigation-link {{ .Params.class }}" href="{{ index (apply (slice .URL) (.Params.urlFunc | default "relLangURL") ".") 0 }}">{{ .Name }}</a>
+                {{ end }}
+              </li>
+            {{ end }}
+          {{ end }}
+        {{ end }}
+        {{/* Colour-scheme toggle — the theme's coder.js binds to
+             #dark-mode-toggle and flips body.colorscheme-light/dark
+             (persisted to localStorage). The floating duplicate is
+             disabled via params.hideColorSchemeToggle so this navbar
+             control is the single toggle element. */}}
+        <li class="navigation-item navigation-item--colorscheme">
+          <button id="dark-mode-toggle" type="button"
+                  class="navigation-link colorscheme-toggle"
+                  aria-label="Farbschema umschalten (hell / dunkel)"
+                  title="Hell / Dunkel">
+            <svg class="cs-icon cs-icon--moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <svg class="cs-icon cs-icon--sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+            <span class="visually-hidden">Hell / Dunkel</span>
+          </button>
+        </li>
+        {{/* Social icons sit as the last <li> in the same nav-list so
+             they ride the same right-aligned flex flow as the menu —
+             matches the efl pattern. */}}
+        {{ with .Site.Params.social }}
+          {{ range sort . "weight" }}
+            <li class="navigation-item navigation-item--social">
+              <a class="navigation-link"
+                 href="{{ .url }}"
+                 rel="me noopener"
+                 aria-label="{{ .name }}"
+                 title="{{ .name }}">
+                <i class="{{ .icon | default "fa-solid fa-link" }}" aria-hidden="true"></i>
+                <span class="visually-hidden">{{ .name }}</span>
+              </a>
+            </li>
+          {{ end }}
+        {{ end }}
+      </ul>
+    {{ end }}
+  </section>
+</nav>

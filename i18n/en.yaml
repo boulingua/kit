@@ -1,0 +1,8 @@
+presentations: { other: "Slide decks" }
+worksheets: { other: "Worksheets" }
+presentation: { other: "Slide deck" }
+worksheet: { other: "Worksheet" }
+download: { other: "Download" }
+listen: { other: "Listen" }
+audio_intro: { other: "Native-voice audio for this unit." }
+exam: { other: "Exam" }

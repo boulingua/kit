@@ -1,0 +1,33 @@
+{{ define "title" }}{{ .Title }} · {{ .Site.Title }}{{ end }}
+{{ define "content" }}
+{{- /* Simple materials listing. The hub page renders its own prose + links to
+       the presentation/worksheet sections. A section with `material_kind` set
+       lists the committed PDFs under static/materials/<kind>/. The discovery
+       "network graph" is intentionally NOT part of the template (bespoke,
+       needs node_modules); a course may add it back per-site. */ -}}
+{{- $kind := .Params.material_kind -}}
+<section class="container page">
+  <article>
+    <header>
+      <h1 class="title">{{ .Title }}</h1>
+      {{ with .Description }}<p class="lead">{{ . }}</p>{{ end }}
+    </header>
+    {{ .Content }}
+    {{ if $kind }}
+      {{- $dir := printf "materials/%ss" $kind -}}
+      <ul class="materials-list">
+      {{- range (readDir (printf "static/%s" $dir)) -}}
+        {{- if strings.HasSuffix .Name ".pdf" -}}
+          <li><a href="{{ (printf "/%s/%s" $dir .Name) | relURL }}">{{ .Name }}</a></li>
+        {{- end -}}
+      {{- end -}}
+      </ul>
+    {{ else }}
+      <ul class="materials-list">
+        <li><a href="{{ "/materials/presentations/" | relURL }}">{{ i18n "presentations" | default "Slide decks" }}</a></li>
+        <li><a href="{{ "/materials/worksheets/" | relURL }}">{{ i18n "worksheets" | default "Worksheets" }}</a></li>
+      </ul>
+    {{ end }}
+  </article>
+</section>
+{{ end }}

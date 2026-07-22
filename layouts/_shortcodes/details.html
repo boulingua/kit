@@ -1,0 +1,15 @@
+{{/*
+  details — collapsible section, replaces Quarto's
+  ::: {.callout-tip collapse="true" title="…"}
+  Args:
+    title    = summary text (named, default "Mehr")
+    type     = visual variant (note | tip | warning ...) — optional
+  Example:
+    {{< details title="Lösungen" type="tip" >}}…{{< /details >}}
+*/}}
+{{- $title := or (.Get "title") "Mehr" -}}
+{{- $type := or (.Get "type") "tip" -}}
+<details class="callout callout-{{ $type }}">
+  <summary>{{ $title }}</summary>
+  {{ .Inner | .Page.RenderString (dict "display" "block") }}
+</details>

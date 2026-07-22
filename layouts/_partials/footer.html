@@ -1,0 +1,40 @@
+{{/*
+  Override of hugo-coder's footer.html with the boulingua/daf
+  footer link strip (Start, Übersicht, Anhang-Seiten, Schwesternsites,
+  Rechtliches, Kontakt).
+*/}}
+{{- if (or (not .Site.Params.hideFooter) (eq .Site.Params.hideFooter false)) }}
+<footer class="footer">
+  <section class="container">
+    <p class="footer-line">
+      DaF · © {{ .Site.Params.author }} · MIT / CC-BY-SA 4.0
+    </p>
+    <p class="footer-links">
+      <a href="{{ "/" | relLangURL }}">Start</a> ·
+      <a href="{{ "/uebersicht/" | relLangURL }}">Übersicht</a> ·
+      <a href="{{ "/formate/" | relLangURL }}">Prüfungsformate</a> ·
+      <a href="{{ "/anhaenge/lernstrategien/" | relLangURL }}">Lernstrategien</a> ·
+      <a href="{{ "/anhaenge/kompetenzbaum/" | relLangURL }}">Kompetenzbaum</a> ·
+      <a href="{{ "/anhaenge/glossar/" | relLangURL }}">Glossar</a> ·
+      <a href="{{ "/anhaenge/typische_fehler/" | relLangURL }}">Typische Fehler</a> ·
+      <a href="{{ "/anhaenge/bewertungsraster/" | relLangURL }}">Bewertungsraster</a> ·
+      <a href="{{ "/literatur/" | relLangURL }}">Literatur</a> ·
+      <a href="{{ "/danksagung/" | relLangURL }}">Danksagung</a>
+    </p>
+    <p class="footer-links">
+      <a href="https://boulingua.github.io/efl/">EFL</a> ·
+      <a href="https://boulingua.github.io/fle/">FLE</a> ·
+      <a href="https://boulingua.github.io/ressources/">Ressourcen</a> ·
+      <strong><a href="{{ "/impressum/" | relLangURL }}">Impressum</a></strong> ·
+      <strong><a href="{{ "/datenschutz/" | relLangURL }}">Datenschutz</a></strong> ·
+      <strong><a href="{{ "/haftungsausschluss/" | relLangURL }}">Haftungsausschluss</a></strong> ·
+      <a href="mailto:277736839+s-leboulanger@users.noreply.github.com">Kontakt</a>
+    </p>
+    {{- if (or (not .Site.Params.hideCredits) (eq .Site.Params.hideCredits false)) }}
+    <p class="footer-line credits">
+      Mit <a href="https://gohugo.io/">Hugo</a> + <a href="https://github.com/luizdepra/hugo-coder/">Coder</a> gebaut.
+    </p>
+    {{- end }}
+  </section>
+</footer>
+{{- end }}
