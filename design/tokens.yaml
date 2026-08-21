@@ -1,0 +1,175 @@
+# tokens.yaml — the boulingua design system, and the only file in this
+# organisation where a colour may be written by hand.
+#
+# Everything else is generated from here by build_tokens.py:
+#
+#   assets/css/tokens.css          loaded before custom.css
+#   latex/boulingua-tokens.sty     \RequirePackage'd by both .sty files
+#   data/accents.yaml              head/extensions.html, brand/make_icon.py
+#   design/tokens.json             the Python generators and gates
+#   website/content/design.md      the public colour page
+#
+# Before this file there were two independent sources for one palette: the CSS
+# custom properties and 86 \definecolor literals split across two .sty files,
+# kept in agreement by hand. They were not in agreement — Persian was added to
+# the CSS side and never reached either .sty, so `pfa` had a web accent and no
+# print accent for as long as it existed. That is the failure this file exists
+# to make impossible, and it is why the .sty palette blocks are deleted rather
+# than checked.
+#
+# Gate A7 proves the invariant on every push: zero colour literals outside the
+# generated tokens.css, zero \definecolor outside the generated
+# boulingua-tokens.sty. Run `python design/build_tokens.py --check` locally.
+
+meta:
+  prefix: boulingua        # --boulingua-*. Renaming to --blg- touches ~150
+                           # declarations for no user-visible gain; rejected.
+  generated_by: build_tokens.py
+
+# `latex:` marks a colour that print also consumes, and names it. Only these
+# reach boulingua-tokens.sty — border, the semantic callout hues, the topic
+# palette and the network panel are web-only, and emitting them into LaTeX
+# would invent nine unused colours a reader would have to reason about.
+#
+# ── Brand ───────────────────────────────────────────────────────────────────
+# Hub blue is the umbrella colour, reserved for website/ and for chrome that
+# does not belong to a single course. A course's own colour is its accent.
+colour:
+  brand:
+    hub:        { light: "#1A73E8", dark: "#7EB3F0", latex: blgaccent }
+    hub-hover:  { light: "#0B57D0", dark: "#A9CDF5", latex: blgaccenthover }
+    fg:         { light: "#23272B", dark: "#E8EAED", latex: blgfg }
+    fg-muted:   { light: "#6B7280", dark: "#9AA0A6", latex: blgmuted }
+    surface:    { light: "#F7F8FA", dark: "#1C1F26", latex: blgsurface }
+    # Opaque on both sides. These were rgba(0,0,0,0.12) and rgba(255,255,255,
+    # 0.16), which composite unpredictably over a callout wash — the rule
+    # changed colour depending on what sat behind it.
+    rule:       { light: "#E4E7EB", dark: "#2A2E36", latex: blgrule }
+    border:     { light: "#E0E3E7", dark: "#33373F" }
+
+  # ── CEFR band ─────────────────────────────────────────────────────────────
+  # Shared across all courses and independent of the accent: a B1 badge means
+  # the same thing on every site. cefr.b is an ALIAS of brand.hub, not a copy —
+  # they were two independent literals that happened to agree, which is one
+  # edit away from ending.
+  cefr:
+    a: { light: "#4CAF50", dark: "#7BD37F", latex: blgcefrA }
+    b: { alias: brand.hub, latex: blgcefrB }
+    c: { light: "#8E24AA", dark: "#C77FDB", latex: blgcefrC }
+
+  # ── Callout semantics ─────────────────────────────────────────────────────
+  # `note` resolves to the course accent at render time, so a note reads as
+  # belonging to its course.
+  semantic:
+    note:      { alias: accent }
+    tip:       { light: "#2E7D32", dark: "#7BC47F" }
+    warning:   { light: "#EF6C00", dark: "#F2A25C" }
+    caution:   { alias: semantic.warning }
+    important: { light: "#C62828", dark: "#EE8080" }
+
+  # ── Materials-network panel ───────────────────────────────────────────────
+  # These were a second token namespace (--network-*) introduced by the network
+  # work and never reconciled with --boulingua-*. They name the same roles.
+  # build_tokens.py emits them as aliases for one release so the call sites can
+  # be migrated by `kit design migrate`, then they are deleted.
+  network:
+    highlight: { light: "#E8C547", dark: "#F0D060" }
+    rail-bg:   { light: "#F2F3F5", dark: "#22262E" }
+
+  # ── Topic palette ─────────────────────────────────────────────────────────
+  # Seven thematic hues over a closed enum. The discovery graph colours nodes
+  # by topic; an unregistered value fails gate A2 at source rather than
+  # rendering as an untokenised grey, which is what '#888' hard-coded in
+  # network/main.js used to do.
+  topic:
+    alltag:        { light: "#7C9885", dark: "#A4C3B2" }
+    arbeit:        { light: "#D4A373", dark: "#E5B98F" }
+    gesellschaft:  { light: "#9B7EBD", dark: "#B8A1D9" }
+    kultur:        { light: "#C97B63", dark: "#E29A82" }
+    wissenschaft:  { light: "#5B8FA8", dark: "#7FB0CC" }
+    umwelt:        { light: "#6B8E23", dark: "#8FB04A" }
+    kommunikation: { light: "#A07855", dark: "#C09778" }
+
+# ── Per-language accents ────────────────────────────────────────────────────
+# Rules, from website/content/design.md: flag-safe (the hue does not appear in
+# that language's national flag), at least 20 degrees apart on the hue wheel,
+# WCAG AA on white, and hub blue reserved for the umbrella site.
+#
+# `published` drives the generated sister-site list in the footer and the rows
+# on the public design page. Adding language nineteen is one entry here.
+accents:
+  - { code: template, language: "(unconfigured template)", accent: "#3F4A54", hover: "#2B333A", dark: "#8A96A1", dark_hover: "#AAB4BD", published: false,
+      note: "Neutral graphite, deliberately not a language colour. A course that has not set [params].code resolves here and looks obviously unfinished, instead of silently looking like whichever course the template was cut from." }
+  - { code: daf, language: German,     accent: "#1D87A7", hover: "#176780", dark: "#7ECEE7", dark_hover: "#A9DEEF", published: true }
+  - { code: efl, language: English,    accent: "#248D19", hover: "#1A6612", dark: "#89E77E", dark_hover: "#B0EFA9", published: true }
+  - { code: fle, language: French,     accent: "#4B8D19", hover: "#366612", dark: "#ACE77E", dark_hover: "#C7EFA9", published: true }
+  - { code: afl, language: Arabic,     accent: "#4A23C7", hover: "#3B1CA0", dark: "#977EE7", dark_hover: "#BAA9EF", published: false }
+  - { code: cfl, language: Chinese,    accent: "#2334C7", hover: "#1C2AA0", dark: "#7E89E7", dark_hover: "#A9B0EF", published: false }
+  - { code: ele, language: Spanish,    accent: "#198D81", hover: "#12665D", dark: "#7EE7DC", dark_hover: "#A9EFE8", published: false }
+  - { code: gfl, language: Greek,      accent: "#C74A23", hover: "#A03B1C", dark: "#E7977E", dark_hover: "#EFBAA9", published: false }
+  - { code: ils, language: Italian,    accent: "#8023C7", hover: "#671CA0", dark: "#B97EE7", dark_hover: "#D1A9EF", published: false }
+  - { code: jfl, language: Japanese,   accent: "#867B18", hover: "#5F5811", dark: "#E7DC7E", dark_hover: "#EFE8A9", published: false }
+  - { code: lle, language: Latin,      accent: "#C72334", hover: "#A01C2A", dark: "#E77E89", dark_hover: "#EFA9B0", published: false }
+  - { code: nsf, language: Norwegian,  accent: "#6D8618", hover: "#4D5F11", dark: "#CEE77E", dark_hover: "#DEEFA9", published: false }
+  - { code: nvt, language: Dutch,      accent: "#198D34", hover: "#126626", dark: "#7EE797", dark_hover: "#A9EFBA", published: false }
+  - { code: pfa, language: Persian,    accent: "#B5892B", hover: "#8C6A21", dark: "#E7C97E", dark_hover: "#EFDCA9", published: false }
+  - { code: pfl, language: Polish,     accent: "#AD701F", hover: "#865618", dark: "#E7B97E", dark_hover: "#EFD1A9", published: false }
+  - { code: ple, language: Portuguese, accent: "#B723C7", hover: "#931CA0", dark: "#DC7EE7", dark_hover: "#E8A9EF", published: false }
+  - { code: rki, language: Russian,    accent: "#198D5B", hover: "#126642", dark: "#7EE7B9", dark_hover: "#A9EFD1", published: false }
+  - { code: tfl, language: Turkish,    accent: "#C7236A", hover: "#A01C56", dark: "#E77EAC", dark_hover: "#EFA9C7", published: false }
+  - { code: ufl, language: Ukrainian,  accent: "#C723A1", hover: "#A01C82", dark: "#E77ECE", dark_hover: "#EFA9DE", published: false }
+
+# ── Type ────────────────────────────────────────────────────────────────────
+# A 1.125 modular scale anchored at 1rem = 11pt, replacing 17 distinct
+# font-size values across 41 declarations. The pt column is the print side of
+# the same step, so a caption is the same size on screen and on paper.
+type:
+  scale_ratio: 1.125
+  root: { rem: 1.0, pt: 11 }
+  steps:
+    "-3": { rem: 0.70, pt: 7.7,  latex: tiny }
+    "-2": { rem: 0.79, pt: 8.7,  latex: scriptsize }
+    "-1": { rem: 0.89, pt: 9.8,  latex: footnotesize }
+    "0":  { rem: 1.00, pt: 11.0, latex: normalsize }
+    "1":  { rem: 1.125, pt: 12.4, latex: large }
+    "2":  { rem: 1.27, pt: 13.9, latex: Large }
+    "3":  { rem: 1.42, pt: 15.6, latex: LARGE }
+    "4":  { rem: 1.60, pt: 17.6, latex: huge }
+  line_height: { body: 1.6, heading: 1.25, micro: 1.3 }
+  # Four tracking values were in use (0.02, 0.04, 0.08, 0.12em). Two survive.
+  tracking: { tight: "0.02em", caps: "0.10em" }
+  # Prose measure. hugo-coder's container is wider than 70 characters at body
+  # size; custom.css already narrowed .lead to 50rem by hand. Gate C14 checks
+  # the rendered line length is 55-75 characters rather than trusting the rem.
+  measure: "34rem"
+
+# ── Space ───────────────────────────────────────────────────────────────────
+# A 0.25rem ramp absorbing 20 observed ad-hoc values. pt is rem x 11.
+space:
+  "0":   { rem: 0,    pt: 0 }
+  "1":   { rem: 0.25, pt: 2.75 }
+  "2":   { rem: 0.5,  pt: 5.5 }
+  "3":   { rem: 0.75, pt: 8.25 }
+  "4":   { rem: 1.0,  pt: 11 }
+  "5":   { rem: 1.25, pt: 13.75 }
+  "6":   { rem: 1.5,  pt: 16.5 }
+  "8":   { rem: 2.0,  pt: 22 }
+  "10":  { rem: 2.5,  pt: 27.5 }
+  "12":  { rem: 3.0,  pt: 33 }
+
+# ── Radius ──────────────────────────────────────────────────────────────────
+# 4px at 96dpi is exactly 3pt, so the worksheet's existing `rounded corners=3pt`
+# badge and `arc=3pt` answer box already are the web radius.
+radius:
+  sm:     { px: 4,   pt: 3 }
+  md:     { px: 6,   pt: 4.5 }
+  lg:     { px: 8,   pt: 6 }
+  pill:   { px: 999, pt: null }
+  circle: { css: "50%", pt: null }
+
+# ── Elevation ───────────────────────────────────────────────────────────────
+# Two levels, not three. Print never emulates a shadow: depth on paper is rule
+# weight, never blur, which is why there is no pt column here.
+elevation:
+  "1": { light: "0 4px 14px rgba(0, 0, 0, 0.08)", dark: "0 4px 14px rgba(0, 0, 0, 0.50)" }
+  "2": { light: "0 6px 20px rgba(0, 0, 0, 0.14)", dark: "0 6px 20px rgba(0, 0, 0, 0.60)" }

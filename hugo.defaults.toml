@@ -52,7 +52,7 @@ enableRobotsTXT = true
   # (layouts/_partials/header.html); disable the theme's floating duplicate
   # so there is exactly one toggle on the page.
   hideColorSchemeToggle = true
-  customCSS = ["css/custom.css"]
+  customCSS = ["css/tokens.css", "css/custom.css"]   # tokens first: custom.css consumes them
   # Site code — selects this course's accent from data/accents.yaml.
   code = "template"   # CHANGE per course. "template" resolves to the neutral
                       # graphite accent, so an unconfigured course looks obviously

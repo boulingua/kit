@@ -2,3 +2,11 @@
 *.pdf binary
 *.png binary
 *.ogg binary
+
+# Generated from design/tokens.yaml by design/build_tokens.py. Marked so they
+# collapse in review: a hand edit here should be noticed before gate A7 catches
+# it, which is the cheaper place to catch it.
+assets/css/tokens.css       linguist-generated=true
+latex/boulingua-tokens.sty  linguist-generated=true
+data/accents.yaml           linguist-generated=true
+design/tokens.json          linguist-generated=true

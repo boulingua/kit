@@ -1,0 +1,14 @@
+# SHA256SUMS — the design system's generated artefacts and their source.
+#
+# Regenerate with `python design/build_tokens.py`; verify with
+# `python scripts/verify_tokens.py` (gate A7). If a checksum here
+# disagrees with the file, one of the two was edited by hand.
+
+# source
+7455e940a7cf7119dea63672f508462dd31eb6f338bad875acc30cf67692026c  design/tokens.yaml
+
+# generated
+f8d2714b14bb667d51c6058a8b793fd74cfd4cb08e22e56b68761f76e7c7d060  assets/css/tokens.css
+49b14a0db64b7a2508530e5e01afb6d7cf8629db8034a269141ba120c8230208  latex/boulingua-tokens.sty
+e44ed6c96d3f73b69ac8128ec971198455cebe7af0ffc178cf753b7ecdff0e11  data/accents.yaml
+94883efac2aa584efc093fbe2934d2e2e8d5b2f9056b3e5577ba8fd60da5be8a  design/tokens.json
