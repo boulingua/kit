@@ -1,0 +1,20 @@
+{{- /* {{< gap len="8" answer="Bahnhof" >}} — a fill-in blank.
+
+  Renders an underlined space in a cloze sentence.
+
+  ACCESSIBILITY — this is the shortcode where the naive implementation is
+  actively hostile. An empty <span> with a border is invisible to a screen
+  reader: the sentence is simply read with a word missing, and the learner has
+  no idea a task exists. So the element is never empty — it carries an
+  aria-label saying what is elided and how long it is.
+
+  It is deliberately NOT an <input>. These worksheets are printed as often as
+  they are read on screen, and a form control in a printed PDF is a box that
+  cannot be typed in; the underline is the affordance in both media. The answer
+  goes in the answer key, which is why `answer` is optional here and never
+  rendered — it exists so a future `--with-answers` build can use one source. */ -}}
+{{- $len := .Get "len" | default "8" -}}
+{{- $hint := .Get "hint" -}}
+{{- $label := cond (ne $hint nil) (printf "%s: %s" (i18n "gap" | default "Blank") $hint) (i18n "gap" | default "Blank") -}}
+<span class="gap" role="img" aria-label="{{ $label }}"
+      style="--gap-len: {{ $len }}ch">{{ with $hint }}<span class="gap-hint" aria-hidden="true">{{ . }}</span>{{ end }}</span>

@@ -63,6 +63,10 @@ def battery(repo: Path, cfg: dict) -> list[tuple[str, list[str]]]:
         ("A8  logical CSS",   [PY, str(SCRIPTS / "verify_logical_css.py")]),
         ("A4  font licences", [PY, str(SCRIPTS / "verify_fonts.py")]),
     ]
+    built = repo / "build" / "site" if repo == KIT else repo / "public"
+    if built.exists():
+        gates.append(("A12 teaching markup",
+                      [PY, str(SCRIPTS / "verify_eqs.py"), str(built)]))
     if repo != KIT:
         gates += [
             ("D2  PDF metadata", [PY, str(SCRIPTS / "verify_pdf_metadata.py"), str(repo)]),

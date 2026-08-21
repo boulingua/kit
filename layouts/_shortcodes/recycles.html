@@ -1,0 +1,25 @@
+{{- /* {{< recycles unit="hobbies-and-sports" >}} — spaced retrieval.
+
+  Marks that this unit deliberately re-uses language from an earlier one.
+  Retrieval practice is only practice if the learner can go back, so this
+  renders a link, not a note to the author.
+
+  It resolves through `unit_slug` — the EDITORIAL name — and never through a
+  URL. That is the whole reason it takes a unit and not an href: efl's four
+  slug namespaces mean a hand-written link is a guess, and a wrong one is a
+  dead link that no gate would catch. Gate A2 resolves these. */ -}}
+{{- $slug := .Get "unit" -}}
+{{- $label := .Get "label" -}}
+{{- $target := "" -}}
+{{- range where site.RegularPages "Params.unit_slug" $slug -}}{{- $target = . -}}{{- end -}}
+<aside class="recycles" aria-label="{{ i18n "recycles" | default "Recycles earlier language" }}">
+  <span class="recycles-icon" aria-hidden="true">&#8635;</span>
+  {{- with $target }}
+  <a href="{{ .RelPermalink }}">{{ $label | default .LinkTitle }}</a>
+  {{- else }}
+  {{/* No page carries this unit_slug. Rendering the raw slug rather than a
+       broken link keeps the failure visible to gate A2 instead of shipping a
+       404 that looks like a link. */}}
+  <span class="recycles-unresolved" data-unit="{{ $slug }}">{{ $label | default $slug }}</span>
+  {{- end }}
+</aside>

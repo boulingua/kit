@@ -1,0 +1,64 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{boulingua-eqs}[boulingua EQS teaching macros]
+% The print half of the EQS shortcode set. Each web shortcode has an emitter
+% here, so a unit renders the same on screen and on paper from one source
+% rather than from two that are asserted to agree.
+%
+% Print has no dark mode, no keyboard focus and no screen reader, so the
+% accessibility contracts differ in kind rather than in degree: what the web
+% expresses with aria-label, print expresses by making the thing visible.
+\RequirePackage{boulingua-tokens}
+\RequirePackage{tabularx}
+\RequirePackage{booktabs}
+\RequirePackage{tcolorbox}
+\RequirePackage{array}
+
+% ── \blgvocab — the vocabulary table ────────────────────────────────────────
+% Three columns, the accent rule under the header. The web version carries a
+% per-column lang so a screen reader switches voice between the target term and
+% its gloss; on paper the equivalent is that the columns are visibly distinct,
+% which the rule and the header row provide.
+% tabularx scans forward for its own \end, so it cannot be wrapped in a
+% \newenvironment the ordinary way — the scan runs past \end{blgvocab} and
+% consumes the rest of the file. The command form (\tabularx ... \endtabularx)
+% is the supported way to build an environment on top of it.
+\newenvironment{blgvocab}{%
+  \par\medskip
+  \tabularx{\linewidth}{@{}>{\raggedright\arraybackslash}X
+                          >{\raggedright\arraybackslash}X
+                          >{\raggedright\arraybackslash}X@{}}
+  \toprule}{%
+  \bottomrule\endtabularx\par\medskip}
+
+% ── \blgniveau{G|M|E} — the differentiation badge ───────────────────────────
+% The LETTER is the cue, boxed rather than filled. On the web this is because
+% colour alone is not an affordance; in print it is because these are
+% photocopied, and a filled badge photocopies to a black rectangle with the
+% letter gone.
+\newcommand{\blgniveau}[1]{%
+  \begingroup\blgsemibold
+  \fbox{\strut\,#1\,}%
+  \endgroup}
+
+% ── \blgrecycles{unit} — spaced retrieval ───────────────────────────────────
+% A marginal note. It names the unit rather than linking, because a printed
+% worksheet has nowhere to link to — which is also why the web version resolves
+% through unit_slug and not through a URL: one editorial name, two renderings.
+\newcommand{\blgrecycles}[1]{%
+  \marginpar{\raggedright\blgtextminusone\color{blgmuted}$\circlearrowleft$\ #1}}
+
+% ── \blggap[len] — a fill-in blank ──────────────────────────────────────────
+% A rule of a given width in characters. The web version is deliberately not an
+% <input>, and this is why: these sheets are printed at least as often as they
+% are read, and the underline is the affordance in both media.
+\newcommand{\blggap}[1][8]{\rule{#1 em}{0.4pt}}
+
+% ── blgextension — the optional stretch task ────────────────────────────────
+% Not collapsible on paper, so it is boxed instead: the learner who is not
+% ready for it must be able to see where it starts and stops and skip it.
+\newtcolorbox{blgextension}[1][Extension]{%
+  colback=blgsurface, colframe=blgaccent, boxrule=0.4pt, arc=\blgradiussm,
+  left=6pt, right=6pt, top=4pt, bottom=4pt,
+  title={\blgsemibold #1}, fonttitle=\blgtextminusone}
+
+\endinput

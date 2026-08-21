@@ -1,6 +1,10 @@
 ---
 # ─── CORE (every page_type) ───────────────────────────────────────────────
 title: "Unit 1 — Example unit"
+# The editorial name. {{< recycles >}} resolves through this and never
+# through a URL, because efl carries four different slug namespaces and a
+# hand-written link is a guess.
+unit_slug: "example-unit"
 page_type: unit                 # unit | exam | section | appendix
 author: S. Le Boulanger
 date: 2026-01-01

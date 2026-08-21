@@ -1062,3 +1062,47 @@ div.tl { display: block; margin-block: 1rem; }
   unicode-bidi: isolate;
   font-variant-numeric: tabular-nums;
 }
+
+/* ── EQS teaching shortcodes ──────────────────────── */
+/* Six shortcodes EQS-1 is written against. Each is HTML + a LaTeX emitter + an
+   accessibility contract; the contract is the part that is easy to skip and
+   expensive to retrofit, so it is expressed here rather than assumed. */
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  margin: -1px; padding: 0; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.vocab { width: 100%; border-collapse: collapse; margin-block: var(--boulingua-space-4); }
+.vocab th, .vocab td {
+  text-align: start; padding: var(--boulingua-space-2) var(--boulingua-space-3);
+  border-block-end: 1px solid var(--boulingua-rule);
+}
+.vocab thead th { border-block-end: 2px solid var(--boulingua-accent); }
+
+.niveau { display: flex; gap: var(--boulingua-space-3); margin-block: var(--boulingua-space-4); }
+.niveau-badge {
+  flex: none; font-weight: 700; line-height: 1;
+  padding: var(--boulingua-space-1) var(--boulingua-space-2);
+  border: 2px solid var(--boulingua-accent); border-radius: var(--boulingua-radius-sm);
+  /* Border and letter, not a fill. The letter carries the meaning; the colour
+     only reinforces it, because colour alone is not an affordance. */
+}
+
+.recycles { display: flex; gap: var(--boulingua-space-2); align-items: baseline;
+            font-size: var(--boulingua-text-n1); color: var(--boulingua-fg-muted); }
+.recycles-unresolved { text-decoration: underline wavy var(--boulingua-semantic-important); }
+
+.gap {
+  display: inline-block; min-inline-size: var(--gap-len, 8ch);
+  border-block-end: 1.5px solid var(--boulingua-fg);
+  margin-inline: 0.15em; vertical-align: baseline;
+}
+.gap-hint { font-size: var(--boulingua-text-n2); color: var(--boulingua-fg-muted);
+            padding-inline: 0.3em; }
+
+.extension { margin-block: var(--boulingua-space-4);
+             border-inline-start: 3px solid var(--boulingua-accent);
+             padding-inline-start: var(--boulingua-space-3); }
+.extension > summary { cursor: pointer; font-weight: 600; }

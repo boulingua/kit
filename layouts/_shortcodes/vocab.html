@@ -1,0 +1,45 @@
+{{- /* {{< vocab >}} — a vocabulary table.
+
+  {{< vocab >}}
+  der Bahnhof | station | Wir treffen uns am Bahnhof.
+  die Fahrkarte | ticket | Ich kaufe eine Fahrkarte.
+  {{< /vocab >}}
+
+  Three columns: target term, gloss, example. Pipe-separated because an author
+  types this between other prose and a YAML block would break the flow.
+
+  ACCESSIBILITY — per-column `lang`, and this is the substance of the shortcode
+  rather than a detail. A vocabulary table is the one place on the page where
+  two languages sit in adjacent cells, so a screen reader that treats the whole
+  table as one language reads the target terms in the wrong voice — German
+  phonology applied to French words, which is not merely wrong but unusable for
+  the learner who most needs it. The target column carries the course's
+  target_language, the gloss column the chrome language.
+
+  Headers are <th scope="col">, so a cell announced out of order still says
+  which column it belongs to. */ -}}
+{{- $target := site.Params.targetLanguage | default site.LanguageCode -}}
+{{- $chrome := site.Params.chromeLanguage | default "de" -}}
+{{- $rows := split (trim .Inner "\n") "\n" -}}
+<table class="vocab">
+  <caption class="visually-hidden">{{ i18n "vocab" | default "Vocabulary" }}</caption>
+  <thead>
+    <tr>
+      <th scope="col" lang="{{ $target }}">{{ i18n "vocab_term" | default "Term" }}</th>
+      <th scope="col" lang="{{ $chrome }}">{{ i18n "vocab_gloss" | default "Meaning" }}</th>
+      <th scope="col" lang="{{ $target }}">{{ i18n "vocab_example" | default "Example" }}</th>
+    </tr>
+  </thead>
+  <tbody>
+  {{- range $rows }}
+    {{- $c := split . "|" }}
+    {{- if ge (len $c) 2 }}
+    <tr>
+      <td lang="{{ $target }}">{{ trim (index $c 0) " " }}</td>
+      <td lang="{{ $chrome }}">{{ trim (index $c 1) " " }}</td>
+      <td lang="{{ $target }}">{{ if ge (len $c) 3 }}{{ trim (index $c 2) " " }}{{ end }}</td>
+    </tr>
+    {{- end }}
+  {{- end }}
+  </tbody>
+</table>

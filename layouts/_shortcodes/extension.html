@@ -1,0 +1,20 @@
+{{- /* {{< extension >}}…{{< /extension >}} — an optional stretch task.
+
+  Collapsed by default: it must not lengthen the page for the learner who is
+  not ready for it, and must be one keystroke away for the one who is.
+
+  ACCESSIBILITY — <details>/<summary> rather than a JavaScript toggle, so it is
+  keyboard-reachable and announced as expandable with no script at all. The
+  summary is a real heading, not styled text, so it appears in the document
+  outline a screen-reader user navigates by.
+
+  EQS-1 requires `openness` to increase strictly across a unit's tasks, and an
+  extension is the most open task in its step — gate A14 checks that ordering,
+  which is why the level is declared rather than inferred. */ -}}
+{{- $title := .Get "title" | default (i18n "extension" | default "Extension") -}}
+<details class="extension">
+  <summary><span class="extension-label">{{ $title }}</span></summary>
+  <div class="extension-body">
+{{ .Inner | .Page.RenderString }}
+  </div>
+</details>

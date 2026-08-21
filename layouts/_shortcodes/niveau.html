@@ -1,0 +1,20 @@
+{{- /* {{< niveau G|M|E >}}…{{< /niveau >}} — differentiated content.
+
+  Marks a passage as belonging to one Niveau. The three are not three versions
+  of a unit: they are one unit whose input length, scaffolding and task
+  openness differ, which is why this wraps a passage rather than forking a file.
+
+  ACCESSIBILITY — the letter is TEXT, never a background-only cue. A coloured
+  chip alone fails for a reader who cannot see it, and colour is exactly what
+  distinguishes G from M from E at a glance. The aria-label names the level in
+  full because "M" read aloud is a letter, not a meaning. */ -}}
+{{- $lv := .Get 0 | default (.Get "level") | upper -}}
+{{- $names := dict "G" "Grundlegendes Niveau" "M" "Mittleres Niveau" "E" "Erweitertes Niveau" -}}
+{{- $full := index $names $lv | default $lv -}}
+<div class="niveau niveau-{{ lower $lv }}" role="group" aria-label="{{ $full }}">
+  <span class="niveau-badge" aria-hidden="true">{{ $lv }}</span>
+  <span class="visually-hidden">{{ $full }}</span>
+  <div class="niveau-body">
+{{ .Inner | .Page.RenderString }}
+  </div>
+</div>
