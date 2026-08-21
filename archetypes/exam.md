@@ -15,4 +15,8 @@ duration_min: 45
 total_points: 100
 notenschluessel: "60 % to pass"
 exam: { file: "" }
+# vgwort_pixel: ""        # VG Wort Zählmarke — paste the 32-hex public code drawn
+#                         # from T.O.M. once this page passes 1800 rendered chars.
+#                         # Never a private code. Never on legal pages, the home
+#                         # page, the materials hub or paginated continuations.
 ---
