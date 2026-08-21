@@ -18,14 +18,24 @@ format, always paired with its written transcript on the unit page.
 
 ## Voices
 
-| Language | Voice (Piper) | Used by |
-|----------|---------------|---------|
-| French   | `fr_FR-siwis-medium`     | fle |
-| German   | `de_DE-thorsten-medium`  | daf |
-| English  | `en_GB-alba-medium`      | efl |
+`voices.yml` is the single source of truth: one row per boulingua language
+code, carrying the exact upstream Piper key, its quality tier, its speaker
+count, its licence verbatim from the model card, and the other voices
+available for that language. Voice IDs are written nowhere else — not in this
+table, not in a ROADMAP, not in `get_voices.sh`, which reads the registry
+rather than carrying a list of its own. A second voice per language, where the
+registry records one, enables alternating speakers in dialogues.
 
-More languages/voices are added here as new sister sites come online. A second
-voice per language enables alternating speakers in dialogues.
+**The licence rule.** Course content ships under CC BY-SA 4.0, and audio
+synthesised from a Piper model inherits the licence of that model's training
+dataset. A NonCommercial voice therefore cannot go into a unit at all, and a
+voice whose dataset licence is unstated cannot be shipped safely either — no
+statement is not permission. Each row records the judgement as `licence_ok:`,
+and `get_voices.sh` downloads only rows that are both `status: ready` and
+`licence_ok: true`, checking the licence before it fetches a single byte. Of
+the eighteen languages, fourteen have an openly-licensed voice; Arabic,
+Japanese, Turkish and Latin do not, and those courses ship transcript-only
+until one appears.
 
 ## Flow
 
@@ -58,7 +68,9 @@ with each content change; this repo is the canonical source of the tooling.
 ## Files
 
 - `build_audio.py` — extraction + synthesis + manifest generator (the workflow)
-- `get_voices.sh` — downloads the openly-licensed Piper voices
+- `voices.yml` — the voice registry: one row per language code, with the
+  upstream key, licence and status (the single source of truth for voice IDs)
+- `get_voices.sh` — downloads the openly-licensed Piper voices named in `voices.yml`
 - `templates/audio-block.*.html` — the per-language Hugo partial each site uses
 - `AUDIO_STRUCTURE.md` — the detailed design/structure
 - `requirements.txt`
