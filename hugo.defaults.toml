@@ -54,6 +54,10 @@ enableRobotsTXT = true
   hideColorSchemeToggle = true
   customCSS = ["css/tokens.css", "css/custom.css"]   # tokens first: custom.css consumes them
   # Site code — selects this course's accent from data/accents.yaml.
+  # Which font payload this course loads. One of the shipped tiers in
+  # design/fonts.yaml: core, latin-ext, greek, cyrillic. `kit sync` refuses a
+  # course whose tier is deferred.
+  scriptTier = "core"        # CHANGE per course where the script needs it
   code = "template"   # CHANGE per course. "template" resolves to the neutral
                       # graphite accent, so an unconfigured course looks obviously
                       # wrong instead of looking like DaF. Gate F7-C3 makes it fatal.

@@ -1,0 +1,233 @@
+# fonts.yaml — the typographic half of the design system.
+#
+# One manifest, two pipelines. build_fonts.py subsets from design/fonts/src/
+# and emits both the web payload (static/fonts/*.woff2 + the generated
+# static/css/fonts.css) and the print payload (fonts/<tier>/*.otf, loaded by
+# the LaTeX templates through boulingua-tokens).
+#
+# WHY THIS EXISTS. What shipped before was a `latin,latin-ext` subset fetched
+# from a Google Fonts helper: 781 codepoints, zero Greek, zero Cyrillic. Six
+# courses were planned against it. `rki`'s roadmap stated in as many words that
+# "Source Sans 3 ships a full Cyrillic subset, no custom font needed" — the
+# family does; the file in the repo did not, and Russian would have authored
+# its first unit against tofu. The fix is not a different family. It is to stop
+# shipping somebody else's subset and cut our own from the upstream release.
+#
+# RANGES ARE DECLARED BY CODEPOINT, NEVER BY GOOGLE RANGE NAME. Google's
+# `cyrillic` range stops at U+045F. Ukrainian ґ is U+0490. A subset built with
+# the name silently drops it while the glyph sits in the face. That class of
+# bug cannot recur here because the names are not available to be used.
+#
+# Gate A4 fails if a shipped .woff2 or .otf has no ATTRIBUTION.md row.
+# Gate C11 checks rendered x-heights against the ratios below.
+
+meta:
+  generated_by: build_fonts.py
+  subset_command: >-
+    pyftsubset <src> --flavor=woff2 --with-zopfli --no-hinting --desubroutinize
+    --unicodes=<tier ranges> --layout-features=<computed retention set>
+  measured_with: "fontTools 4.63.0, BoundsPen on 'x' and 'H'"
+  measured_at: 2026-08-21
+
+# ── OpenType feature retention ──────────────────────────────────────────────
+# A floor plus a no-drop rule, not a fixed list. A fixed list is unenforceable
+# and, for Arabic, wrong: `isol` is the unsubstituted default form and appears
+# in no well-built Arabic sans's GSUB, and `curs` is GPOS — IBM Plex Sans
+# Arabic has neither, so a hardcoded requirement would reject the very face
+# this manifest selects. build_fonts.py reads each source face's own feature
+# list, computes floor ∪ used, and fails naming any tag the subset dropped.
+# Losing a joining feature does not degrade Arabic rendering; it breaks
+# joining. That must be impossible, not discouraged.
+features:
+  required_floor:
+    gsub: [ccmp, locl, calt, liga]
+    gpos: [kern, mark, mkmk]
+  required_floor_arabic:
+    gsub: [init, medi, fina, rlig]
+  no_drop: true
+  # no_drop protects the FLOOR only. smcp, ss07+ and the cv* character variants
+  # are deliberately not retained — that is curation, and it costs bytes we do
+  # not spend. A rule that cannot tell curation from breakage fails on the
+  # wrong thing and gets switched off, which is worse than not having it.
+  curated_out: [smcp, c2sc, size, "ss07+", "cv03+"]
+
+# ── Script tiers ────────────────────────────────────────────────────────────
+# A course declares one in boulingua.yml. `core` is implied by every other
+# tier. Deferred tiers are fully declared but carry no committed binaries;
+# `kit sync` refuses a course whose tier is deferred, naming this file.
+tiers:
+  core:
+    status: shipped
+    description: Latin, Latin-1, punctuation and the arrows and symbols units use.
+    # U+2192 (→) is listed explicitly: it is absent from the old bundled subset,
+    # which is why decks fell back to CMSY10 for a single arrow glyph.
+    ranges: ["U+0000-00FF", "U+0131", "U+0152-0153", "U+02BB-02BC", "U+02C6",
+             "U+02DA", "U+02DC", "U+0300-0304", "U+0308-0309", "U+0323", "U+0329",
+             "U+2000-206F", "U+2074", "U+20AC", "U+2122", "U+2190-2193", "U+2212",
+             "U+2215", "U+F8FF", "U+FEFF", "U+FFFD"]
+    courses: [efl, fle, daf, ele, ils, ple, nvt, nsf, pfl, tfl]
+
+  latin-ext:
+    status: shipped
+    description: Latin Extended-A/B and the macron set Latin needs.
+    ranges: ["U+0100-024F", "U+0259", "U+1E00-1EFF", "U+2020", "U+20A0-20AB",
+             "U+20AD-20CF", "U+2113", "U+2C60-2C7F", "U+A720-A7FF"]
+    courses: [lle, tfl]
+
+  greek:
+    status: shipped
+    # Both blocks ship. Polytonic is NOT a build failure — all 233 assigned
+    # characters of U+1F00-1FFF are present in Source Sans 3 3.052, verified.
+    # It is an editorial constraint: gfl teaches Modern Greek and is monotonic
+    # throughout, and polytonic is permitted only inside {{< tl lang="grc" >}}
+    # for a classical citation. Gate C11 checks the declaration, not the glyph.
+    description: Monotonic Greek, plus polytonic for classical citation only.
+    ranges: ["U+0370-03FF", "U+1F00-1FFF"]
+    courses: [gfl]
+
+  cyrillic:
+    status: shipped
+    # ONE range covering base and extended together. Ukrainian ґ (U+0490/0491)
+    # and the whole U+0460-052F tail sit outside Google's `cyrillic` range,
+    # which stops at U+045F. Declaring by codepoint is what makes that
+    # impossible to get wrong.
+    description: Cyrillic including the extended tail Ukrainian needs.
+    ranges: ["U+0400-052F", "U+2116"]
+    courses: [rki, ufl]
+
+  arabic:
+    status: deferred          # wave 5 — ADR-0018
+    deferred_note: >-
+      Declared so the mechanism is built and the decision is recorded, but no
+      binary is committed and no course may select it yet. Its payload,
+      reference document and RTL LaTeX template are the first work item of the
+      wave that opens it, not of Phase 1.
+    ranges: ["U+0600-06FF", "U+0750-077F", "U+08A0-08FF", "U+FB50-FDFF", "U+FE70-FEFF"]
+    courses: [afl, pfa]
+
+  hanzi-sc:
+    status: deferred          # wave 6 — ADR-0018
+    deferred_note: >-
+      Content-derived, two-tier: the taught character set preloaded, the full
+      block as a separate family at font-display: optional so a forgotten
+      rebuild degrades to a slower load rather than to tofu.
+    ranges: [content-derived]
+    courses: [cfl]
+
+  kana-kanji:
+    status: deferred          # wave 6 — ADR-0018
+    deferred_note: Content-derived, as hanzi-sc.
+    ranges: [content-derived]
+    courses: [jfl]
+
+# ── Families ────────────────────────────────────────────────────────────────
+# x_height_ratio is measured against Source Sans 3 at the same nominal size and
+# is what makes the continuity claim checkable rather than adjectival. A family
+# set at 100% beside Source Sans 3 when its x-height runs 10% larger reads as a
+# different design even when it is the right face. size_adjust is derived from
+# the ratio, and the SAME number produces the CSS size-adjust and the LaTeX
+# Scale= factor, so web and print cannot drift apart.
+#
+# A family whose ratio has not been measured FAILS THE BUILD. It does not
+# default to 100%, because 100% is exactly the value that produces the problem.
+families:
+  source-sans-3:
+    role: primary
+    version: "3.052"
+    release: 3.052R
+    upstream: https://github.com/adobe-fonts/source-sans
+    licence: OFL-1.1
+    licence_file: LICENSES/OFL-1.1.txt
+    x_height_ratio: 1.0000     # the baseline, by definition
+    size_adjust: 100.0
+    tiers: [core, latin-ext, greek, cyrillic]
+    faces:
+      - { file: SourceSans3-Regular.otf,    weight: 400, style: normal }
+      - { file: SourceSans3-It.otf,         weight: 400, style: italic }
+      - { file: SourceSans3-Semibold.otf,   weight: 600, style: normal }
+      - { file: SourceSans3-SemiboldIt.otf, weight: 600, style: italic }
+      - { file: SourceSans3-Bold.otf,       weight: 700, style: normal }
+      - { file: SourceSans3-BoldIt.otf,     weight: 700, style: italic }
+
+  jetbrains-mono:
+    role: mono
+    version: "2.304"
+    release: v2.304
+    upstream: https://github.com/JetBrains/JetBrainsMono
+    licence: OFL-1.1
+    licence_file: LICENSES/OFL-1.1.txt
+    # Measured 0.550 against Source Sans 3's 0.486. Left at 100% it sets code
+    # visibly larger than the prose around it.
+    x_height_ratio: 1.1317
+    size_adjust: 88.4
+    tiers: [core, latin-ext, greek, cyrillic]
+    faces:
+      - { file: JetBrainsMono-Regular.ttf, weight: 400, style: normal }
+      - { file: JetBrainsMono-Bold.ttf,    weight: 700, style: normal }
+
+  noto-sans:
+    role: fallback
+    version: "2.015"
+    release: NotoSans-v2.015
+    upstream: https://github.com/notofonts/latin-greek-cyrillic
+    licence: OFL-1.1
+    licence_file: LICENSES/OFL-1.1.txt
+    x_height_ratio: 1.1029
+    size_adjust: 90.7
+    tiers: [latin-ext]
+    # Declared AFTER source-sans-3 and restricted to the gaps it does not fill.
+    # ȳ U+0233 and Ȳ U+0232 are absent from the full upstream Source Sans 3 —
+    # not merely from the old bundled subset — and lle needs them. Noto Sans
+    # covers all 336 characters of Latin Extended-A/B, so one fallback closes
+    # the whole class rather than one letter.
+    fallback_for: source-sans-3
+    fallback_ranges: ["U+0232-0233", "U+0100-024F"]
+    faces:
+      - { file: NotoSans-Regular.ttf, weight: 400, style: normal }
+
+  # ── Deferred families: decided now, paid for at wave 5/6 ──────────────────
+  ibm-plex-sans-arabic:
+    role: primary
+    status: deferred
+    version: "1.005"
+    upstream: https://github.com/IBM/plex
+    licence: OFL-1.1
+    x_height_ratio: null       # MUST be measured before this tier ships
+    tiers: [arabic]
+    note: >-
+      Chosen over Noto Naskh and Vazirmatn because one design language across
+      18 courses is the governing requirement and a Naskh serif does not
+      deliver it beside Source Sans 3. Verified to carry the full Persian
+      orthographic set, both digit sets and the tashkil marks. Its Latin is
+      Latin-1 only, which is why afl and pfa take their Latin runs from
+      Source Sans 3.
+
+  noto-naskh-arabic:
+    role: script-stage
+    status: deferred
+    licence: OFL-1.1
+    tiers: [arabic]
+    x_height_ratio: null
+    note: Scoped to fully-vocalised script-stage passages, where tashkil positions better in Naskh.
+
+  noto-sans-sc: { role: primary, status: deferred, licence: OFL-1.1, tiers: [hanzi-sc], x_height_ratio: null,
+                  upstream: https://github.com/notofonts/noto-cjk,
+                  note: "From noto-cjk, not the Google Fonts repackaging, because the subsetting is ours. Its proportional Latin is Source Sans Pro, so Latin runs inside a Chinese page share the Source skeleton." }
+  noto-sans-jp:  { role: primary, status: deferred, licence: OFL-1.1, tiers: [kana-kanji], x_height_ratio: null,
+                  upstream: https://github.com/notofonts/noto-cjk }
+
+# ── Web delivery ────────────────────────────────────────────────────────────
+web:
+  # EXACTLY ONE preload, and it is emitted AFTER the VG Wort pixel preload.
+  # Mono, italic and every fallback load with font-display: swap and no
+  # preload: a language-course page uses code spans rarely enough that
+  # preloading a mono face buys nothing and costs a connection slot ahead of
+  # the counting request, which is the one request on the page that earns.
+  preload: [source-sans-3/400/normal]
+  font_display: swap
+  # Global, so a missing italic becomes visible rather than faked. There are
+  # 13,576 emphasis spans across the three live courses and not one italic face
+  # in the org — every one of them is currently a synthesised oblique. For
+  # Cyrillic a synthesised oblique is not merely ugly: а, т and д have
+  # different italic constructions, so it renders the wrong letterforms.
+  font_synthesis: none

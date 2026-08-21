@@ -20,8 +20,18 @@ body.colorscheme-dark{--boulingua-accent:{{ .dark }};--boulingua-accent-hover:{{
 {{- with (partial "vgwort/url.html" .) }}
 <link rel="preload" as="image" href="{{ . | safeURL }}" fetchpriority="high">
 {{- end }}
-<link rel="preload" as="font" type="font/woff2" crossorigin href="{{ "fonts/source-sans-3-v19-latin_latin-ext-regular.woff2" | relURL }}">
-<link rel="preload" as="font" type="font/woff2" crossorigin href="{{ "fonts/jetbrains-mono-v24-latin_latin-ext-regular.woff2" | relURL }}">
+{{- /* EXACTLY ONE font preload, and it sits after the pixel above.
+
+       One, not two. This preloaded the body face AND the mono face; a
+       language-course page uses code spans rarely enough that preloading a
+       mono face buys nothing and costs a connection slot ahead of the one
+       request on the page that earns. Mono, italic and every fallback family
+       load with font-display: swap.
+
+       The face follows the course's script tier, so a Greek course preloads
+       the Greek cut rather than a Latin one it will never use. */ -}}
+{{- $tier := site.Params.scriptTier | default "core" }}
+<link rel="preload" as="font" type="font/woff2" crossorigin href="{{ (printf "fonts/source-sans-3-400.%s.woff2" $tier) | relURL }}">
 <link rel="stylesheet" href="{{ "css/fonts.css" | relURL }}">
 {{- if and $p $p.domain }}
 <script defer data-domain="{{ $p.domain }}" src="{{ or $p.src "https://plausible.io/js/script.js" }}"></script>

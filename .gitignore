@@ -31,3 +31,8 @@ __pycache__/
 # Local build output: the example site, and the flat _materials/ tree the
 # LaTeX Makefile assembles to compile in.
 build/
+
+# Font build scratch. The upstream sources in design/fonts/src/ ARE committed
+# (pruned to the faces fonts.yaml names) so the build is reproducible offline.
+design/fonts/src/*.zip
+design/fonts/src/__MACOSX/

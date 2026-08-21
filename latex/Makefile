@@ -11,15 +11,20 @@
 # but for the target, and the fonts and brand assets they both bundled are now
 # shared rather than duplicated.
 TEX   := xelatex   # := not ?=, so a stray TEX in the environment cannot pick the wrong engine
+# Which script tier's faces to assemble. A course sets this from its
+# boulingua.yml script_tier; core is Latin-only and is what most courses use.
+# `make TIER=greek` builds the Greek reference document's payload.
+TIER  ?= core
 BUILD := ../build/materials
 KIT   := ../..
 
 all: slides worksheet
 
-$(BUILD)/.assembled: beamerthemeboulingua.sty boulingua-sheet.sty
+$(BUILD)/.assembled: beamerthemeboulingua.sty boulingua-sheet.sty boulingua-tokens.sty
 	@mkdir -p $(BUILD)/fonts $(BUILD)/brand/icons $(BUILD)/assets
 	@cp *.sty *.tex                  $(BUILD)/
-	@cp $(KIT)/kit/fonts/*.ttf       $(BUILD)/fonts/
+	@cp $(KIT)/kit/fonts/core/*            $(BUILD)/fonts/
+	@if [ "$(TIER)" != "core" ]; then cp $(KIT)/kit/fonts/$(TIER)/* $(BUILD)/fonts/; fi
 	@cp $(KIT)/kit/brand/icons/*.pdf $(BUILD)/brand/icons/
 	@cp $(KIT)/kit/brand/boulingua-logo.png $(BUILD)/assets/
 	@touch $@

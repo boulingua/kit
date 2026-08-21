@@ -25,11 +25,38 @@
 \newcommand{\blgsetlang}[1]{\colorlet{blgaccent}{acc-#1}\colorlet{blgaccenthover}{acch-#1}%
   \renewcommand{\blglangmark}[1][12mm]{\includegraphics[height=##1]{brand/icons/#1.pdf}}}
 
-% ── Fonts (bundled) ─────────────────────────────────────────────────────────
-\setmainfont{SourceSans3}[Path=fonts/, Extension=.ttf,
-  UprightFont=*-Regular, BoldFont=*-Bold, FontFace={l}{n}{*-Light}]
-\newfontfamily\blgsemibold{SourceSans3-Semibold}[Path=fonts/, Extension=.ttf]
-\setmonofont{JetBrainsMono-Regular}[Path=fonts/, Extension=.ttf]
+% ── Fonts ───────────────────────────────────────────────────────────────────
+% Extension is .otf now: these are cut from the upstream Adobe release, not the
+% Google Fonts `latin,latin-ext` repackaging that shipped before. That one
+% carried 781 codepoints with no Greek and no Cyrillic, and declared every
+% weight "Source Sans 3 ExtraLight" in its name table, which is why every
+% committed worksheet embeds /BUEMMA+SourceSans3ExtraLight-Regular.
+%
+% ItalicFont is set for the first time. There was no italic face anywhere in
+% the org, so all 13,576 emphasis spans across the three live courses were
+% synthesised obliques. For Cyrillic that is not merely ugly: а, т and д have
+% different italic constructions, so a synthesised oblique renders the wrong
+% letterforms.
+\setmainfont{SourceSans3}[Path=fonts/, Extension=.otf,
+  UprightFont=*-Regular, ItalicFont=*-It,
+  BoldFont=*-Bold, BoldItalicFont=*-BoldIt]
+% \setsansfont, and this is the fix for a defect the italic work uncovered:
+% \setmainfont sets \rmfamily, but beamer's default document family is
+% \sffamily. Every committed deck in the org — 156 fle + 60 daf — is therefore
+% typeset in Latin Modern Sans, with Source Sans 3 appearing only where
+% \blgsemibold is called explicitly. Verified in the artefacts: they embed
+% LMSans10-Regular and LMSans10-Oblique for body text.
+\setsansfont{SourceSans3}[Path=fonts/, Extension=.otf,
+  UprightFont=*-Regular, ItalicFont=*-It,
+  BoldFont=*-Bold, BoldItalicFont=*-BoldIt]
+\newfontfamily\blgsemibold{SourceSans3-Semibold}[Path=fonts/, Extension=.otf,
+  ItalicFont=SourceSans3-SemiboldIt]
+% Scale=0.884 is not a preference. JetBrains Mono's x-height measures 0.550 em
+% against Source Sans 3's 0.486 — 13% larger — so at the same nominal size code
+% sets visibly bigger than the prose around it. The number is measured in
+% design/fonts.yaml and the SAME value produces the CSS size-adjust, so web and
+% print cannot drift apart.
+\setmonofont{JetBrainsMono-Regular}[Path=fonts/, Extension=.ttf, Scale=0.884]
 \newfontfamily\blgmarker{PermanentMarker-Regular}[Path=fonts/, Extension=.ttf]
 
 % ── Colours & fonts of beamer elements ──────────────────────────────────────
