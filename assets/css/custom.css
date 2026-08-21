@@ -3,7 +3,14 @@
    generated from design/tokens.yaml and loaded before this file. There are no
    colour literals here by design: gate A7 fails any #rrggbb, rgb(), rgba() or
    hsl() outside tokens.css, because two hand-maintained sources for one
-   palette is exactly how Persian ended up with a web accent and no print one. */
+   palette is exactly how Persian ended up with a web accent and no print one.
+
+   Inline positioning is expressed logically — inset-inline-start, not left —
+   so a right-to-left island lays out correctly without a mirrored stylesheet.
+   Gate A8 keeps it that way. flex-direction is direction-neutral and
+   allowlisted. This landed before any RTL content exists, deliberately:
+   retro-fitting logical properties under time pressure at wave 5 is how a
+   physical property survives into production. */
 
 /* ── Typography ─────────────────────────────────── */
 body {
@@ -61,7 +68,7 @@ a:focus {
   display: none;
   position: absolute;
   top: 100%;
-  left: 0;
+  inset-inline-start: 0;
   background: var(--network-surface, var(--boulingua-surface));
   color: var(--fg-color, inherit);
   border: 1px solid var(--network-border, var(--boulingua-panel-border));
@@ -101,7 +108,7 @@ a:focus {
     position: static;
     box-shadow: none;
     border: none;
-    padding-left: 1rem;
+    padding-inline-start: 1rem;
   }
 }
 
@@ -110,8 +117,7 @@ a:focus {
    and ends up at the top-right with the rest of the nav. */
 .navigation-item--social .navigation-link {
   font-size: 1.05rem;
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
+  padding-inline: 0.5rem;
 }
 .navigation-item--social .navigation-link i {
   vertical-align: middle;
@@ -235,7 +241,7 @@ main.content h2:hover,
 
 /* ── Callouts (Quarto-equivalent) ───────────────── */
 .callout {
-  border-left: 4px solid var(--boulingua-accent);
+  border-inline-start: 4px solid var(--boulingua-accent);
   /* a7-allow: color-mix() is only universally supported from 2023. A machine
      that does not understand the line below must still get a neutral wash, not
      an unstyled callout, so this literal is deliberate and must stay first. */
@@ -249,11 +255,11 @@ main.content h2:hover,
 .callout > p:first-child { margin-top: 0; }
 .callout > p:last-child { margin-bottom: 0; }
 
-.callout-note    { border-left-color: var(--boulingua-accent); background: color-mix(in srgb, var(--boulingua-accent) 7%, transparent); }
-.callout-tip     { border-left-color: var(--boulingua-semantic-tip); background: color-mix(in srgb, var(--boulingua-semantic-tip) 7%, transparent); }
-.callout-warning { border-left-color: var(--boulingua-semantic-warning); background: color-mix(in srgb, var(--boulingua-semantic-warning) 7%, transparent); }
-.callout-important { border-left-color: var(--boulingua-semantic-important); background: color-mix(in srgb, var(--boulingua-semantic-important) 7%, transparent); }
-.callout-caution { border-left-color: var(--boulingua-semantic-warning); background: color-mix(in srgb, var(--boulingua-semantic-warning) 7%, transparent); }
+.callout-note    { border-inline-start-color: var(--boulingua-accent); background: color-mix(in srgb, var(--boulingua-accent) 7%, transparent); }
+.callout-tip     { border-inline-start-color: var(--boulingua-semantic-tip); background: color-mix(in srgb, var(--boulingua-semantic-tip) 7%, transparent); }
+.callout-warning { border-inline-start-color: var(--boulingua-semantic-warning); background: color-mix(in srgb, var(--boulingua-semantic-warning) 7%, transparent); }
+.callout-important { border-inline-start-color: var(--boulingua-semantic-important); background: color-mix(in srgb, var(--boulingua-semantic-important) 7%, transparent); }
+.callout-caution { border-inline-start-color: var(--boulingua-semantic-warning); background: color-mix(in srgb, var(--boulingua-semantic-warning) 7%, transparent); }
 
 .callout-title {
   font-weight: 600;
@@ -530,7 +536,7 @@ details.callout summary {
 .materials-filter .filter-label {
   font-size: 0.85rem;
   font-weight: 600;
-  margin-right: 0.4rem;
+  margin-inline-end: 0.4rem;
   min-width: 5rem;
 }
 
@@ -573,14 +579,14 @@ details.callout summary {
 }
 
 .chip-clear {
-  margin-left: auto;
+  margin-inline-start: auto;
   border-style: dashed;
 }
 
 .materials-count {
   font-size: 0.85rem;
   opacity: 0.7;
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 /* ╔══════════════════════════════════════════════════╗
@@ -802,7 +808,7 @@ body.colorscheme-dark {
 .network-graph .graph-legend {
   position: absolute;
   bottom: 0.6rem;
-  left: 0.7rem;
+  inset-inline-start: 0.7rem;
   font-size: 0.75rem;
   color: var(--network-fg-mute);
   background: var(--network-surface);
@@ -833,7 +839,7 @@ body.colorscheme-dark {
   flex-direction: column;
   background: var(--network-surface);
   border: 1px solid var(--network-border);
-  border-left: 4px solid var(--network-topic, var(--network-fg-mute));
+  border-inline-start: 4px solid var(--network-topic, var(--network-fg-mute));
   border-radius: 6px;
   padding: 0.85rem 1rem 1rem;
   gap: 0.4rem;
@@ -981,7 +987,7 @@ body.colorscheme-dark {
 .notes {
   font-size: 0.9rem;
   opacity: 0.85;
-  border-left: 3px solid var(--boulingua-rule);
+  border-inline-start: 3px solid var(--boulingua-rule);
   padding: 0.4rem 1rem;
   margin: 1.5rem 0;
 }
@@ -1034,3 +1040,25 @@ body.colorscheme-dark .colorscheme-toggle .cs-icon--sun { display: inline-block;
 .audio-transcript { margin-top: 0.5rem; font-size: 0.9rem; }
 .audio-transcript summary { cursor: pointer; color: var(--boulingua-accent); }
 .audio-transcript p { margin: 0.5rem 0 0; line-height: 1.5; }
+
+/* ── Target-language islands ─────────────────────── */
+/* The page is LTR and the target language renders in islands (ADR-0007). These
+   rules are what keep the island from taking the rest of the page with it. */
+.tl { unicode-bidi: isolate; }
+div.tl { display: block; margin-block: 1rem; }
+
+/* Code never mirrors, whatever it sits inside. A right-to-left run of source
+   code is unreadable, and the reason is not aesthetic: the tokens themselves
+   are LTR sequences. */
+[dir="rtl"] pre,
+[dir="rtl"] code,
+[dir="rtl"] .highlight { direction: ltr; text-align: start; unicode-bidi: isolate; }
+
+/* Identifiers stay ASCII, LTR and tabular in every direction. unit06 must read
+   identically in the URL, the front matter and on the page: a re-slug orphans
+   a registered VG Wort mark, so these are not free to reflow. */
+.unit-nr, .cefr-badge, time, .tabular {
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-variant-numeric: tabular-nums;
+}

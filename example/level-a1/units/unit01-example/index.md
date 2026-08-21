@@ -62,3 +62,14 @@ The main output task. This is what differentiation (support/extension) scaffolds
 ## 5. Reflect
 
 Learners self-assess against the can-do statements.
+
+## Target-language runs
+
+An inline run — {{< tl >}}Guten Morgen{{< /tl >}} — carries its own `lang`,
+so a screen reader switches voice and the spellchecker stops underlining it.
+
+{{< tl block >}}
+Ein ganzer Absatz in der Zielsprache steht als eigener Block.
+{{< /tl >}}
+
+An explicit override for a citation: {{< tl lang="grc" >}}μῆνιν ἄειδε{{< /tl >}}.

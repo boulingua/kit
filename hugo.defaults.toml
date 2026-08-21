@@ -58,6 +58,9 @@ enableRobotsTXT = true
   # design/fonts.yaml: core, latin-ext, greek, cyrillic. `kit sync` refuses a
   # course whose tier is deferred.
   scriptTier = "core"        # CHANGE per course where the script needs it
+  # The language {{< tl >}} tags its runs with. A unit author never types a
+  # language code; the shortcode reads it from here.
+  targetLanguage = "en"      # CHANGE per course
   code = "template"   # CHANGE per course. "template" resolves to the neutral
                       # graphite accent, so an unconfigured course looks obviously
                       # wrong instead of looking like DaF. Gate F7-C3 makes it fatal.

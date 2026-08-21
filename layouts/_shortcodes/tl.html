@@ -1,0 +1,39 @@
+{{- /* {{< tl >}} — a run of target-language text.
+
+  {{< tl >}}Καλημέρα{{< /tl >}}              inline
+  {{< tl block >}}…{{< /tl >}}                block
+  {{< tl lang="grc" >}}μῆνιν ἄειδε{{< /tl >}} explicit override for a citation
+
+  This is not an RTL feature, and that is the point. Every course uses it,
+  including the Latin-script ones, because it is how a target-language run gets
+  its `lang` attribute — which is what makes a screen reader switch voice, what
+  makes hyphenation correct, and what lets a spellchecker stop underlining a
+  whole Greek paragraph. A German page with an untagged Greek sentence is read
+  aloud as German with Greek letters.
+
+  `lang` comes from the course's own config, so a unit author never types a
+  language code. `dir` is emitted only where the script needs it — for the four
+  shipped tiers it is omitted entirely, so this renders identically in all of
+  them and does not wait for the RTL work in F4b.
+
+  The page itself stays LTR (ADR-0007). The metalanguage is German:
+  navigation, task instructions, CEFR badges and download buttons must not
+  mirror. An Arabic passage renders as a right-to-left island on a
+  left-to-right page, which is exactly how an Arabic text is set inside a
+  German textbook — because that is what this is. */ -}}
+
+{{- $lang := .Get "lang" | default site.Params.targetLanguage | default site.LanguageCode -}}
+{{- $tier := site.Params.scriptTier | default "core" -}}
+{{- /* Only the arabic tier is bidirectional among the seven declared. Omitting
+       dir elsewhere is deliberate: dir="ltr" on an LTR page is noise, and
+       dir="auto" would let a stray Latin run flip a Greek paragraph. */ -}}
+{{- $dir := cond (eq $tier "arabic") "rtl" "" -}}
+{{- $inner := .Inner | .Page.RenderString -}}
+
+{{- if in .Params "block" -}}
+<div class="tl" lang="{{ $lang }}"{{ with $dir }} dir="{{ . }}"{{ end }}>
+{{ $inner }}
+</div>
+{{- else -}}
+<span class="tl" lang="{{ $lang }}"{{ with $dir }} dir="{{ . }}"{{ end }}>{{ $inner }}</span>
+{{- end -}}
