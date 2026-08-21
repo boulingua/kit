@@ -61,12 +61,30 @@ REQUIRED_FIELDS = ("/Author", "/Title")
 REPORTED_FIELDS = ("/Subject", "/Keywords", "/Creator")
 
 
+def _has_units(repo: Path) -> bool:
+    """Does this course have any unit content at all?
+
+    The distinction these gates must draw is between "artefacts are missing for
+    content that exists" — a real failure — and "there is no content yet",
+    which is what every course looks like on its first commit. Failing a fresh
+    scaffold teaches the author to ignore the battery before they have written
+    a single unit, and a battery ignored from day one is never switched back on.
+    """
+    c = repo / "content"
+    return c.exists() and any(
+        p.suffix == ".md" and p.name not in ("_index.md",) and "/units/" in p.as_posix()
+        for p in c.rglob("*.md"))
+
+
 def main() -> int:
     pdfs = sorted(STATIC.rglob("*.pdf"))
     if not pdfs:
         # Is this course supposed to have artefacts? If it commits its
         # materials, finding none means the build did not run, and reporting
         # success for that is exactly backwards.
+        if not _has_units(REPO):
+            print("verify_pdf_metadata: no unit content yet — nothing to attribute.")
+            return 0
         cfg = REPO / "boulingua.yml"
         committed = "materials: committed" in cfg.read_text(encoding="utf-8") \
             if cfg.exists() else (REPO / "static" / "materials").exists()

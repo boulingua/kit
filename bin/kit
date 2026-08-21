@@ -1,0 +1,288 @@
+#!/usr/bin/env python3
+"""kit — the boulingua platform CLI.
+
+    kit check [REPO] [--ci]     run the whole gate battery
+    kit design [--check]        regenerate tokens and icons, or verify them
+    kit sync REPO               write _materials/ and kit.lock into a course
+    kit urldiff REPO            has anything moved a URL that carries a mark?
+    kit materials REPO ...      build decks, worksheets, thumbnails
+    kit audio REPO ...          fetch, audition, synthesise
+    kit vgwort REPO ...         the mark ledger
+    kit new CODE                instantiate a course from the kit
+    kit menu                    regenerate the footer menu input
+
+THE CONTRACT, and the reason this exists at all:
+
+    **If `kit check` passes locally it passes in CI, because CI runs exactly
+    it.** The reusable workflow's job body is `kit check --ci` and nothing else.
+
+That property is the whole point. This organisation accumulated nine
+`continue-on-error` suppressions, and every one of them started as somebody
+debugging a gate through CI because they could not run it locally. A gate you
+cannot run before pushing is a gate you eventually switch off.
+
+`kit check` is therefore not a convenience wrapper. It is the definition of the
+battery, and the workflow is a thin caller — never the other way round.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import os
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+KIT = Path(__file__).resolve().parent.parent
+SCRIPTS = KIT / "scripts"
+PY = sys.executable
+
+
+def load_cfg(repo: Path) -> dict:
+    import yaml
+    f = repo / "boulingua.yml"
+    if not f.exists():
+        return {}
+    return yaml.safe_load(f.read_text(encoding="utf-8")) or {}
+
+
+def run(cmd: list[str], label: str, cwd: Path | None = None) -> tuple[str, int]:
+    r = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
+    out = (r.stdout or "") + (r.stderr or "")
+    return out.strip(), r.returncode
+
+
+# ── the battery ─────────────────────────────────────────────────────────────
+# One list. A gate reachable from CI but not from here, or the reverse, is the
+# drift this file exists to prevent — `kit check --list` prints it and the
+# kit's own CI asserts the workflow adds nothing of its own.
+def battery(repo: Path, cfg: dict) -> list[tuple[str, list[str]]]:
+    gates: list[tuple[str, list[str]]] = [
+        ("A7  design tokens", [PY, str(SCRIPTS / "verify_tokens.py")]),
+        ("A8  logical CSS",   [PY, str(SCRIPTS / "verify_logical_css.py")]),
+        ("A4  font licences", [PY, str(SCRIPTS / "verify_fonts.py")]),
+    ]
+    if repo != KIT:
+        gates += [
+            ("D2  PDF metadata", [PY, str(SCRIPTS / "verify_pdf_metadata.py"), str(repo)]),
+            ("D1  downloads",    [PY, str(SCRIPTS / "verify_downloads.py"), str(repo)]),
+            ("A5  vendored lock", [PY, str(SCRIPTS / "verify_kit_lock.py"), str(repo)]),
+        ]
+        if cfg.get("gates", {}).get("network_graph"):
+            gates.append(("C13 JS budget",
+                          [PY, str(SCRIPTS / "verify_js_budget.py"), str(repo / "public")]))
+        if cfg.get("gates", {}).get("pagefind"):
+            gates.append(("B3  search index",
+                          [PY, str(SCRIPTS / "verify_pagefind.py"), str(repo / "public")]))
+    return gates
+
+
+def cmd_check(a) -> int:
+    repo = Path(a.repo).resolve() if a.repo else Path.cwd()
+    cfg = load_cfg(repo)
+    gates = battery(repo, cfg)
+    if a.list:
+        for name, cmd in gates:
+            print(f"  {name:20s} {Path(cmd[1]).name}")
+        return 0
+    print(f"kit check — {repo.name}"
+          + (f" ({cfg.get('code')}, tier {cfg.get('script_tier')})" if cfg else ""))
+    failed = []
+    for name, cmd in gates:
+        out, rc = run(cmd, name, cwd=repo)
+        last = out.splitlines()[-1] if out else ""
+        print(f"  {'FAIL' if rc else 'ok  '}  {name:20s} {last[:78]}")
+        if rc:
+            failed.append((name, out))
+    if failed:
+        print(f"\n{len(failed)} gate(s) failed:\n", file=sys.stderr)
+        for name, out in failed:
+            print(f"── {name} ──\n{out}\n", file=sys.stderr)
+        return 1
+    print(f"\nkit check OK — {len(gates)} gates")
+    return 0
+
+
+# ── design ──────────────────────────────────────────────────────────────────
+def cmd_design(a) -> int:
+    flag = ["--check"] if a.check else []
+    steps = [("tokens", [PY, str(KIT / "design" / "build_tokens.py")] + flag),
+             ("icons",  [PY, str(KIT / "brand" / "make_icon.py"),
+                         "--check" if a.check else "--all"])]
+    bad = 0
+    for name, cmd in steps:
+        out, rc = run(cmd, name, cwd=KIT)
+        print(f"  {'FAIL' if rc else 'ok  '}  {name:8s} {out.splitlines()[-1][:70] if out else ''}")
+        bad += bool(rc)
+    return 1 if bad else 0
+
+
+# ── sync: the one vendored surface ──────────────────────────────────────────
+def cmd_sync(a) -> int:
+    repo = Path(a.repo).resolve()
+    cfg = load_cfg(repo)
+    tier = cfg.get("script_tier", "core")
+
+    import yaml
+    fonts = yaml.safe_load((KIT / "design" / "fonts.yaml").read_text(encoding="utf-8"))
+    spec = fonts["tiers"].get(tier)
+    if not spec:
+        print(f"::error::script_tier {tier!r} is not a tier in fonts.yaml", file=sys.stderr)
+        return 1
+    if spec["status"] == "deferred":
+        print(f"::error::script_tier {tier!r} is declared but deferred — no font "
+              f"payload is committed for it and no reference document has ever "
+              f"been built. See kit/design/fonts.yaml and ADR-0018.", file=sys.stderr)
+        return 1
+
+    dest = repo / "_materials"
+    dest.mkdir(parents=True, exist_ok=True)
+    (dest / "fonts").mkdir(exist_ok=True)
+    (dest / "brand" / "icons").mkdir(parents=True, exist_ok=True)
+    (dest / "assets").mkdir(exist_ok=True)
+
+    copied: list[Path] = []
+    for src in sorted((KIT / "latex").glob("*.sty")):
+        shutil.copy2(src, dest / src.name); copied.append(dest / src.name)
+    for src in sorted((KIT / "fonts" / "core").iterdir()):
+        shutil.copy2(src, dest / "fonts" / src.name); copied.append(dest / "fonts" / src.name)
+    if tier != "core":
+        for src in sorted((KIT / "fonts" / tier).iterdir()):
+            shutil.copy2(src, dest / "fonts" / src.name); copied.append(dest / "fonts" / src.name)
+    # ALL 18 icons, not just this course's. Courses cross-reference each other —
+    # pt-BR contrast boxes, Flemish callouts, German-Chinese mediation — and a
+    # byte-identical brand/icons/ everywhere is what makes one digest gate
+    # possible instead of eighteen.
+    for src in sorted((KIT / "brand" / "icons").glob("*.pdf")):
+        shutil.copy2(src, dest / "brand" / "icons" / src.name)
+        copied.append(dest / "brand" / "icons" / src.name)
+    logo = KIT / "brand" / "boulingua-logo.png"
+    if logo.exists():
+        shutil.copy2(logo, dest / "assets" / logo.name); copied.append(dest / "assets" / logo.name)
+
+    lock = ["# kit.lock — digests of the one vendored surface.",
+            "#",
+            "# XeLaTeX cannot read a Hugo module, so these files live in the course",
+            "# repo. That makes them the only place drift can happen, which is why",
+            "# they are hashed: a one-byte edit to a vendored .sty fails the next",
+            "# `kit check`.",
+            f"# tier: {tier}", ""]
+    for p in sorted(copied):
+        lock.append(f"{hashlib.sha256(p.read_bytes()).hexdigest()}  "
+                    f"{p.relative_to(dest).as_posix()}")
+    (dest / "kit.lock").write_text("\n".join(lock) + "\n", encoding="utf-8")
+    print(f"  _materials/ synced: {len(copied)} files, tier {tier}")
+    return 0
+
+
+def cmd_urldiff(a) -> int:
+    repo = Path(a.repo).resolve()
+    cfg = load_cfg(repo)
+    built = Path(a.built) if a.built else repo / "public"
+    base = f"/{cfg.get('code', repo.name)}/"
+    return run([PY, str(SCRIPTS / "vgwort_urldiff.py"), str(repo), str(built),
+                "--base", base], "urldiff", cwd=repo)[1] or _echo(
+        [PY, str(SCRIPTS / "vgwort_urldiff.py"), str(repo), str(built), "--base", base], repo)
+
+
+def _echo(cmd: list[str], cwd: Path) -> int:
+    out, rc = run(cmd, "", cwd=cwd)
+    print(out)
+    return rc
+
+
+def cmd_materials(a) -> int:
+    repo = Path(a.repo).resolve()
+    if a.thumbs:
+        return _echo([PY, str(SCRIPTS / "render_thumbs.py")], repo)
+    return _echo([PY, str(SCRIPTS / "build_materials_latex.py")], repo)
+
+
+def cmd_audio(a) -> int:
+    if a.action == "audition":
+        return _echo([PY, str(KIT / "audio" / "audition.py"), "--code", a.code], KIT)
+    repo = Path(a.repo).resolve() if a.repo else Path.cwd()
+    return _echo([PY, str(KIT / "audio" / "build_audio.py"), str(repo)], repo)
+
+
+def cmd_vgwort(a) -> int:
+    repo = Path(a.repo).resolve()
+    cfg = load_cfg(repo)
+    base = f"/{cfg.get('code', repo.name)}/"
+    if a.action == "lock":
+        built = Path(a.built) if a.built else repo / "public"
+        return _echo([PY, str(SCRIPTS / "vgwort_lock.py"), str(repo), str(built),
+                      "--base", base], repo)
+    print("::error::only `lock` is implemented. assign/reconcile write the private "
+          "ledger, which is derived from the T.O.M. export — deferred to the "
+          "closing phase per ADR-0020.", file=sys.stderr)
+    return 1
+
+
+def cmd_new(a) -> int:
+    import yaml
+    accents = yaml.safe_load((KIT / "data" / "accents.yaml").read_text(encoding="utf-8"))
+    if a.code not in {x["code"] for x in accents}:
+        print(f"::error::{a.code} is not in data/accents.yaml — add the accent row "
+              f"first, so the course has a colour before it has content.",
+              file=sys.stderr)
+        return 1
+    dest = Path(a.into or a.code).resolve()
+    if dest.exists() and any(dest.iterdir()):
+        print(f"::error::{dest} exists and is not empty", file=sys.stderr)
+        return 1
+    (dest / "content").mkdir(parents=True, exist_ok=True)
+    (dest / ".github" / "workflows").mkdir(parents=True, exist_ok=True)
+    cfg = (KIT / "templates" / "boulingua.yml").read_text(encoding="utf-8")
+    (dest / "boulingua.yml").write_text(cfg.replace("code: template", f"code: {a.code}"),
+                                        encoding="utf-8")
+    hugo = (KIT / "hugo.defaults.toml").read_text(encoding="utf-8")
+    hugo = hugo.replace('code = "template"', f'code = "{a.code}"')
+    hugo = hugo.replace("https://boulingua.github.io/CHANGEME/",
+                        f"https://boulingua.github.io/{a.code}/")
+    (dest / "hugo.toml").write_text(hugo, encoding="utf-8")
+    (dest / "go.mod").write_text(
+        f"module github.com/boulingua/{a.code}\n\ngo 1.26.1\n", encoding="utf-8")
+    shutil.copy2(KIT / "templates" / "deploy.yml", dest / ".github" / "workflows" / "deploy.yml")
+    print(f"  {dest.name}/ created — content/, boulingua.yml, hugo.toml, go.mod, deploy.yml")
+    print("  no layouts/, no assets/, no scripts/: those arrive as a Hugo module.")
+    return 0
+
+
+def cmd_menu(a) -> int:
+    import yaml
+    accents = yaml.safe_load((KIT / "data" / "accents.yaml").read_text(encoding="utf-8"))
+    live = [x for x in accents if x.get("published")]
+    print(f"  {len(live)} published course(s) feed the footer sister list:")
+    for x in live:
+        print(f"    {x['code']:5s} {x['language']}")
+    print("  The footer ranges over this at render time; there is nothing to write.")
+    return 0
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(prog="kit", description=__doc__.splitlines()[0])
+    sub = ap.add_subparsers(dest="cmd", required=True)
+
+    c = sub.add_parser("check"); c.add_argument("repo", nargs="?")
+    c.add_argument("--ci", action="store_true"); c.add_argument("--list", action="store_true")
+    d = sub.add_parser("design"); d.add_argument("--check", action="store_true")
+    s = sub.add_parser("sync"); s.add_argument("repo")
+    u = sub.add_parser("urldiff"); u.add_argument("repo"); u.add_argument("--built")
+    m = sub.add_parser("materials"); m.add_argument("repo"); m.add_argument("--thumbs", action="store_true")
+    au = sub.add_parser("audio"); au.add_argument("action", choices=["build", "audition"])
+    au.add_argument("repo", nargs="?"); au.add_argument("--code")
+    v = sub.add_parser("vgwort"); v.add_argument("action", choices=["lock", "assign", "reconcile"])
+    v.add_argument("repo"); v.add_argument("--built")
+    n = sub.add_parser("new"); n.add_argument("code"); n.add_argument("--into")
+    sub.add_parser("menu")
+
+    a = ap.parse_args()
+    return {"check": cmd_check, "design": cmd_design, "sync": cmd_sync,
+            "urldiff": cmd_urldiff, "materials": cmd_materials, "audio": cmd_audio,
+            "vgwort": cmd_vgwort, "new": cmd_new, "menu": cmd_menu}[a.cmd](a)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

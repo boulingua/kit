@@ -1,0 +1,71 @@
+# boulingua.yml — the per-course configuration the gate battery reads.
+#
+# One file. The specifications had this split across a materials-profile.yml, a
+# gates: block in the workflow, and half a dozen hugo.toml params, which meant
+# three places to look and three places to disagree.
+#
+# Copy this into a course, change the marked values, and `kit check` reads it.
+
+code: template                  # must match [params].code and the baseURL path
+kind: course                    # course | hub | catalogue | framework | kit
+content_model: leaf-bundle      # leaf-bundle | flat-file
+
+# ── The slug declaration: THREE AXES, NOT ONE ──────────────────────────────
+#
+# FROZEN per site, permanently (ADR-0003). A single `slug_style` value cannot
+# describe what the three live sites do, and a generator honouring a wrong one
+# destroys registered VG Wort marks in a single commit.
+#
+# Measured, which is the only reason this is three fields:
+#
+#   efl  0 of 360 slug overrides · section track-e/kl09 · leaf = bundle dir ·
+#        ordinal IN the url    /track-e/kl09/units/unit06-interview-and-portrait/
+#   fle  312 of 358 overrides, NONE containing an underscore · section
+#        track_gm_kl06 · leaf = front matter · ordinal ABSENT
+#                                /track_gm_kl06/units/salutations-et-prenoms/
+#   daf  0 of 60 · section kurs_a1 · leaf = file stem · ordinal IN the url
+#                                /kurs_a1/units/unit01_begruessung-und-name/
+#
+# So fle's underscores are in the SECTION path only; its leaf slugs are
+# hyphenated and carry no unitNN prefix at all. Declaring `slug_style:
+# underscore` for fle would emit /track_gm_kl06/units/unit01_salutations-et-
+# prenoms/ and orphan 349 registered marks.
+slug:
+  section_separator: hyphen     # underscore | hyphen
+  leaf_source: dirname          # frontmatter | dirname | filestem
+  leaf_style: hyphen            # underscore | hyphen
+  unit_number_in_slug: true
+
+script_tier: core               # core | latin-ext | greek | cyrillic
+                                # (arabic | hanzi-sc | kana-kanji are declared
+                                #  in kit/design/fonts.yaml but deferred; sync
+                                #  refuses a course that names one)
+target_language: en             # what {{< tl >}} tags its runs with
+chrome_language: de             # UI and LaTeX instruction language. Every page
+                                # is German instructions around target-language
+                                # content, and those are two different things.
+
+band_default: II                # EQS word-count band
+milestone: M0                   # M0 | M1 | M2 | M3 — drives the implements ramp
+
+gates:
+  network_graph: false          # the materials-network graph + JS budget
+  pagefind: false               # search index
+  bildungsplan: false           # Bildungsplan-BW anchor codes
+  curriculum: warn              # off | warn | block
+
+vgwort:
+  registry: vgwort/marks.yaml
+  url_lock: vgwort/url-lock-provisional.csv
+  # Pages that must NEVER carry a mark: navigation surfaces and the templated
+  # legal pages, which are not the author's creative work.
+  hub_exclusions: ["/", "/materials/"]
+  # true for a catalogue whose every prose page is under the 1800-character
+  # floor — it makes "no marks here" a recorded decision rather than an absence.
+  expect_empty: false
+
+materials: committed            # committed | generated
+                                # Org-wide policy is committed (ADR-0009): CI
+                                # verifies, it does not generate. A course set
+                                # to `generated` fails D2 on an empty glob
+                                # rather than passing vacuously.

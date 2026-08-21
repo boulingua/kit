@@ -15,7 +15,10 @@ from pathlib import Path
 
 import yaml
 
-REPO = Path(__file__).resolve().parent.parent
+# The repo under test is an ARGUMENT, never this script's own location.
+# Inside a course that was the same thing; in the kit it is the kit, and the
+# gate reports success about a repo it never opened.
+REPO = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 and not sys.argv[1].startswith("-") else Path.cwd()
 CONTENT = REPO / "content"
 STATIC = REPO / "static"
 FM_RE = re.compile(r"^---\n(.*?)\n---\n", re.S)
@@ -39,7 +42,25 @@ def static_path(url: str) -> Path:
     return STATIC / rel
 
 
+def _has_units(repo: Path) -> bool:
+    """Does this course have any unit content at all?
+
+    The distinction these gates must draw is between "artefacts are missing for
+    content that exists" — a real failure — and "there is no content yet",
+    which is what every course looks like on its first commit. Failing a fresh
+    scaffold teaches the author to ignore the battery before they have written
+    a single unit, and a battery ignored from day one is never switched back on.
+    """
+    c = repo / "content"
+    return c.exists() and any(
+        p.suffix == ".md" and p.name not in ("_index.md",) and "/units/" in p.as_posix()
+        for p in c.rglob("*.md"))
+
+
 def main() -> int:
+    if not _has_units(REPO):
+        print('verify-downloads: no unit content yet — nothing to resolve.')
+        return 0
     missing: list[tuple[str, str]] = []
     units = sorted(CONTENT.glob("kurs_*/units/unit*.md"))
     if not units:

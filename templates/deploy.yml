@@ -1,68 +1,15 @@
-# Canonical boulingua course build + deploy pipeline.
-# Materials (PDF/audio) are generated locally and COMMITTED; CI only builds,
-# verifies, and deploys — no TeX Live in the deploy path.
-name: build-deploy
+# The twelve-line caller. Byte-identical in every course.
+#
+# The job body is `kit check --ci` and nothing else, and that is the contract:
+# if it passes locally it passes here, because this runs exactly it. Any gate
+# added to this file instead of to the battery breaks that property and is
+# caught by the kit's own drift test.
+name: Build and deploy
 on:
-  push:
-    branches: [main]
+  push: { branches: [main] }
   workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-concurrency:
-  group: pages
-  cancel-in-progress: true
-
+permissions: { contents: read, pages: write, id-token: write }
+concurrency: { group: pages, cancel-in-progress: false }
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    env:
-      HUGO_VERSION: 0.159.2
-    steps:
-      - uses: actions/checkout@v4
-        with: { submodules: recursive, fetch-depth: 0 }
-      - name: Install Hugo (extended)
-        run: |
-          curl -sSL "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.deb" -o /tmp/hugo.deb
-          sudo dpkg -i /tmp/hugo.deb
-      - uses: actions/setup-go@v5
-        with: { go-version-file: go.mod }
-      - uses: actions/setup-python@v5
-        with: { python-version: '3.11' }
-      - run: pip install pyyaml pymupdf
-
-      - name: Build
-        run: hugo --minify --gc
-
-      # ── Gate battery (each gate is a discrete, fail-loud step) ──────────
-      - name: VG Wort — Mindestumfang coverage (warning)
-        run: python scripts/verify_vgwort_coverage.py || true
-      - name: VG Wort — manifest ↔ data
-        run: python scripts/verify_all_pixels.py
-      - name: VG Wort — rendered pixels
-        run: python scripts/verify_rendered_pixels.py
-      - name: VG Wort — manifest pixel gate
-        run: bash scripts/verify-vgwort.sh
-      - name: Legal placeholders filled
-        # TEMPLATE: `|| true` because pagegen ships with ⟨…⟩ placeholders.
-        # In a real course, fill the legal pages and REMOVE `|| true` to enforce.
-        run: python scripts/verify_legal_placeholders.py || true
-      - name: Downloads present + attributed
-        run: python scripts/verify_downloads.py || true
-      # Add per-course opt-in gates here: verify_cefr.py, verify_bildungsplan_refs.py,
-      # verify_author_meta.py, verify_tracking.py, verify_qa_basics.py, pa11y.
-
-      - uses: actions/upload-pages-artifact@v3
-        with: { path: public }
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+  course:
+    uses: boulingua/.github/.github/workflows/course-build.yml@v1
