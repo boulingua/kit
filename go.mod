@@ -1,4 +1,4 @@
-module github.com/boulingua/pagegen
+module github.com/boulingua/kit
 
 go 1.26.1
 

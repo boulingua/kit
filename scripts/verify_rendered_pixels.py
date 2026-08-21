@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify every VG Wort pixel URL from vgwort-manifest.csv appears in the
+"""Verify every VG Wort pixel URL in vgwort/url-lock-provisional.csv appears in the
 rendered Hugo output under public/. This is the deploy-gate verification.
 """
 from __future__ import annotations
@@ -12,7 +12,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def main() -> int:
-    rows = list(csv.DictReader((ROOT / "vgwort-manifest.csv").open(encoding="utf-8")))
+    lock = ROOT / "vgwort" / "url-lock-provisional.csv"
+    rows = list(csv.DictReader(
+        l for l in lock.open(encoding="utf-8") if not l.startswith("#")))
     public = ROOT / "public"
     if not public.is_dir():
         print("public/ missing — run `hugo --minify` first", file=sys.stderr)

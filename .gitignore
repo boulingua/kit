@@ -27,3 +27,7 @@ Thumbs.db
 __pycache__/
 *.pyc
 .venv/
+
+# Local build output: the example site, and the flat _materials/ tree the
+# LaTeX Makefile assembles to compile in.
+build/

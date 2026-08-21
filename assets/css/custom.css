@@ -1,9 +1,14 @@
-/* DaF — design tokens layered on hugo-coder. Mirrors boulingua/website
-   colour scheme so all four sister sites feel like one product. */
+/* boulingua — design tokens layered on hugo-coder, shared by every course.
+   The accent below is a NEUTRAL FALLBACK, not a design choice: the real accent
+   is injected per course from data/accents.yaml, keyed by [params].code. This
+   file previously shipped DaF's teal, so a course that forgot to set `code`
+   silently looked like DaF and nothing complained. Graphite is deliberate —
+   an unconfigured course should look obviously wrong, not like another course.
+   F2 replaces these literals with generated tokens. */
 
 :root {
-  --boulingua-accent: #1D87A7;
-  --boulingua-accent-hover: #176780;
+  --boulingua-accent: #3F4A54;
+  --boulingua-accent-hover: #2B333A;
   --boulingua-panel-border: rgba(0, 0, 0, 0.12);
   --boulingua-panel-border-hover: var(--boulingua-accent);
   --boulingua-panel-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
@@ -15,8 +20,8 @@
 
 @media (prefers-color-scheme: dark) {
   body.colorscheme-auto {
-    --boulingua-accent: #7ECEE7;
-    --boulingua-accent-hover: #A9DEEF;
+    --boulingua-accent: #8A96A1;
+    --boulingua-accent-hover: #AAB4BD;
     --boulingua-panel-border: rgba(255, 255, 255, 0.16);
     --boulingua-panel-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
     --boulingua-rule: rgba(255, 255, 255, 0.16);
@@ -24,8 +29,8 @@
 }
 
 body.colorscheme-dark {
-  --boulingua-accent: #7ECEE7;
-  --boulingua-accent-hover: #A9DEEF;
+  --boulingua-accent: #8A96A1;
+  --boulingua-accent-hover: #AAB4BD;
   --boulingua-panel-border: rgba(255, 255, 255, 0.16);
   --boulingua-panel-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
   --boulingua-rule: rgba(255, 255, 255, 0.16);

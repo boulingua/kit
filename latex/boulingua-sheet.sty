@@ -88,6 +88,11 @@
 % \worksheetheader{Title}{Subtitle line}{Badge label}{badge color}
 \newcommand{\worksheetheader}[4]{%
   \gdef\blgtitle{#1}%
+  % Also set the PDF /Title. The deck has always done this from
+  % \inserttitle; the worksheet did not, so every worksheet PDF shipped with
+  % an empty title while the attribution gate — which greps /Author only —
+  % stayed green. Gate D2 checks both.
+  \hypersetup{pdftitle={#1}}%
   \thispagestyle{empty}%
   {\blgsemibold\LARGE\color{blgfg} #1\hfill\raisebox{-3.2mm}[0pt][0pt]{\blglangmark[11mm]}\par}%
   \vspace{0.35em}%

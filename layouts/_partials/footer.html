@@ -1,38 +1,44 @@
 {{/*
-  Override of hugo-coder's footer.html with the boulingua/daf
-  footer link strip (Start, Übersicht, Anhang-Seiten, Schwesternsites,
-  Rechtliches, Kontakt).
+  boulingua footer. Overrides hugo-coder's.
+
+  Nothing here is per-course. This file used to be DaF's footer verbatim: ten
+  hard-coded German links to pages that exist only in daf, a hand-written
+  three-site sister list, and a mailto in the markup. Copied into a new course
+  it produced ten dead links and a contact address nobody could change without
+  editing a layout.
+
+  Now: the link strip comes from the `footer` menu in the course's own config,
+  the sister list is generated from data/accents.yaml filtered to
+  `published: true`, and the address is a param.
 */}}
-{{- if (or (not .Site.Params.hideFooter) (eq .Site.Params.hideFooter false)) }}
+{{- if (or (not site.Params.hideFooter) (eq site.Params.hideFooter false)) }}
+{{- $code := site.Params.code | default "template" }}
 <footer class="footer">
   <section class="container">
     <p class="footer-line">
-      DaF · © {{ .Site.Params.author }} · MIT / CC-BY-SA 4.0
+      {{ with site.Params.navTitle }}{{ . }} · {{ end }}© {{ site.Params.author }} ·
+      {{ i18n "licence_pair" | default "MIT / CC BY-SA 4.0" }}
     </p>
+
+    {{- with site.Menus.footer }}
     <p class="footer-links">
-      <a href="{{ "/" | relLangURL }}">Start</a> ·
-      <a href="{{ "/uebersicht/" | relLangURL }}">Übersicht</a> ·
-      <a href="{{ "/formate/" | relLangURL }}">Prüfungsformate</a> ·
-      <a href="{{ "/anhaenge/lernstrategien/" | relLangURL }}">Lernstrategien</a> ·
-      <a href="{{ "/anhaenge/kompetenzbaum/" | relLangURL }}">Kompetenzbaum</a> ·
-      <a href="{{ "/anhaenge/glossar/" | relLangURL }}">Glossar</a> ·
-      <a href="{{ "/anhaenge/typische_fehler/" | relLangURL }}">Typische Fehler</a> ·
-      <a href="{{ "/anhaenge/bewertungsraster/" | relLangURL }}">Bewertungsraster</a> ·
-      <a href="{{ "/literatur/" | relLangURL }}">Literatur</a> ·
-      <a href="{{ "/danksagung/" | relLangURL }}">Danksagung</a>
+      {{- range $i, $e := . }}{{ if $i }} · {{ end }}<a href="{{ $e.URL | relLangURL }}">{{ $e.Name }}</a>{{ end }}
     </p>
+    {{- end }}
+
     <p class="footer-links">
-      <a href="https://boulingua.github.io/efl/">EFL</a> ·
-      <a href="https://boulingua.github.io/fle/">FLE</a> ·
-      <a href="https://boulingua.github.io/ressources/">Ressourcen</a> ·
-      <strong><a href="{{ "/impressum/" | relLangURL }}">Impressum</a></strong> ·
-      <strong><a href="{{ "/datenschutz/" | relLangURL }}">Datenschutz</a></strong> ·
-      <strong><a href="{{ "/haftungsausschluss/" | relLangURL }}">Haftungsausschluss</a></strong> ·
-      <a href="mailto:277736839+s-leboulanger@users.noreply.github.com">Kontakt</a>
+      {{- /* Sister sites, generated. Adding language nineteen is one row in
+             accents.yaml, not an edit in eighteen footers. */ -}}
+      {{- range where hugo.Data.accents "published" true }}
+        {{- if ne .code $code }}<a href="https://boulingua.github.io/{{ .code }}/">{{ .language }}</a> · {{ end }}
+      {{- end }}
+      {{- range site.Menus.legal }}<strong><a href="{{ .URL | relLangURL }}">{{ .Name }}</a></strong> · {{ end }}
+      {{- with site.Params.contactEmail }}<a href="mailto:{{ . }}">{{ i18n "contact" | default "Contact" }}</a>{{ end }}
     </p>
-    {{- if (or (not .Site.Params.hideCredits) (eq .Site.Params.hideCredits false)) }}
+
+    {{- if (or (not site.Params.hideCredits) (eq site.Params.hideCredits false)) }}
     <p class="footer-line credits">
-      Mit <a href="https://gohugo.io/">Hugo</a> + <a href="https://github.com/luizdepra/hugo-coder/">Coder</a> gebaut.
+      {{ i18n "built_with" | default "Built with Hugo + Coder." | safeHTML }}
     </p>
     {{- end }}
   </section>

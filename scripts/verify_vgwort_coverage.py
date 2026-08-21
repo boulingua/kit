@@ -108,7 +108,7 @@ def main() -> int:
             print(f"  …and {len(over_threshold_unregistered) - 30} more")
         print("\nRegister via VG Wort T.O.M. and re-run "
               "_scripts/migrate_vgwort_to_data.py once the public_id is "
-              "added to vgwort-manifest.csv.")
+              "registered in data/vgwort.yaml.")
     return 0  # warning, not a hard fail
 
 

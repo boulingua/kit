@@ -11,7 +11,7 @@
 # Everything else is the shared standard and should NOT be edited per course.
 # ─────────────────────────────────────────────────────────────────────────
 
-baseURL = "https://boulingua.github.io/pagegen/"   # CHANGE per course
+baseURL = "https://boulingua.github.io/CHANGEME/"  # CHANGE per course
 title = "Course Template — S. Le Boulanger"        # CHANGE per course
 languageCode = "en"                                # CHANGE per course
 defaultContentLanguage = "en"                      # CHANGE per course
@@ -54,7 +54,9 @@ enableRobotsTXT = true
   hideColorSchemeToggle = true
   customCSS = ["css/custom.css"]
   # Site code — selects this course's accent from data/accents.yaml.
-  code = "efl"                                     # CHANGE per course (efl/fle/daf/…)
+  code = "template"   # CHANGE per course. "template" resolves to the neutral
+                      # graphite accent, so an unconfigured course looks obviously
+                      # wrong instead of looking like DaF. Gate F7-C3 makes it fatal.
   # Content licence, surfaced by pdf attribution + legal pages.
   license = "CC BY-SA 4.0"
 
