@@ -41,7 +41,10 @@
     {{- $t := printf "%s" . -}}
     {{- if or (hasPrefix $t "http://") (hasPrefix $t "https://") -}}{{- $url = $t -}}
     {{- else if findRE "^vg[a-z0-9]+\\.met\\.vgwort\\.de/" $t -}}{{- $url = printf "https://%s" $t -}}
-    {{- else -}}{{- $url = printf "https://vg09.met.vgwort.de/na/%s" $t -}}
+    {{- else if findRE "^[0-9a-f]{32}$" $t -}}{{- $url = printf "https://vg09.met.vgwort.de/na/%s" $t -}}
+    {{- /* Anything else — an empty slot, a "<code>" placeholder, a typo — resolves
+           to no URL at all. A malformed token must never become a live request to
+           VG Wort's counting server. */ -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
