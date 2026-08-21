@@ -1,0 +1,24 @@
+{
+  "_comment": [
+    "Promoted from daf, the only site that had an accessibility gate at all.",
+    "The chromeLaunchConfig args and the 60s timeout are verbatim: the timeout",
+    "pairs with the navigation-timeout escape in the workflow, which tells a",
+    "transport flake apart from a real violation and warns loudly instead of",
+    "failing silently. That escape is well judged and is kept as written.",
+    "",
+    "The ignore list is NOT settled. Suppressing color-contrast on a site read",
+    "by ten-year-olds is not an accessibility programme, and duplicate-id is a",
+    "real defect wherever it appears. Both stay for now only because F2 has",
+    "just changed every surface colour and turning contrast on in the same",
+    "release would produce a wall of failures with no way to tell a token bug",
+    "from a content one. Gate C14 removes them, after one release at warn.",
+    "Route scope is C14's business too: this audits /materials/ alone today."
+  ],
+  "chromeLaunchConfig": {
+    "args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"]
+  },
+  "ignore": ["duplicate-id", "color-contrast"],
+  "runners": ["axe"],
+  "threshold": 0,
+  "timeout": 60000
+}
