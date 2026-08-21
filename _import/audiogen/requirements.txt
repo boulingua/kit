@@ -1,0 +1,2 @@
+piper-tts>=1.5.0
+# ffmpeg (system package) is required for OGG/Opus encoding.
