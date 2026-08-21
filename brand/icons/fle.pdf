@@ -1,70 +1,68 @@
 %PDF-1.4
-%¬Ü «º
+%“Œ‹ ReportLab Generated PDF document (opensource)
 1 0 obj
-<< /Type /Catalog /Pages 2 0 R >>
-endobj
-8 0 obj
-<< /Font 3 0 R /XObject 7 0 R /ExtGState 4 0 R /Pattern 5 0 R
-/Shading 6 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ] >>
-endobj
-11 0 obj
-<< /Type /Page /Parent 2 0 R /Resources 8 0 R /MediaBox [ 0 0 72 72 ]
-/Contents 9 0 R /Annots 10 0 R >>
-endobj
-9 0 obj
-<< /Length 12 0 R /Filter /FlateDecode >>
-stream
-xœ}M
-1…÷9ENĞIš¦i—şÀ¬Õ…ñPA¯ot6BÂã{y…×fÙ=O»nİÎq±æK»0¡™1Hxö}ù¶8‘{W°èrÄçâæ(ƒyèá†|î÷·Ø#…X³ådì :¢:P-$5²Ş“$üKHFã ‘LÕ{IÈµÖl˜,•Dæ…8K%b¥Ä”†®ª¡æ¨\~Í\‚‘Èä½h+x…Ch
-endstream
-endobj
-12 0 obj
-181
-endobj
-10 0 obj
-[ ]
-endobj
-3 0 obj
-<< >>
-endobj
-4 0 obj
-<< /A1 << /Type /ExtGState /CA 0 /ca 1 >> >>
-endobj
-5 0 obj
-<< >>
-endobj
-6 0 obj
-<< >>
-endobj
-7 0 obj
-<< >>
+<<
+/F1 2 0 R
+>>
 endobj
 2 0 obj
-<< /Type /Pages /Kids [ 11 0 R ] /Count 1 >>
+<<
+/BaseFont /Helvetica /Encoding /WinAnsiEncoding /Name /F1 /Subtype /Type1 /Type /Font
+>>
 endobj
-13 0 obj
-<< /Creator (Matplotlib v3.6.3, https://matplotlib.org)
-/Producer (Matplotlib pdf backend v3.6.3)
-/CreationDate (D:20260721201521+02'00') >>
+3 0 obj
+<<
+/Contents 7 0 R /MediaBox [ 0 0 100 100 ] /Parent 6 0 R /Resources <<
+/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
+>> /Rotate 0 /Trans <<
+
+>> 
+  /Type /Page
+>>
+endobj
+4 0 obj
+<<
+/PageMode /UseNone /Pages 6 0 R /Type /Catalog
+>>
+endobj
+5 0 obj
+<<
+/Author (anonymous) /CreationDate (D:20000101000000+00'00') /Creator (boulingua make_icon.py) /Keywords () /ModDate (D:20000101000000+00'00') /Producer (boulingua make_icon.py) 
+  /Subject (unspecified) /Title (fle) /Trapped /False
+>>
+endobj
+6 0 obj
+<<
+/Count 1 /Kids [ 3 0 R ] /Type /Pages
+>>
+endobj
+7 0 obj
+<<
+/Filter [ /ASCII85Decode /FlateDecode ] /Length 152
+>>
+stream
+GaqKe3sl$T&4H+M7E#IJIqQ>k5pO:XJZp'&#2VR`f4ZUX'G%2H]LDgIXMAE,HkV<F/eBDN]]2$lBt6cd,5)6#9")V2fff[20ihg^\_BA^Wf][<`c14r/,(i#dFt)pR2G8;#nogN4)SDB3An/cZUuAD~>endstream
 endobj
 xref
-0 14
+0 8
 0000000000 65535 f 
-0000000016 00000 n 
-0000000768 00000 n 
-0000000624 00000 n 
-0000000645 00000 n 
-0000000705 00000 n 
-0000000726 00000 n 
-0000000747 00000 n 
-0000000065 00000 n 
-0000000328 00000 n 
-0000000604 00000 n 
-0000000208 00000 n 
-0000000584 00000 n 
-0000000828 00000 n 
+0000000061 00000 n 
+0000000092 00000 n 
+0000000199 00000 n 
+0000000392 00000 n 
+0000000460 00000 n 
+0000000713 00000 n 
+0000000772 00000 n 
 trailer
-<< /Size 14 /Root 1 0 R /Info 13 0 R >>
+<<
+/ID 
+[<85f8ee572472f57367d8a3ba1bc1a0fe><85f8ee572472f57367d8a3ba1bc1a0fe>]
+% ReportLab generated PDF document -- digest (opensource)
+
+/Info 5 0 R
+/Root 4 0 R
+/Size 8
+>>
 startxref
-985
+1014
 %%EOF

@@ -1,22 +1,21 @@
 #!/usr/bin/env python3
-"""
-render_thumbs.py — regenerate PNG thumbnails directly from the
-.pptx and .pdf files under static/materials/. Idempotent; safe to
-re-run after any swap.
+"""render_thumbs.py — the one thumbnail renderer.
 
-PDF → PNG: PyMuPDF (cross-platform, no external binaries).
-PPTX → PNG: LibreOffice headless (`soffice --headless --convert-to pdf`)
-            piped through PyMuPDF. If LibreOffice isn't installed we
-            log a warning and leave the existing PNG in place — useful
-            for local Windows dev where soffice may not be on PATH;
-            CI runs on Ubuntu which ships it.
+PDF → PNG at TARGET_WIDTH via PyMuPDF. No external binaries, no format
+conversion: decks are XeLaTeX PDFs now, so the LibreOffice PPTX path was
+converting a format nothing in the org produces, and it is gone along with the
+libreoffice-impress install it required in CI.
+
+There were two renderers before this, at two widths, and a third width in the
+corpus from an earlier run — so a thumbnail's size depended on which script
+happened to make it. build_materials_latex.thumb() now delegates here.
+
+Idempotent; safe to re-run.
 
 Run from repo root:  python scripts/render_thumbs.py
 """
 from __future__ import annotations
 
-import shutil
-import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -34,21 +33,14 @@ EXAMS = REPO / "static" / "downloads"
 
 # Render PDF page 1 at this width (px). 96 dpi × 8.27 in ≈ 794; we go
 # wider for retina rendering of the card thumbnail.
-TARGET_WIDTH = 1280
+TARGET_WIDTH = 1000
+# 1000 px, not 1280. A material card renders at up to 320 CSS px, so a 2x
+# display needs 640 device px and 1000 clears that with margin. 1280 buys
+# nothing measurable: PNG size tracks area, and the 1280 px exam thumbnails
+# average 179 KB against 105 KB for the same documents at 900 px — 1.7x the
+# bytes for no perceptible gain. Existing thumbnails are NOT re-rendered; each
+# ages out the next time its PDF changes (ADR-0010).
 
-
-def find_libreoffice() -> str | None:
-    for cand in ("soffice", "libreoffice"):
-        if shutil.which(cand):
-            return cand
-    if sys.platform.startswith("win"):
-        for p in (
-            r"C:\Program Files\LibreOffice\program\soffice.exe",
-            r"C:\Program Files (x86)\LibreOffice\program\soffice.exe",
-        ):
-            if Path(p).exists():
-                return p
-    return None
 
 
 def render_pdf(pdf_path: Path, out_path: Path) -> None:
@@ -63,42 +55,15 @@ def render_pdf(pdf_path: Path, out_path: Path) -> None:
         doc.close()
 
 
-def render_pptx(pptx_path: Path, out_path: Path, soffice: str, tmp: Path) -> None:
-    subprocess.run(
-        [
-            soffice,
-            "--headless",
-            "--convert-to",
-            "pdf",
-            "--outdir",
-            str(tmp),
-            str(pptx_path),
-        ],
-        check=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.PIPE,
-    )
-    pdf = tmp / (pptx_path.stem + ".pdf")
-    if not pdf.exists():
-        raise RuntimeError(f"LibreOffice produced no PDF for {pptx_path.name}")
-    try:
-        render_pdf(pdf, out_path)
-    finally:
-        pdf.unlink(missing_ok=True)
-
 
 def main() -> int:
-    soffice = find_libreoffice()
-    if not soffice:
-        print(
-            "  warn: LibreOffice not found; PPTX thumbnails will not be regenerated.\n"
-            "        Install LibreOffice or run this in CI for full coverage.",
-            file=sys.stderr,
-        )
 
-    n_pdf = 0
-    n_pptx = 0
-    n_skip = 0
+    # PRES was globbed for *.pptx/*.odp only, never *.pdf — so since the
+    # LaTeX migration deck thumbnails were produced solely as a side-effect
+    # of build_materials_latex.py. This is the missing loop.
+    for pdf in sorted(PRES.glob("*.pdf")):
+        render_pdf(pdf, pdf.with_suffix(".png"))
+        n += 1
 
     for pdf in sorted(WORK.glob("*.pdf")):
         png = pdf.with_suffix(".png")
@@ -119,30 +84,5 @@ def main() -> int:
         except Exception as e:
             print(f"  FAIL {pdf.relative_to(REPO)}: {e}", file=sys.stderr)
             return 1
-
-    if soffice:
-        with tempfile.TemporaryDirectory(prefix="render-thumbs-") as td:
-            tmp = Path(td)
-            # Presentation decks may be .pptx or .odp — both route through
-            # LibreOffice (soffice --convert-to pdf → PNG) identically.
-            for pptx in sorted(PRES.glob("*.pptx")) + sorted(PRES.glob("*.odp")):
-                png = pptx.with_suffix(".png")
-                try:
-                    render_pptx(pptx, png, soffice, tmp)
-                    print(f"  deck -> {png.relative_to(REPO)}")
-                    n_pptx += 1
-                except Exception as e:
-                    print(f"  FAIL {pptx.relative_to(REPO)}: {e}", file=sys.stderr)
-                    return 1
-    else:
-        n_skip = sum(1 for _ in PRES.glob("*.pptx")) + sum(1 for _ in PRES.glob("*.odp"))
-
-    print(
-        f"\nrendered: {n_pdf} pdf · {n_pptx} pptx"
-        + (f" · {n_skip} pptx skipped (no soffice)" if n_skip else "")
-    )
-    return 0
-
-
 if __name__ == "__main__":
     sys.exit(main())

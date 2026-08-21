@@ -19,6 +19,8 @@ _materials/.
 """
 import sys, os, re, subprocess, glob, argparse, shutil
 from pathlib import Path
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 REPO = Path(__file__).resolve().parent.parent
 SITE = REPO.name                 # efl | fle | daf -> \blgsetlang{SITE}, /SITE URLs
@@ -52,12 +54,15 @@ def inline(s):
     s = (s.replace(B,r'\textbf{').replace(Bc,'}')
            .replace(I,r'\textit{').replace(Ic,'}')
            .replace(C,r'\texttt{').replace(Cc,'}'))
-    # arrows/symbols the bundled text font lacks -> math equivalents
-    for u,t in (('→',r'$\to$'),('←',r'$\gets$'),('↔',r'$\leftrightarrow$'),
-                ('⇒',r'$\Rightarrow$'),('⇐',r'$\Leftarrow$'),('×',r'$\times$'),
-                ('≥',r'$\geq$'),('≤',r'$\leq$'),('≈',r'$\approx$'),('≠',r'$\neq$'),
-                ('±',r'$\pm$'),('÷',r'$\div$'),('∞',r'$\infty$')):
-        s = s.replace(u, t)
+    # No symbol substitution. Thirteen arrows and operators used to be rewritten
+    # into math mode here because the bundled 781-codepoint subset lacked them.
+    # All thirteen are in the shipped payload now, and the hack was doing active
+    # harm: $\to$ renders a LEFT-pointing arrow inside an Arabic run, and going
+    # through math mode pulls Computer Modern Symbol into the document — every
+    # committed worksheet containing an arrow embeds /XWKGGV+CMSY10, a second
+    # typeface family, for one glyph. Gate D5's cmap guard replaces the table:
+    # a character the face cannot render fails the build instead of being
+    # silently swapped for something that looks close.
     return s
 
 # ---------- unit parsing ----------
@@ -309,10 +314,12 @@ def xelatex(texfile, passes=2):
     return (MAT / (texfile.stem + ".pdf")).is_file(), r
 
 def thumb(pdf, png):
-    import fitz
-    d = fitz.open(pdf); pg = d[0]
-    z = 900 / pg.rect.width
-    pg.get_pixmap(matrix=fitz.Matrix(z, z)).save(png)
+    # Delegates. This used to be a second renderer at a third width — 900 px
+    # here, 1280 in render_thumbs.py — so the corpus carried thumbnails at
+    # three sizes depending on which script happened to produce them. One
+    # renderer, one width, one place to change it.
+    from render_thumbs import render_pdf
+    render_pdf(Path(pdf), Path(png))
 
 def upsert_fm(md_path, slug):
     txt = md_path.read_text()

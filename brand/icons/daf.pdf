@@ -1,71 +1,68 @@
 %PDF-1.4
-%¬Ü «º
+%“Œ‹ ReportLab Generated PDF document (opensource)
 1 0 obj
-<< /Type /Catalog /Pages 2 0 R >>
-endobj
-8 0 obj
-<< /Font 3 0 R /XObject 7 0 R /ExtGState 4 0 R /Pattern 5 0 R
-/Shading 6 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ] >>
-endobj
-11 0 obj
-<< /Type /Page /Parent 2 0 R /Resources 8 0 R /MediaBox [ 0 0 72 72 ]
-/Contents 9 0 R /Annots 10 0 R >>
-endobj
-9 0 obj
-<< /Length 12 0 R /Filter /FlateDecode >>
-stream
-xœ}AŠBAD÷9ENŸtº“îå¨àÚ™…¯¨ ‚^ß4
-3#t(êu*Ãb¼ÿnÆïåç?0ü¹Í0|	înÈxˆyÄ,qâ`'ğrìïğ-îÎpÁn^ÿ××xF&õTrãØ¦’ZqËÆ:•f\ñº›$áS@]H{)ÑKÉZkæ˜jÑÌ…ÄˆÕsMØ¨Ö”sïZ
-5KEêh•”™U'ûqĞVğ¡Cb
-endstream
-endobj
-12 0 obj
-184
-endobj
-10 0 obj
-[ ]
-endobj
-3 0 obj
-<< >>
-endobj
-4 0 obj
-<< /A1 << /Type /ExtGState /CA 0 /ca 1 >> >>
-endobj
-5 0 obj
-<< >>
-endobj
-6 0 obj
-<< >>
-endobj
-7 0 obj
-<< >>
+<<
+/F1 2 0 R
+>>
 endobj
 2 0 obj
-<< /Type /Pages /Kids [ 11 0 R ] /Count 1 >>
+<<
+/BaseFont /Helvetica /Encoding /WinAnsiEncoding /Name /F1 /Subtype /Type1 /Type /Font
+>>
 endobj
-13 0 obj
-<< /Creator (Matplotlib v3.6.3, https://matplotlib.org)
-/Producer (Matplotlib pdf backend v3.6.3)
-/CreationDate (D:20260721201521+02'00') >>
+3 0 obj
+<<
+/Contents 7 0 R /MediaBox [ 0 0 100 100 ] /Parent 6 0 R /Resources <<
+/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
+>> /Rotate 0 /Trans <<
+
+>> 
+  /Type /Page
+>>
+endobj
+4 0 obj
+<<
+/PageMode /UseNone /Pages 6 0 R /Type /Catalog
+>>
+endobj
+5 0 obj
+<<
+/Author (anonymous) /CreationDate (D:20000101000000+00'00') /Creator (boulingua make_icon.py) /Keywords () /ModDate (D:20000101000000+00'00') /Producer (boulingua make_icon.py) 
+  /Subject (unspecified) /Title (daf) /Trapped /False
+>>
+endobj
+6 0 obj
+<<
+/Count 1 /Kids [ 3 0 R ] /Type /Pages
+>>
+endobj
+7 0 obj
+<<
+/Filter [ /ASCII85Decode /FlateDecode ] /Length 154
+>>
+stream
+GaqKe0b-N)$q'c\_D=Q8e"gh],a]Eq"/HG0T7QkM'IIA4_m>p@?/_u*4)gWJ?3hJ3#.ceV($A_QXPEpjQG-C6iMhS+]t=o6<9tGNl!?H?9(pYh-b;qi/][TZNL#K*87c*#+/=]_[/05Tb'#0]+0GG`p]~>endstream
 endobj
 xref
-0 14
+0 8
 0000000000 65535 f 
-0000000016 00000 n 
-0000000771 00000 n 
-0000000627 00000 n 
-0000000648 00000 n 
-0000000708 00000 n 
-0000000729 00000 n 
-0000000750 00000 n 
-0000000065 00000 n 
-0000000328 00000 n 
-0000000607 00000 n 
-0000000208 00000 n 
-0000000587 00000 n 
-0000000831 00000 n 
+0000000061 00000 n 
+0000000092 00000 n 
+0000000199 00000 n 
+0000000392 00000 n 
+0000000460 00000 n 
+0000000713 00000 n 
+0000000772 00000 n 
 trailer
-<< /Size 14 /Root 1 0 R /Info 13 0 R >>
+<<
+/ID 
+[<c4e9a87e3f184a9c0991cf3f795ff631><c4e9a87e3f184a9c0991cf3f795ff631>]
+% ReportLab generated PDF document -- digest (opensource)
+
+/Info 5 0 R
+/Root 4 0 R
+/Size 8
+>>
 startxref
-988
+1016
 %%EOF

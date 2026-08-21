@@ -20,7 +20,18 @@
 \RequirePackage{changepage}
 \RequirePackage{hyperref}
 % PDF metadata — attribute the author in the file's core properties.
-\hypersetup{pdfauthor={S. Le Boulanger},hidelinks}
+% ── Document metadata ───────────────────────────────────────────────────────
+% /Author was the only field any of these carried, and the attribution gate
+% greps /Author alone — so 432 committed PDFs passed while shipping with no
+% title, no subject and no keywords. The gate is being widened; these are the
+% fields it will want. Set the per-document ones with \blgsetmeta.
+\hypersetup{
+  pdfauthor={S. Le Boulanger},
+  pdfcreator={boulingua kit},
+  pdfproducer={boulingua kit},
+  hidelinks}
+% \blgsetmeta{<course long name>}{<comma-separated keywords>}
+\newcommand{\blgsetmeta}[2]{\hypersetup{pdfsubject={#1},pdfkeywords={#2}}}
 
 % Body indent: the title bar + accent rule run the full text width; the
 % worksheet content sits inside a slightly indented column beneath them.
@@ -40,6 +51,19 @@
 % \blglangmark[height] draws the language's abstract icon (accent-filled);
 % it is a no-op until \blgsetlang{code} points it at brand/icons/<code>.pdf.
 \newcommand{\blglangmark}[1][12mm]{}
+% \blgsetui{<polyglossia language>} — the INSTRUCTION language.
+%
+% Every page is German instructions around target-language content, and those
+% are two different languages with two different typographic conventions. The
+% design spec had no way to say that on the print side, so a Greek worksheet
+% and its German task rubric were indistinguishable to the renderer.
+%
+% Defaults to german and is a no-op in the four shipped script tiers: it
+% records the distinction now so unit sources carry it, and becomes a real
+% \setmainlanguage when polyglossia lands with bidi at wave 5 (ADR-0008).
+\newcommand{\blguilang}{german}
+\newcommand{\blgsetui}[1]{\renewcommand{\blguilang}{#1}}
+
 \newcommand{\blgsetlang}[1]{\colorlet{blgaccent}{acc-#1}\colorlet{blgaccenthover}{acch-#1}%
   \renewcommand{\blglangmark}[1][12mm]{\includegraphics[height=##1]{brand/icons/#1.pdf}}}
 \color{blgfg}

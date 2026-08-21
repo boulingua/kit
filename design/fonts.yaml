@@ -61,10 +61,17 @@ tiers:
     description: Latin, Latin-1, punctuation and the arrows and symbols units use.
     # U+2192 (→) is listed explicitly: it is absent from the old bundled subset,
     # which is why decks fell back to CMSY10 for a single arrow glyph.
+    # The arrow and operator blocks are here in full, not glyph by glyph.
+    # build_materials_latex.py used to substitute thirteen of these into math
+    # mode because the old 781-codepoint subset lacked them — which pulled
+    # Computer Modern Symbol into every worksheet containing an arrow, a whole
+    # second typeface for one glyph. Removing that hack only works if the
+    # symbols are actually in the payload, and a first pass at this range list
+    # covered five of the thirteen.
     ranges: ["U+0000-00FF", "U+0131", "U+0152-0153", "U+02BB-02BC", "U+02C6",
              "U+02DA", "U+02DC", "U+0300-0304", "U+0308-0309", "U+0323", "U+0329",
-             "U+2000-206F", "U+2074", "U+20AC", "U+2122", "U+2190-2193", "U+2212",
-             "U+2215", "U+F8FF", "U+FEFF", "U+FFFD"]
+             "U+2000-206F", "U+2074", "U+20AC", "U+2122", "U+2190-21FF",
+             "U+2200-22FF", "U+2212", "U+2215", "U+F8FF", "U+FEFF", "U+FFFD"]
     courses: [efl, fle, daf, ele, ils, ple, nvt, nsf, pfl, tfl]
 
   latin-ext:
