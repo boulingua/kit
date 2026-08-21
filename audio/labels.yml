@@ -1,0 +1,64 @@
+# Segment labels, one per kind per tts_lang.
+#
+# This lived as a dict literal in build_audio.py covering fr/de/en, and any
+# other language raised KeyError on the first segment of the first unit.
+# Adding a language is now a data edit, and a missing entry degrades to
+# English rather than to a traceback.
+
+vocab:
+  en: Vocabulary
+  de: Wortschatz
+  fr: Vocabulaire
+  es: Vocabulario
+  it: Lessico
+  pt: Vocabulário
+  nl: Woordenschat
+  'no': Ordforråd
+  pl: Słownictwo
+  ru: Словарь
+  uk: Словник
+  el: Λεξιλόγιο
+  tr: Kelime
+  ar: المفردات
+  fa: واژگان
+  zh: 词汇
+  ja: 語彙
+  la: Vocabula
+dialogue:
+  en: Dialogue
+  de: Dialog
+  fr: Dialogue
+  es: Diálogo
+  it: Dialogo
+  pt: Diálogo
+  nl: Dialoog
+  'no': Dialog
+  pl: Dialog
+  ru: Диалог
+  uk: Діалог
+  el: Διάλογος
+  tr: Diyalog
+  ar: حوار
+  fa: گفتگو
+  zh: 对话
+  ja: 会話
+  la: Colloquium
+texte:
+  en: Text
+  de: Text
+  fr: Texte
+  es: Texto
+  it: Testo
+  pt: Texto
+  nl: Tekst
+  'no': Tekst
+  pl: Tekst
+  ru: Текст
+  uk: Текст
+  el: Κείμενο
+  tr: Metin
+  ar: نص
+  fa: متن
+  zh: 课文
+  ja: 本文
+  la: Textus

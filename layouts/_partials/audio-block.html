@@ -1,27 +1,37 @@
-{{- /* Audio section for a unit. Reads data/audio/<filename>.json (generated
-       by scripts/build_audio.py with a native German voice) and renders an
-       accessible "Hören" section: one player per segment with its transcript.
-       Degrades to nothing when no audio exists for the unit yet. */ -}}
+{{- /* Native-voice audio for a unit, driven by data/audio/<slug>.json.
+
+  ONE partial, not one per language. audiogen/templates/ carried .de.html and
+  .fr.html; daf's and fle's partials were byte-identical copies of them, and
+  efl's was a third, hand-translated English variant nobody backported. Adding
+  English would have made four, and eighteen courses would have made eighteen.
+  Every string here comes from i18n instead.
+
+  A course with no usable voice still renders: status: none in voices.yml is a
+  first-class state, so the transcript section appears with no player rather
+  than the section disappearing. Four courses are in that position today — lle
+  has no voice upstream at all, jfl and tfl have exactly one each and both are
+  NonCommercial, and afl's is unstated — and for them the transcript IS the
+  material. */ -}}
 {{- $key := .File.ContentBaseName -}}
-{{- with (index hugo.Data.audio $key) -}}
-<section class="audio-section" id="audio">
-  <h2>Hören</h2>
-  <p class="audio-intro">Wortschatz, Dialoge und Texte dieser Einheit als Audio,
-    gesprochen von einer muttersprachlichen Stimme. Der gesprochene Text steht
-    jeweils darunter.</p>
+{{- with (index hugo.Data.audio $key) }}
+<section class="audio-block" aria-labelledby="audio-{{ $key }}">
+  <h2 id="audio-{{ $key }}">{{ i18n "listen" | default "Listen" }}</h2>
+  <p class="audio-intro">{{ i18n "audio_intro" | default "Native-voice recordings of this unit's vocabulary, dialogues and texts." }}</p>
   {{- range . }}
-  <div class="audio-item">
-    <div class="audio-item-head">
-      <span class="audio-label">{{ .label }}</span>
-      <audio controls preload="none" src="{{ .file | relURL }}">
-        Ihr Browser unterstützt kein Audio.
-      </audio>
-    </div>
-    <details class="audio-transcript">
-      <summary>Text anzeigen</summary>
-      <p>{{ .transcript | replaceRE "\n" "<br>" | safeHTML }}</p>
+  <figure class="audio-clip">
+    <figcaption>{{ .label }}</figcaption>
+    {{- if .file }}
+    <audio controls preload="none" src="{{ .file | relURL }}">
+      {{ i18n "audio_unsupported" | default "Your browser does not support audio playback." }}
+    </audio>
+    {{- end }}
+    {{- with .transcript }}
+    <details>
+      <summary>{{ i18n "show_text" | default "Show text" }}</summary>
+      <div class="transcript">{{ . }}</div>
     </details>
-  </div>
+    {{- end }}
+  </figure>
   {{- end }}
 </section>
-{{- end -}}
+{{- end }}

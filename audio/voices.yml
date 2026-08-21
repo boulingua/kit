@@ -1,505 +1,977 @@
-# voices.yml — the boulingua voice registry.
-#
-# This file is the single source of truth for Piper voice IDs. No voice ID is
-# written anywhere else: not in a ROADMAP, not in a §11 dossier row, not in a
-# README table, not in a download script. Everything that needs one reads it
-# from here. A voice ID typed into prose is how a 404 gets into a build.
-#
-# It relocates to kit/audio/voices.yml at F1, unchanged in schema, and every
-# consumer moves with it.
-#
-# Gate D6 refuses any row whose model_url does not resolve upstream, and any
-# row carrying status: ready or status: candidate whose licence is not in the
-# allow-list below. Both checks run before a single byte is downloaded.
-#
-# The licence rule. boulingua content ships under CC BY-SA 4.0. Audio
-# synthesised from a Piper model inherits the licence of the model's training
-# dataset, so a NonCommercial voice cannot go inside a CC BY-SA 4.0 work at
-# all, and a voice whose dataset licence is unstated cannot be shipped safely
-# either — "no statement" is not permission. licence: is copied verbatim from
-# the voice's MODEL_CARD, including where upstream writes a bare URL or the
-# words "See URL"; it is never normalised, summarised or guessed at.
-# licence_ok: is the judgement made from it.
-#
-# status:
-#   ready      — licence clear, voice in production, audio shipping today.
-#   candidate  — licence clear, voice chosen, awaiting the Stage 3 audition
-#                (bin/kit audio audition <code>). Nothing is generated from a
-#                candidate row until auditions/<code>.md records verdict: pass.
-#   none       — no usable voice. The course ships transcript-only: the unit
-#                page still renders its <details> transcript, with no player.
-#                This is a first-class state, not a failure.
-#
-# Keys are verbatim upstream and are not ASCII. pt_PT-tugão-medium carries ã
-# in the key, the directory and the filename; transliterating that ã to a bare
-# a yields a URL that returns 404. model_url is percent-encoded and must be
-# used as given — never construct a path from a key.
-#
-# Voices are never substituted across languages. The fallback ladder is: the
-# second voice in the same locale, then any allow-listed voice in the same
-# language family, then transcript-only. Never a neighbouring language.
-
 snapshot:
   source: https://huggingface.co/rhasspy/piper-voices/resolve/main/voices.json
   taken_at: 2026-08-21
   voices_in_catalogue: 174
   voices_in_boulingua_languages: 115
-
-# A row may not carry status: ready or candidate unless its licence is in this list.
-# Anything else — including an unstated licence — is a hard failure of gate D6.
 licence_allowlist:
-  - "CC0"
-  - "public domain"
-  - "Unlicense"
-  - "CC BY 3.0"
-  - "CC BY 4.0"
-  - "CC BY-SA 4.0"
-  - "Apache-2.0"
-  - "MIT"
-
+- CC0
+- public domain
+- Unlicense
+- CC BY 3.0
+- CC BY 4.0
+- CC BY-SA 4.0
+- Apache-2.0
+- MIT
 languages:
-
-  - code: efl
-    language: "English (United Kingdom)"
-    iso: en
-    status: ready
-    voice: "en_GB-alba-medium"
+- code: efl
+  language: English (United Kingdom)
+  iso: en
+  status: ready
+  quality: medium
+  num_speakers: 1
+  licence: https://creativecommons.org/licenses/by/4.0/
+  dataset: https://datashare.ed.ac.uk/handle/10283/3270
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/alba/medium/en_GB-alba-medium.onnx
+  note: The model card states the licence as a bare URL; it is CC BY 4.0, so alba carries an attribution
+    obligation and needs a NOTICE.md row naming the model and the CSTR Edinburgh dataset. en_GB-cori-medium
+    (public domain) is the second speaker.
+  alternatives:
+  - key: en_GB-cori-high
+    quality: high
+    num_speakers: 1
+    licence: public domain
+    licence_ok: true
+  - key: en_US-libritts-high
+    quality: high
+    num_speakers: 904
+    licence: CC BY 4.0
+    licence_ok: true
+  - key: en_US-ljspeech-high
+    quality: high
+    num_speakers: 1
+    licence: public domain
+    licence_ok: true
+  - key: en_GB-aru-medium
+    quality: medium
+    num_speakers: 12
+    licence: https://creativecommons.org/licenses/by/4.0/
+    licence_ok: true
+  - key: en_GB-cori-medium
     quality: medium
     num_speakers: 1
-    licence: "https://creativecommons.org/licenses/by/4.0/"
+    licence: public domain
     licence_ok: true
-    dataset: "https://datashare.ed.ac.uk/handle/10283/3270"
-    model_url: "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/alba/medium/en_GB-alba-medium.onnx"
-    verified_at: 2026-08-21
-    note: >-
-      The model card states the licence as a bare URL; it is CC BY 4.0, so alba carries an
-      attribution obligation and needs a NOTICE.md row naming the model and the CSTR
-      Edinburgh dataset. en_GB-cori-medium (public domain) is the second speaker.
-    alternatives:
-      - { key: "en_GB-cori-high", quality: high, num_speakers: 1, licence: "public domain", licence_ok: true }
-      - { key: "en_US-libritts-high", quality: high, num_speakers: 904, licence: "CC BY 4.0", licence_ok: true }
-      - { key: "en_US-ljspeech-high", quality: high, num_speakers: 1, licence: "public domain", licence_ok: true }
-      - { key: "en_GB-aru-medium", quality: medium, num_speakers: 12, licence: "https://creativecommons.org/licenses/by/4.0/", licence_ok: true }
-      - { key: "en_GB-cori-medium", quality: medium, num_speakers: 1, licence: "public domain", licence_ok: true }
-      - { key: "en_GB-northern_english_male-medium", quality: medium, num_speakers: 1, licence: "CC-BY-SA 4.0 International", licence_ok: true }
-      - { key: "en_GB-vctk-medium", quality: medium, num_speakers: 109, licence: "https://creativecommons.org/licenses/by/4.0/", licence_ok: true }
-      - { key: "en_US-bryce-medium", quality: medium, num_speakers: 1, licence: "public domain", licence_ok: true }
-      - { key: "en_US-joe-medium", quality: medium, num_speakers: 1, licence: "CC0", licence_ok: true }
-      - { key: "en_US-john-medium", quality: medium, num_speakers: 1, licence: "public domain", licence_ok: true }
-      - { key: "en_US-kristin-medium", quality: medium, num_speakers: 1, licence: "public domain", licence_ok: true }
-      - { key: "en_US-libritts_r-medium", quality: medium, num_speakers: 904, licence: "CC BY 4.0", licence_ok: true }
-      - { key: "en_US-ljspeech-medium", quality: medium, num_speakers: 1, licence: "public domain", licence_ok: true }
-      - { key: "en_US-mike-medium", quality: medium, num_speakers: 1, licence: "CC0", licence_ok: true }
-      - { key: "en_US-norman-medium", quality: medium, num_speakers: 1, licence: "public domain", licence_ok: true }
-      - { key: "en_US-reza_ibrahim-medium", quality: medium, num_speakers: 1, licence: "CC0", licence_ok: true }
-      - { key: "en_US-sam-medium", quality: medium, num_speakers: 1, licence: "https://www.apache.org/licenses/LICENSE-2.0.txt", licence_ok: true }
-      - { key: "en_GB-southern_english_female-low", quality: low, num_speakers: 1, licence: "CC-BY-SA 4.0 International", licence_ok: true }
-      - { key: "en_US-kathleen-low", quality: low, num_speakers: 1, licence: "CC0", licence_ok: true }
-      - { key: "en_US-lessac-high", quality: high, num_speakers: 1, licence: "https://www.cstr.ed.ac.uk/projects/blizzard/2013/lessac_blizzard2013/license.html", licence_ok: false }
-      - { key: "en_US-ryan-high", quality: high, num_speakers: 1, licence: "CC BY-NC-SA 4.0", licence_ok: false }
-      - { key: "en_GB-alan-medium", quality: medium, num_speakers: 1, licence: "See URL", licence_ok: false }
-      - { key: "en_GB-jenny_dioco-medium", quality: medium, num_speakers: 1, licence: "See URL", licence_ok: false }
-      - { key: "en_GB-semaine-medium", quality: medium, num_speakers: 4, licence: "http://creativecommons.org/licenses/by-nc-sa/4.0/", licence_ok: false }
-      - { key: "en_US-amy-medium", quality: medium, num_speakers: 1, licence: "See URL", licence_ok: false }
-      - { key: "en_US-arctic-medium", quality: medium, num_speakers: 18, licence: "See LICENSE file", licence_ok: false }
-      - { key: "en_US-hfc_female-medium", quality: medium, num_speakers: 1, licence: "https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en", licence_ok: false }
-      - { key: "en_US-hfc_male-medium", quality: medium, num_speakers: 1, licence: "https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en", licence_ok: false }
-      - { key: "en_US-kusal-medium", quality: medium, num_speakers: 1, licence: "See URL", licence_ok: false }
-      - { key: "en_US-l2arctic-medium", quality: medium, num_speakers: 24, licence: "https://creativecommons.org/licenses/by-nc/4.0/", licence_ok: false }
-      - { key: "en_US-lessac-medium", quality: medium, num_speakers: 1, licence: "https://www.cstr.ed.ac.uk/projects/blizzard/2013/lessac_blizzard2013/license.html", licence_ok: false }
-      - { key: "en_US-ryan-medium", quality: medium, num_speakers: 1, licence: "CC BY-NC-SA 4.0", licence_ok: false }
-      - { key: "en_GB-alan-low", quality: low, num_speakers: 1, licence: "See URL", licence_ok: false }
-      - { key: "en_US-amy-low", quality: low, num_speakers: 1, licence: "See URL", licence_ok: false }
-      - { key: "en_US-danny-low", quality: low, num_speakers: 1, licence: "See URL", licence_ok: false }
-      - { key: "en_US-lessac-low", quality: low, num_speakers: 1, licence: "https://www.cstr.ed.ac.uk/projects/blizzard/2013/lessac_blizzard2013/license.html", licence_ok: false }
-      - { key: "en_US-ryan-low", quality: low, num_speakers: 1, licence: "CC BY-NC-SA 4.0", licence_ok: false }
-
-  - code: fle
-    language: "French"
-    iso: fr
-    status: ready
-    voice: "fr_FR-siwis-medium"
+  - key: en_GB-northern_english_male-medium
     quality: medium
     num_speakers: 1
-    licence: "CC-BY 4.0"
+    licence: CC-BY-SA 4.0 International
     licence_ok: true
-    dataset: "https://datashare.is.ed.ac.uk/handle/10283/2353"
-    model_url: "https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/siwis/medium/fr_FR-siwis-medium.onnx"
-    verified_at: 2026-08-21
-    note: >-
-      CC BY 4.0, written CC-BY 4.0 upstream; siwis carries an attribution obligation and
-      needs a NOTICE.md row. fr_FR-gilles-low (CC0) is the second speaker.
-      fr_FR-tom-medium is AGPLv3 — a software copyleft with no clean path into a
-      CC BY-SA 4.0 work — and is excluded.
-    alternatives:
-      - { key: "fr_FR-mls-medium", quality: medium, num_speakers: 125, licence: "CC-BY 4.0", licence_ok: true }
-      - { key: "fr_FR-upmc-medium", quality: medium, num_speakers: 2, licence: "http://creativecommons.org/licenses/by-sa/4.0/", licence_ok: true }
-      - { key: "fr_FR-gilles-low", quality: low, num_speakers: 1, licence: "CC0", licence_ok: true }
-      - { key: "fr_FR-mls_1840-low", quality: low, num_speakers: 1, licence: "CC BY 4.0", licence_ok: true }
-      - { key: "fr_FR-siwis-low", quality: low, num_speakers: 1, licence: "CC-BY 4.0", licence_ok: true }
-      - { key: "fr_FR-tom-medium", quality: medium, num_speakers: 1, licence: "AGPLv3", licence_ok: false }
-
-  - code: daf
-    language: "German"
-    iso: de
-    status: ready
-    voice: "de_DE-thorsten-medium"
+  - key: en_GB-vctk-medium
+    quality: medium
+    num_speakers: 109
+    licence: https://creativecommons.org/licenses/by/4.0/
+    licence_ok: true
+  - key: en_US-bryce-medium
     quality: medium
     num_speakers: 1
-    licence: "CC0"
+    licence: public domain
     licence_ok: true
-    dataset: "https://github.com/thorstenMueller/Thorsten-Voice"
-    model_url: "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/medium/de_DE-thorsten-medium.onnx"
-    verified_at: 2026-08-21
-    note: >-
-      CC0, no obligation. de_DE-kerstin-low (CC0) is the second speaker;
-      de_DE-thorsten_emotional-medium (CC0, 8 speakers) covers dialogues needing more
-      than two voices.
-    alternatives:
-      - { key: "de_DE-thorsten-high", quality: high, num_speakers: 1, licence: "CC0", licence_ok: true }
-      - { key: "de_DE-mls-medium", quality: medium, num_speakers: 236, licence: "CC-BY 4.0", licence_ok: true }
-      - { key: "de_DE-thorsten_emotional-medium", quality: medium, num_speakers: 8, licence: "CC0", licence_ok: true }
-      - { key: "de_DE-kerstin-low", quality: low, num_speakers: 1, licence: "CC0", licence_ok: true }
-      - { key: "de_DE-thorsten-low", quality: low, num_speakers: 1, licence: "CC0", licence_ok: true }
-      - { key: "de_DE-karlsson-low", quality: low, num_speakers: 1, licence: "See URL", licence_ok: false }
-      - { key: "de_DE-pavoque-low", quality: low, num_speakers: 1, licence: "http://creativecommons.org/licenses/by-nc-sa/4.0/", licence_ok: false }
-      - { key: "de_DE-ramona-low", quality: low, num_speakers: 1, licence: "See URL", licence_ok: false }
-      - { key: "de_DE-eva_k-x_low", quality: x_low, num_speakers: 1, licence: "See URL", licence_ok: false }
-
-  - code: afl
-    language: "Arabic"
-    iso: ar
-    status: none
-    voice: null
-    quality: null
-    num_speakers: 0
+  - key: en_US-joe-medium
+    quality: medium
+    num_speakers: 1
+    licence: CC0
+    licence_ok: true
+  - key: en_US-john-medium
+    quality: medium
+    num_speakers: 1
+    licence: public domain
+    licence_ok: true
+  - key: en_US-kristin-medium
+    quality: medium
+    num_speakers: 1
+    licence: public domain
+    licence_ok: true
+  - key: en_US-libritts_r-medium
+    quality: medium
+    num_speakers: 904
+    licence: CC BY 4.0
+    licence_ok: true
+  - key: en_US-ljspeech-medium
+    quality: medium
+    num_speakers: 1
+    licence: public domain
+    licence_ok: true
+  - key: en_US-mike-medium
+    quality: medium
+    num_speakers: 1
+    licence: CC0
+    licence_ok: true
+  - key: en_US-norman-medium
+    quality: medium
+    num_speakers: 1
+    licence: public domain
+    licence_ok: true
+  - key: en_US-reza_ibrahim-medium
+    quality: medium
+    num_speakers: 1
+    licence: CC0
+    licence_ok: true
+  - key: en_US-sam-medium
+    quality: medium
+    num_speakers: 1
+    licence: https://www.apache.org/licenses/LICENSE-2.0.txt
+    licence_ok: true
+  - key: en_GB-southern_english_female-low
+    quality: low
+    num_speakers: 1
+    licence: CC-BY-SA 4.0 International
+    licence_ok: true
+  - key: en_US-kathleen-low
+    quality: low
+    num_speakers: 1
+    licence: CC0
+    licence_ok: true
+  - key: en_US-lessac-high
+    quality: high
+    num_speakers: 1
+    licence: https://www.cstr.ed.ac.uk/projects/blizzard/2013/lessac_blizzard2013/license.html
+    licence_ok: false
+  - key: en_US-ryan-high
+    quality: high
+    num_speakers: 1
+    licence: CC BY-NC-SA 4.0
+    licence_ok: false
+  - key: en_GB-alan-medium
+    quality: medium
+    num_speakers: 1
+    licence: See URL
+    licence_ok: false
+  - key: en_GB-jenny_dioco-medium
+    quality: medium
+    num_speakers: 1
+    licence: See URL
+    licence_ok: false
+  - key: en_GB-semaine-medium
+    quality: medium
+    num_speakers: 4
+    licence: http://creativecommons.org/licenses/by-nc-sa/4.0/
+    licence_ok: false
+  - key: en_US-amy-medium
+    quality: medium
+    num_speakers: 1
+    licence: See URL
+    licence_ok: false
+  - key: en_US-arctic-medium
+    quality: medium
+    num_speakers: 18
+    licence: See LICENSE file
+    licence_ok: false
+  - key: en_US-hfc_female-medium
+    quality: medium
+    num_speakers: 1
+    licence: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
+    licence_ok: false
+  - key: en_US-hfc_male-medium
+    quality: medium
+    num_speakers: 1
+    licence: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
+    licence_ok: false
+  - key: en_US-kusal-medium
+    quality: medium
+    num_speakers: 1
+    licence: See URL
+    licence_ok: false
+  - key: en_US-l2arctic-medium
+    quality: medium
+    num_speakers: 24
+    licence: https://creativecommons.org/licenses/by-nc/4.0/
+    licence_ok: false
+  - key: en_US-lessac-medium
+    quality: medium
+    num_speakers: 1
+    licence: https://www.cstr.ed.ac.uk/projects/blizzard/2013/lessac_blizzard2013/license.html
+    licence_ok: false
+  - key: en_US-ryan-medium
+    quality: medium
+    num_speakers: 1
+    licence: CC BY-NC-SA 4.0
+    licence_ok: false
+  - key: en_GB-alan-low
+    quality: low
+    num_speakers: 1
+    licence: See URL
+    licence_ok: false
+  - key: en_US-amy-low
+    quality: low
+    num_speakers: 1
+    licence: See URL
+    licence_ok: false
+  - key: en_US-danny-low
+    quality: low
+    num_speakers: 1
+    licence: See URL
+    licence_ok: false
+  - key: en_US-lessac-low
+    quality: low
+    num_speakers: 1
+    licence: https://www.cstr.ed.ac.uk/projects/blizzard/2013/lessac_blizzard2013/license.html
+    licence_ok: false
+  - key: en_US-ryan-low
+    quality: low
+    num_speakers: 1
+    licence: CC BY-NC-SA 4.0
+    licence_ok: false
+  piper_key: en_GB-alba-medium
+  tts_lang: en
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/alba/medium/en_GB-alba-medium.onnx
+  md5: c07f313752bb3aba8061041666251654
+  sample_rate: 22050
+  second_voice: en_GB-cori-medium
+  licence_verified_at: '2026-08-21'
+- code: fle
+  language: French
+  iso: fr
+  status: ready
+  quality: medium
+  num_speakers: 1
+  licence: CC-BY 4.0
+  dataset: https://datashare.is.ed.ac.uk/handle/10283/2353
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/siwis/medium/fr_FR-siwis-medium.onnx
+  note: CC BY 4.0, written CC-BY 4.0 upstream; siwis carries an attribution obligation and needs a NOTICE.md
+    row. fr_FR-gilles-low (CC0) is the second speaker. fr_FR-tom-medium is AGPLv3 — a software copyleft
+    with no clean path into a CC BY-SA 4.0 work — and is excluded.
+  alternatives:
+  - key: fr_FR-mls-medium
+    quality: medium
+    num_speakers: 125
+    licence: CC-BY 4.0
+    licence_ok: true
+  - key: fr_FR-upmc-medium
+    quality: medium
+    num_speakers: 2
+    licence: http://creativecommons.org/licenses/by-sa/4.0/
+    licence_ok: true
+  - key: fr_FR-gilles-low
+    quality: low
+    num_speakers: 1
+    licence: CC0
+    licence_ok: true
+  - key: fr_FR-mls_1840-low
+    quality: low
+    num_speakers: 1
+    licence: CC BY 4.0
+    licence_ok: true
+  - key: fr_FR-siwis-low
+    quality: low
+    num_speakers: 1
+    licence: CC-BY 4.0
+    licence_ok: true
+  - key: fr_FR-tom-medium
+    quality: medium
+    num_speakers: 1
+    licence: AGPLv3
+    licence_ok: false
+  piper_key: fr_FR-siwis-medium
+  tts_lang: fr
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/siwis/medium/fr_FR-siwis-medium.onnx
+  md5: 20e876e8c839e9b11a26085858f2300c
+  sample_rate: 22050
+  second_voice: fr_FR-gilles-low
+  must_render:
+  - é
+  - è
+  - ê
+  - ç
+  - œ
+  licence_verified_at: '2026-08-21'
+- code: daf
+  language: German
+  iso: de
+  status: ready
+  quality: medium
+  num_speakers: 1
+  licence: CC0
+  dataset: https://github.com/thorstenMueller/Thorsten-Voice
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/medium/de_DE-thorsten-medium.onnx
+  note: CC0, no obligation. de_DE-kerstin-low (CC0) is the second speaker; de_DE-thorsten_emotional-medium
+    (CC0, 8 speakers) covers dialogues needing more than two voices.
+  alternatives:
+  - key: de_DE-thorsten-high
+    quality: high
+    num_speakers: 1
+    licence: CC0
+    licence_ok: true
+  - key: de_DE-mls-medium
+    quality: medium
+    num_speakers: 236
+    licence: CC-BY 4.0
+    licence_ok: true
+  - key: de_DE-thorsten_emotional-medium
+    quality: medium
+    num_speakers: 8
+    licence: CC0
+    licence_ok: true
+  - key: de_DE-kerstin-low
+    quality: low
+    num_speakers: 1
+    licence: CC0
+    licence_ok: true
+  - key: de_DE-thorsten-low
+    quality: low
+    num_speakers: 1
+    licence: CC0
+    licence_ok: true
+  - key: de_DE-karlsson-low
+    quality: low
+    num_speakers: 1
+    licence: See URL
+    licence_ok: false
+  - key: de_DE-pavoque-low
+    quality: low
+    num_speakers: 1
+    licence: http://creativecommons.org/licenses/by-nc-sa/4.0/
+    licence_ok: false
+  - key: de_DE-ramona-low
+    quality: low
+    num_speakers: 1
+    licence: See URL
+    licence_ok: false
+  - key: de_DE-eva_k-x_low
+    quality: x_low
+    num_speakers: 1
+    licence: See URL
+    licence_ok: false
+  piper_key: de_DE-thorsten-medium
+  tts_lang: de
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/medium/de_DE-thorsten-medium.onnx
+  md5: a129b00fb3078df43c96bab6c94535c0
+  sample_rate: 22050
+  second_voice: de_DE-kerstin-low
+  must_render:
+  - ä
+  - ö
+  - ü
+  - ß
+  licence_verified_at: '2026-08-21'
+- code: afl
+  language: Arabic
+  iso: ar
+  status: none
+  quality: null
+  num_speakers: 0
+  licence: null
+  dataset: null
+  model_url: null
+  note: 'Both Arabic voices are the same speaker and both state License: See URL, pointing at a training
+    repository that carries no licence statement of its own. afl/ROADMAP.md:87 calls this "MIT-compatible
+    OFL data"; that is wrong twice — the dataset states nothing, and OFL is a font licence with no application
+    to a speech corpus. Transcript-only until a written licence determination is obtained and recorded
+    in this file. The voice is also Jordanian, not MSA, which is a separate problem.'
+  alternatives:
+  - key: ar_JO-kareem-medium
+    quality: medium
+    num_speakers: 1
+    licence: See URL
+    licence_ok: false
+  - key: ar_JO-kareem-low
+    quality: low
+    num_speakers: 1
+    licence: See URL
+    licence_ok: false
+  piper_key: null
+  tts_lang: ar
+  must_render:
+  - ً
+  - ّ
+  - ْ
+  - ٰ
+  status_reason: 'ar_JO-kareem MODEL_CARD says ''License: See URL'' and the URL carries no licence statement.
+    The ROADMAP called it ''MIT-compatible OFL data'' — wrong twice: no statement is not permission, and
+    OFL is a font licence with no application to a speech dataset. Gated pending a written determination.'
+  licence_verified_at: '2026-08-21'
+- code: cfl
+  language: Chinese (Mandarin, simplified)
+  iso: zh
+  status: candidate
+  quality: medium
+  num_speakers: 1
+  licence: CC0
+  dataset: https://github.com/OHF-Voice/voice-datasets
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/zh/zh_CN/chaowen/medium/zh_CN-chaowen-medium.onnx
+  note: 'zh_CN-huayan-medium, named at cfl/ROADMAP.md:30,78, states License: Unknown, and zh_CN-xiao_ya-medium
+    is explicitly non-commercial. chaowen is the only licence-clear Mandarin voice in the catalogue and
+    there is only one of him, so dialogues ship single-voice with speaker labels.'
+  alternatives:
+  - key: zh_CN-huayan-medium
+    quality: medium
+    num_speakers: 1
+    licence: Unknown
+    licence_ok: false
+  - key: zh_CN-xiao_ya-medium
+    quality: medium
+    num_speakers: 1
+    licence: Non-commercial use (see https://www.data-baker.com/data/index/TNtts/)
+    licence_ok: false
+  - key: zh_CN-huayan-x_low
+    quality: x_low
+    num_speakers: 1
+    licence: Unknown
+    licence_ok: false
+  piper_key: zh_CN-chaowen-medium
+  tts_lang: zh
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/zh/zh_CN/chaowen/medium/zh_CN-chaowen-medium.onnx
+  md5: 4965c46e983653811bef0253026ff45a
+  sample_rate: 22050
+  must_render_phrases:
+  - mā má mǎ mà ma
+  licence_verified_at: '2026-08-21'
+- code: ele
+  language: Spanish (Spain)
+  iso: es
+  status: candidate
+  quality: medium
+  num_speakers: 1
+  licence: CC0
+  dataset: https://github.com/OHF-Voice/voice-datasets
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_ES/davefx/medium/es_ES-davefx-medium.onnx
+  note: CC0, no obligation. es_ES-sharvard-medium (CC BY 3.0, 2 speakers) is the two-speaker option where
+    a dialogue needs alternating voices, at the cost of an attribution row.
+  alternatives:
+  - key: es_AR-daniela-high
+    quality: high
+    num_speakers: 1
+    licence: Attribution-ShareAlike 4.0 International
+    licence_ok: true
+  - key: es_MX-claude-high
+    quality: high
+    num_speakers: 1
+    licence: apache-2.0
+    licence_ok: true
+  - key: es_ES-sharvard-medium
+    quality: medium
+    num_speakers: 2
+    licence: http://creativecommons.org/licenses/by/3.0/
+    licence_ok: true
+  - key: es_MX-ald-medium
+    quality: medium
+    num_speakers: 1
+    licence: http://unlicense.org
+    licence_ok: true
+  - key: es_ES-mls_10246-low
+    quality: low
+    num_speakers: 1
+    licence: CC BY 4.0
+    licence_ok: true
+  - key: es_ES-mls_9972-low
+    quality: low
+    num_speakers: 1
+    licence: CC BY 4.0
+    licence_ok: true
+  - key: es_ES-carlfm-x_low
+    quality: x_low
+    num_speakers: 1
+    licence: Public domain
+    licence_ok: true
+  - key: es_MX-ald-x_low
+    quality: x_low
+    num_speakers: 1
     licence: null
     licence_ok: false
-    dataset: null
-    model_url: null
-    verified_at: 2026-08-21
-    note: >-
-      Both Arabic voices are the same speaker and both state License: See URL, pointing at
-      a training repository that carries no licence statement of its own. afl/ROADMAP.md:87
-      calls this "MIT-compatible OFL data"; that is wrong twice — the dataset states
-      nothing, and OFL is a font licence with no application to a speech corpus.
-      Transcript-only until a written licence determination is obtained and recorded in
-      this file. The voice is also Jordanian, not MSA, which is a separate problem.
-    alternatives:
-      - { key: "ar_JO-kareem-medium", quality: medium, num_speakers: 1, licence: "See URL", licence_ok: false }
-      - { key: "ar_JO-kareem-low", quality: low, num_speakers: 1, licence: "See URL", licence_ok: false }
-
-  - code: cfl
-    language: "Chinese (Mandarin, simplified)"
-    iso: zh
-    status: candidate
-    voice: "zh_CN-chaowen-medium"
+  piper_key: es_ES-davefx-medium
+  tts_lang: es
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_ES/davefx/medium/es_ES-davefx-medium.onnx
+  md5: dc515cd4ecc5f6f72fe14a941188fc9c
+  sample_rate: 22050
+  second_voice: es_ES-sharvard-medium
+  must_render:
+  - ñ
+  - á
+  - í
+  - ú
+  - ¿
+  - ¡
+  licence_verified_at: '2026-08-21'
+- code: gfl
+  language: Greek (modern, monotonic)
+  iso: el
+  status: candidate
+  quality: medium
+  num_speakers: 1
+  licence: CC0
+  dataset: https://www.kaggle.com/datasets/bryanpark/greek-single-speaker-speech-dataset
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/el/el_GR/rapunzelina/medium/el_GR-rapunzelina-medium.onnx
+  note: 'gfl/ROADMAP.md:38,239 states that el_GR-rapunzelina-low is the only openly-licensed Greek option
+    and accepts a low tier. Upstream ships three Greek voices: -medium is the same speaker at 22.05 kHz
+    against -low''s 16 kHz and is equally CC0, so the tier is a free upgrade. el_GR-joy-medium is CC BY-NC
+    4.0 and is unusable. Greek remains single-speaker, so dialogue turns are still marked typographically.'
+  alternatives:
+  - key: el_GR-rapunzelina-low
+    quality: low
+    num_speakers: 1
+    licence: CC0
+    licence_ok: true
+  - key: el_GR-joy-medium
     quality: medium
     num_speakers: 1
-    licence: "CC0"
+    licence: CC BY-NC 4.0
+    licence_ok: false
+  piper_key: el_GR-rapunzelina-medium
+  tts_lang: el
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/el/el_GR/rapunzelina/medium/el_GR-rapunzelina-medium.onnx
+  md5: 265f2f9be00aa5ce81abc1f022145e42
+  sample_rate: 22050
+  must_render:
+  - ά
+  - έ
+  - ή
+  - ί
+  - ό
+  - ύ
+  - ώ
+  - ΐ
+  - ΰ
+  licence_verified_at: '2026-08-21'
+- code: ils
+  language: Italian
+  iso: it
+  status: candidate
+  quality: medium
+  num_speakers: 1
+  licence: CC-BY-4.0
+  dataset: https://huggingface.co/datasets/committa/serena-synthetic-it-27h
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/it/it_IT/serena/medium/it_IT-serena-medium.onnx
+  note: 'it_IT-paola-medium and it_IT-riccardo-x_low, named at ils/ROADMAP.md:75-82, both state License:
+    See URL with no resolvable statement. serena is the only licence-clear Italian speaker; -high is the
+    same voice at a higher tier, not a second speaker. ils therefore ships single-voice dialogues with
+    speaker labels, the fallback ele/ROADMAP.md:149 already specifies for this case. CC-BY-4.0 needs a
+    NOTICE.md row.'
+  alternatives:
+  - key: it_IT-serena-high
+    quality: high
+    num_speakers: 1
+    licence: CC-BY-4.0
     licence_ok: true
-    dataset: "https://github.com/OHF-Voice/voice-datasets"
-    model_url: "https://huggingface.co/rhasspy/piper-voices/resolve/main/zh/zh_CN/chaowen/medium/zh_CN-chaowen-medium.onnx"
-    verified_at: 2026-08-21
-    note: >-
-      zh_CN-huayan-medium, named at cfl/ROADMAP.md:30,78, states License: Unknown, and
-      zh_CN-xiao_ya-medium is explicitly non-commercial. chaowen is the only licence-clear
-      Mandarin voice in the catalogue and there is only one of him, so dialogues ship
-      single-voice with speaker labels.
-    alternatives:
-      - { key: "zh_CN-huayan-medium", quality: medium, num_speakers: 1, licence: "Unknown", licence_ok: false }
-      - { key: "zh_CN-xiao_ya-medium", quality: medium, num_speakers: 1, licence: "Non-commercial use (see https://www.data-baker.com/data/index/TNtts/)", licence_ok: false }
-      - { key: "zh_CN-huayan-x_low", quality: x_low, num_speakers: 1, licence: "Unknown", licence_ok: false }
-
-  - code: ele
-    language: "Spanish (Spain)"
-    iso: es
-    status: candidate
-    voice: "es_ES-davefx-medium"
+  - key: it_IT-paola-medium
     quality: medium
     num_speakers: 1
-    licence: "CC0"
+    licence: See URL
+    licence_ok: false
+  - key: it_IT-riccardo-x_low
+    quality: x_low
+    num_speakers: 1
+    licence: See URL
+    licence_ok: false
+  piper_key: it_IT-serena-medium
+  tts_lang: it
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/it/it_IT/serena/medium/it_IT-serena-medium.onnx
+  md5: 808596cb580247648bdaef5ee6b4e7da
+  sample_rate: 22050
+  must_render_phrases:
+  - nonno / nono
+  - pala / palla
+  licence_verified_at: '2026-08-21'
+- code: jfl
+  language: Japanese
+  iso: ja
+  status: none
+  quality: null
+  num_speakers: 0
+  licence: null
+  dataset: null
+  model_url: null
+  note: 'The only Japanese voice in the catalogue. Its dataset is CC BY-NC-SA 4.0, which cannot be redistributed
+    inside a CC BY-SA 4.0 work, so the two speakers it carries are unusable. Transcript-only until an
+    openly-licensed Japanese voice appears. Note also the locale tag: upstream writes ja_JA, not the ja_JP
+    at jfl/ROADMAP.md:71,207.'
+  alternatives:
+  - key: ja_JA-hi_fi_captain-medium
+    quality: medium
+    num_speakers: 2
+    licence: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
+    licence_ok: false
+  piper_key: null
+  tts_lang: ja
+  status_reason: ja_JA-hi_fi_captain-medium is the only Japanese voice and is CC BY-NC-SA 4.0. Note the
+    catalogue tag is ja_JA, not the ja_JP written in the ROADMAP. Transcript-only.
+  licence_verified_at: '2026-08-21'
+- code: lle
+  language: Latin
+  iso: la
+  status: none
+  quality: null
+  num_speakers: 0
+  licence: null
+  dataset: null
+  model_url: null
+  note: 'No Latin voice exists: zero la records in a 174-voice catalogue. Transcript-only. Approximating
+    with an Italian or Spanish voice, offered as option (b) at lle/ROADMAP.md, is closed as rejected —
+    voices are never substituted across languages.'
+  alternatives: []
+  piper_key: null
+  tts_lang: la
+  must_render:
+  - ā
+  - ē
+  - ī
+  - ō
+  - ū
+  - ȳ
+  - Ā
+  - Ȳ
+  status_reason: 'No Latin voice exists upstream — 0 of 174. Approximating with an Italian or Spanish
+    voice is rejected: never a neighbouring language''s voice.'
+  licence_verified_at: '2026-08-21'
+- code: nsf
+  language: Norwegian (bokmål)
+  iso: false
+  status: candidate
+  quality: medium
+  num_speakers: 1
+  licence: CC0
+  dataset: https://www.nb.no/sprakbanken/en/resource-catalogue/oai-nb-no-sbr-15/
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/no/no_NO/talesyntese/medium/no_NO-talesyntese-medium.onnx
+  note: Bokmål. CC0, no obligation. no_NO-nvcc-medium (CC0, 10 speakers) covers dialogues needing more
+    than one voice.
+  alternatives:
+  - key: no_NO-nvcc-medium
+    quality: medium
+    num_speakers: 10
+    licence: CC0
     licence_ok: true
-    dataset: "https://github.com/OHF-Voice/voice-datasets"
-    model_url: "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_ES/davefx/medium/es_ES-davefx-medium.onnx"
-    verified_at: 2026-08-21
-    note: >-
-      CC0, no obligation. es_ES-sharvard-medium (CC BY 3.0, 2 speakers) is the
-      two-speaker option where a dialogue needs alternating voices, at the cost of an
-      attribution row.
-    alternatives:
-      - { key: "es_AR-daniela-high", quality: high, num_speakers: 1, licence: "Attribution-ShareAlike 4.0 International", licence_ok: true }
-      - { key: "es_MX-claude-high", quality: high, num_speakers: 1, licence: "apache-2.0", licence_ok: true }
-      - { key: "es_ES-sharvard-medium", quality: medium, num_speakers: 2, licence: "http://creativecommons.org/licenses/by/3.0/", licence_ok: true }
-      - { key: "es_MX-ald-medium", quality: medium, num_speakers: 1, licence: "http://unlicense.org", licence_ok: true }
-      - { key: "es_ES-mls_10246-low", quality: low, num_speakers: 1, licence: "CC BY 4.0", licence_ok: true }
-      - { key: "es_ES-mls_9972-low", quality: low, num_speakers: 1, licence: "CC BY 4.0", licence_ok: true }
-      - { key: "es_ES-carlfm-x_low", quality: x_low, num_speakers: 1, licence: "Public domain", licence_ok: true }
-      - { key: "es_MX-ald-x_low", quality: x_low, num_speakers: 1, licence: null, licence_ok: false }
-
-  - code: gfl
-    language: "Greek (modern, monotonic)"
-    iso: el
-    status: candidate
-    voice: "el_GR-rapunzelina-medium"
+  piper_key: no_NO-talesyntese-medium
+  tts_lang: 'no'
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/no/no_NO/talesyntese/medium/no_NO-talesyntese-medium.onnx
+  md5: 9fc876e7edc6593086b4f2f34889f44b
+  sample_rate: 22050
+  second_voice: no_NO-nvcc-medium
+  must_render:
+  - æ
+  - ø
+  - å
+  licence_verified_at: '2026-08-21'
+- code: nvt
+  language: Dutch
+  iso: nl
+  status: candidate
+  quality: medium
+  num_speakers: 1
+  licence: CC0
+  dataset: https://github.com/OHF-Voice/voice-datasets
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/nl/nl_NL/ronnie/medium/nl_NL-ronnie-medium.onnx
+  note: CC0, no obligation. nl_BE-rdh-medium (CC0 1.0 Universal) is the Flemish contrast voice, used for
+    regional variation rather than as a substitute.
+  alternatives:
+  - key: nl_BE-nathalie-medium
     quality: medium
     num_speakers: 1
-    licence: "CC0"
+    licence: CC0
     licence_ok: true
-    dataset: "https://www.kaggle.com/datasets/bryanpark/greek-single-speaker-speech-dataset"
-    model_url: "https://huggingface.co/rhasspy/piper-voices/resolve/main/el/el_GR/rapunzelina/medium/el_GR-rapunzelina-medium.onnx"
-    verified_at: 2026-08-21
-    note: >-
-      gfl/ROADMAP.md:38,239 states that el_GR-rapunzelina-low is the only openly-licensed
-      Greek option and accepts a low tier. Upstream ships three Greek voices: -medium is
-      the same speaker at 22.05 kHz against -low's 16 kHz and is equally CC0, so the tier
-      is a free upgrade. el_GR-joy-medium is CC BY-NC 4.0 and is unusable. Greek remains
-      single-speaker, so dialogue turns are still marked typographically.
-    alternatives:
-      - { key: "el_GR-rapunzelina-low", quality: low, num_speakers: 1, licence: "CC0", licence_ok: true }
-      - { key: "el_GR-joy-medium", quality: medium, num_speakers: 1, licence: "CC BY-NC 4.0", licence_ok: false }
-
-  - code: ils
-    language: "Italian"
-    iso: it
-    status: candidate
-    voice: "it_IT-serena-medium"
+  - key: nl_BE-rdh-medium
     quality: medium
     num_speakers: 1
-    licence: "CC-BY-4.0"
+    licence: CC0 1.0 Universal
     licence_ok: true
-    dataset: "https://huggingface.co/datasets/committa/serena-synthetic-it-27h"
-    model_url: "https://huggingface.co/rhasspy/piper-voices/resolve/main/it/it_IT/serena/medium/it_IT-serena-medium.onnx"
-    verified_at: 2026-08-21
-    note: >-
-      it_IT-paola-medium and it_IT-riccardo-x_low, named at ils/ROADMAP.md:75-82, both
-      state License: See URL with no resolvable statement. serena is the only licence-clear
-      Italian speaker; -high is the same voice at a higher tier, not a second speaker.
-      ils therefore ships single-voice dialogues with speaker labels, the fallback
-      ele/ROADMAP.md:149 already specifies for this case. CC-BY-4.0 needs a NOTICE.md row.
-    alternatives:
-      - { key: "it_IT-serena-high", quality: high, num_speakers: 1, licence: "CC-BY-4.0", licence_ok: true }
-      - { key: "it_IT-paola-medium", quality: medium, num_speakers: 1, licence: "See URL", licence_ok: false }
-      - { key: "it_IT-riccardo-x_low", quality: x_low, num_speakers: 1, licence: "See URL", licence_ok: false }
-
-  - code: jfl
-    language: "Japanese"
-    iso: ja
-    status: none
-    voice: null
-    quality: null
-    num_speakers: 0
+  - key: nl_NL-alex-medium
+    quality: medium
+    num_speakers: 1
+    licence: CC0
+    licence_ok: true
+  - key: nl_NL-mls-medium
+    quality: medium
+    num_speakers: 52
+    licence: CC-BY 4.0
+    licence_ok: true
+  - key: nl_NL-pim-medium
+    quality: medium
+    num_speakers: 1
+    licence: CC0
+    licence_ok: true
+  - key: nl_NL-mls_5809-low
+    quality: low
+    num_speakers: 1
+    licence: CC BY 4.0
+    licence_ok: true
+  - key: nl_NL-mls_7432-low
+    quality: low
+    num_speakers: 1
+    licence: CC BY 4.0
+    licence_ok: true
+  - key: nl_BE-nathalie-x_low
+    quality: x_low
+    num_speakers: 1
+    licence: CC0
+    licence_ok: true
+  - key: nl_BE-rdh-x_low
+    quality: x_low
+    num_speakers: 1
+    licence: CC0 1.0 Universal
+    licence_ok: true
+  piper_key: nl_NL-ronnie-medium
+  tts_lang: nl
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/nl/nl_NL/ronnie/medium/nl_NL-ronnie-medium.onnx
+  md5: f74c8e7779cb05f935367d661de5b380
+  sample_rate: 22050
+  second_voice: nl_BE-rdh-medium
+  must_render:
+  - ij
+  - é
+  - ë
+  licence_verified_at: '2026-08-21'
+- code: pfa
+  language: Persian
+  iso: fa
+  status: candidate
+  quality: medium
+  num_speakers: 1
+  licence: CC0
+  dataset: https://datacula.com/tts-databases
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/fa/fa_IR/amir/medium/fa_IR-amir-medium.onnx
+  note: 'pfa/ROADMAP.md:56-58,108-112 defers the Persian voice to an M1 survey with no confirmed production-quality
+    option. The survey is answered: four of the five Persian voices are CC0 (amir, ganji, ganji_adabi,
+    reza_ibrahim) and only fa_IR-gyro-medium states See URL. The open decision closes in favour of shipping.
+    fa_IR-ganji_adabi-medium is a literary register and is the natural second voice for the classical-reader
+    strand. What remains is an audition for vocalised-Persian quality, not a search.'
+  alternatives:
+  - key: fa_IR-ganji-medium
+    quality: medium
+    num_speakers: 1
+    licence: CC0
+    licence_ok: true
+  - key: fa_IR-ganji_adabi-medium
+    quality: medium
+    num_speakers: 1
+    licence: CC0
+    licence_ok: true
+  - key: fa_IR-reza_ibrahim-medium
+    quality: medium
+    num_speakers: 1
+    licence: CC0
+    licence_ok: true
+  - key: fa_IR-gyro-medium
+    quality: medium
+    num_speakers: 1
+    licence: See URL
+    licence_ok: false
+  piper_key: fa_IR-amir-medium
+  tts_lang: fa
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/fa/fa_IR/amir/medium/fa_IR-amir-medium.onnx
+  md5: 7c0598c9726427869e1e86447b333539
+  sample_rate: 22050
+  second_voice: fa_IR-ganji_adabi-medium
+  must_render:
+  - ی
+  - ک
+  - گ
+  - پ
+  - چ
+  - ژ
+  - ۰
+  - ۹
+  licence_verified_at: '2026-08-21'
+- code: pfl
+  language: Polish
+  iso: pl
+  status: candidate
+  quality: medium
+  num_speakers: 1
+  licence: CC0
+  dataset: https://github.com/OHF-Voice/voice-datasets
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/pl/pl_PL/gosia/medium/pl_PL-gosia-medium.onnx
+  note: CC0, no obligation. pl_PL-darkman-medium (CC0) is the second speaker, giving a clean alternating
+    pair. pl_PL-bass-high carries no License line at all and is excluded.
+  alternatives:
+  - key: pl_PL-darkman-medium
+    quality: medium
+    num_speakers: 1
+    licence: CC0
+    licence_ok: true
+  - key: pl_PL-mc_speech-medium
+    quality: medium
+    num_speakers: 1
+    licence: CC0
+    licence_ok: true
+  - key: pl_PL-mls_6892-low
+    quality: low
+    num_speakers: 1
+    licence: CC BY 4.0
+    licence_ok: true
+  - key: pl_PL-bass-high
+    quality: high
+    num_speakers: 1
     licence: null
     licence_ok: false
-    dataset: null
-    model_url: null
-    verified_at: 2026-08-21
-    note: >-
-      The only Japanese voice in the catalogue. Its dataset is CC BY-NC-SA 4.0, which
-      cannot be redistributed inside a CC BY-SA 4.0 work, so the two speakers it carries
-      are unusable. Transcript-only until an openly-licensed Japanese voice appears.
-      Note also the locale tag: upstream writes ja_JA, not the ja_JP at
-      jfl/ROADMAP.md:71,207.
-    alternatives:
-      - { key: "ja_JA-hi_fi_captain-medium", quality: medium, num_speakers: 2, licence: "https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en", licence_ok: false }
-
-  - code: lle
-    language: "Latin"
-    iso: la
-    status: none
-    voice: null
-    quality: null
-    num_speakers: 0
-    licence: null
+  piper_key: pl_PL-gosia-medium
+  tts_lang: pl
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/pl/pl_PL/gosia/medium/pl_PL-gosia-medium.onnx
+  md5: ecf817530e575025166e454adde1f382
+  sample_rate: 22050
+  second_voice: pl_PL-darkman-medium
+  must_render:
+  - ą
+  - ć
+  - ę
+  - ł
+  - ń
+  - ó
+  - ś
+  - ź
+  - ż
+  licence_verified_at: '2026-08-21'
+- code: ple
+  language: Portuguese (Portugal)
+  iso: pt
+  status: candidate
+  quality: medium
+  num_speakers: 1
+  licence: CC0
+  dataset: https://github.com/OHF-Voice/voice-datasets
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_PT/tug%C3%A3o/medium/pt_PT-tug%C3%A3o-medium.onnx
+  note: The ã is in the key, the directory and the filename. Transliterating it to a bare a yields a URL
+    that returned 404 on 2026-08-21, where the percent-encoded model_url above returned 302 to the CDN.
+    Never transliterate this key. pt_BR-faber-medium (CC0) is the Brazilian contrast voice for pronunciation
+    clips, not a substitute for the European Portuguese primary.
+  alternatives:
+  - key: pt_BR-cadu-medium
+    quality: medium
+    num_speakers: 1
+    licence: CC0
+    licence_ok: true
+  - key: pt_BR-faber-medium
+    quality: medium
+    num_speakers: 1
+    licence: CC0
+    licence_ok: true
+  - key: pt_BR-jeff-medium
+    quality: medium
+    num_speakers: 1
+    licence: CC0
+    licence_ok: true
+  - key: pt_BR-edresson-low
+    quality: low
+    num_speakers: 1
+    licence: CC BY 4.0
+    licence_ok: true
+  piper_key: pt_PT-tugão-medium
+  tts_lang: pt
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_PT/tug%C3%A3o/medium/pt_PT-tug%C3%A3o-medium.onnx
+  md5: 0642048511ffe36c3b519520614b53f4
+  sample_rate: 22050
+  second_voice: pt_BR-faber-medium
+  must_render:
+  - ã
+  - õ
+  - ç
+  - â
+  - ê
+  licence_verified_at: '2026-08-21'
+- code: rki
+  language: Russian
+  iso: ru
+  status: candidate
+  quality: medium
+  num_speakers: 1
+  licence: CC0
+  dataset: https://github.com/OHF-Voice/voice-datasets
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/denis/medium/ru_RU-denis-medium.onnx
+  note: 'ru_RU-irina-medium, named as primary at rki/ROADMAP.md:29,79, states License: Unknown and cannot
+    ship. ru_RU-ruslan-medium is CC BY-NC-SA 4.0 and cannot ship either. denis and dmitri are both CC0
+    and both medium, which gives the alternating speaker pair the ROADMAP asks for. Strip U+0301 before
+    synthesis; keep ё.'
+  alternatives:
+  - key: ru_RU-dmitri-medium
+    quality: medium
+    num_speakers: 1
+    licence: CC0
+    licence_ok: true
+  - key: ru_RU-irina-medium
+    quality: medium
+    num_speakers: 1
+    licence: Unknown
     licence_ok: false
-    dataset: null
-    model_url: null
-    verified_at: 2026-08-21
-    note: >-
-      No Latin voice exists: zero la records in a 174-voice catalogue. Transcript-only.
-      Approximating with an Italian or Spanish voice, offered as option (b) at
-      lle/ROADMAP.md, is closed as rejected — voices are never substituted across
-      languages.
-    alternatives: []
-
-  - code: nsf
-    language: "Norwegian (bokmål)"
-    iso: no
-    status: candidate
-    voice: "no_NO-talesyntese-medium"
+  - key: ru_RU-ruslan-medium
     quality: medium
     num_speakers: 1
-    licence: "CC0"
-    licence_ok: true
-    dataset: "https://www.nb.no/sprakbanken/en/resource-catalogue/oai-nb-no-sbr-15/"
-    model_url: "https://huggingface.co/rhasspy/piper-voices/resolve/main/no/no_NO/talesyntese/medium/no_NO-talesyntese-medium.onnx"
-    verified_at: 2026-08-21
-    note: >-
-      Bokmål. CC0, no obligation. no_NO-nvcc-medium (CC0, 10 speakers) covers dialogues
-      needing more than one voice.
-    alternatives:
-      - { key: "no_NO-nvcc-medium", quality: medium, num_speakers: 10, licence: "CC0", licence_ok: true }
-
-  - code: nvt
-    language: "Dutch"
-    iso: nl
-    status: candidate
-    voice: "nl_NL-ronnie-medium"
-    quality: medium
-    num_speakers: 1
-    licence: "CC0"
-    licence_ok: true
-    dataset: "https://github.com/OHF-Voice/voice-datasets"
-    model_url: "https://huggingface.co/rhasspy/piper-voices/resolve/main/nl/nl_NL/ronnie/medium/nl_NL-ronnie-medium.onnx"
-    verified_at: 2026-08-21
-    note: >-
-      CC0, no obligation. nl_BE-rdh-medium (CC0 1.0 Universal) is the Flemish contrast
-      voice, used for regional variation rather than as a substitute.
-    alternatives:
-      - { key: "nl_BE-nathalie-medium", quality: medium, num_speakers: 1, licence: "CC0", licence_ok: true }
-      - { key: "nl_BE-rdh-medium", quality: medium, num_speakers: 1, licence: "CC0 1.0 Universal", licence_ok: true }
-      - { key: "nl_NL-alex-medium", quality: medium, num_speakers: 1, licence: "CC0", licence_ok: true }
-      - { key: "nl_NL-mls-medium", quality: medium, num_speakers: 52, licence: "CC-BY 4.0", licence_ok: true }
-      - { key: "nl_NL-pim-medium", quality: medium, num_speakers: 1, licence: "CC0", licence_ok: true }
-      - { key: "nl_NL-mls_5809-low", quality: low, num_speakers: 1, licence: "CC BY 4.0", licence_ok: true }
-      - { key: "nl_NL-mls_7432-low", quality: low, num_speakers: 1, licence: "CC BY 4.0", licence_ok: true }
-      - { key: "nl_BE-nathalie-x_low", quality: x_low, num_speakers: 1, licence: "CC0", licence_ok: true }
-      - { key: "nl_BE-rdh-x_low", quality: x_low, num_speakers: 1, licence: "CC0 1.0 Universal", licence_ok: true }
-
-  - code: pfa
-    language: "Persian"
-    iso: fa
-    status: candidate
-    voice: "fa_IR-amir-medium"
-    quality: medium
-    num_speakers: 1
-    licence: "CC0"
-    licence_ok: true
-    dataset: "https://datacula.com/tts-databases"
-    model_url: "https://huggingface.co/rhasspy/piper-voices/resolve/main/fa/fa_IR/amir/medium/fa_IR-amir-medium.onnx"
-    verified_at: 2026-08-21
-    note: >-
-      pfa/ROADMAP.md:56-58,108-112 defers the Persian voice to an M1 survey with no
-      confirmed production-quality option. The survey is answered: four of the five
-      Persian voices are CC0 (amir, ganji, ganji_adabi, reza_ibrahim) and only
-      fa_IR-gyro-medium states See URL. The open decision closes in favour of shipping.
-      fa_IR-ganji_adabi-medium is a literary register and is the natural second voice for
-      the classical-reader strand. What remains is an audition for vocalised-Persian
-      quality, not a search.
-    alternatives:
-      - { key: "fa_IR-ganji-medium", quality: medium, num_speakers: 1, licence: "CC0", licence_ok: true }
-      - { key: "fa_IR-ganji_adabi-medium", quality: medium, num_speakers: 1, licence: "CC0", licence_ok: true }
-      - { key: "fa_IR-reza_ibrahim-medium", quality: medium, num_speakers: 1, licence: "CC0", licence_ok: true }
-      - { key: "fa_IR-gyro-medium", quality: medium, num_speakers: 1, licence: "See URL", licence_ok: false }
-
-  - code: pfl
-    language: "Polish"
-    iso: pl
-    status: candidate
-    voice: "pl_PL-gosia-medium"
-    quality: medium
-    num_speakers: 1
-    licence: "CC0"
-    licence_ok: true
-    dataset: "https://github.com/OHF-Voice/voice-datasets"
-    model_url: "https://huggingface.co/rhasspy/piper-voices/resolve/main/pl/pl_PL/gosia/medium/pl_PL-gosia-medium.onnx"
-    verified_at: 2026-08-21
-    note: >-
-      CC0, no obligation. pl_PL-darkman-medium (CC0) is the second speaker, giving a
-      clean alternating pair. pl_PL-bass-high carries no License line at all and is
-      excluded.
-    alternatives:
-      - { key: "pl_PL-darkman-medium", quality: medium, num_speakers: 1, licence: "CC0", licence_ok: true }
-      - { key: "pl_PL-mc_speech-medium", quality: medium, num_speakers: 1, licence: "CC0", licence_ok: true }
-      - { key: "pl_PL-mls_6892-low", quality: low, num_speakers: 1, licence: "CC BY 4.0", licence_ok: true }
-      - { key: "pl_PL-bass-high", quality: high, num_speakers: 1, licence: null, licence_ok: false }
-
-  - code: ple
-    language: "Portuguese (Portugal)"
-    iso: pt
-    status: candidate
-    voice: "pt_PT-tugão-medium"
-    quality: medium
-    num_speakers: 1
-    licence: "CC0"
-    licence_ok: true
-    dataset: "https://github.com/OHF-Voice/voice-datasets"
-    model_url: "https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_PT/tug%C3%A3o/medium/pt_PT-tug%C3%A3o-medium.onnx"
-    verified_at: 2026-08-21
-    note: >-
-      The ã is in the key, the directory and the filename. Transliterating it to a bare a
-      yields a URL that returned 404 on 2026-08-21, where the percent-encoded model_url
-      above returned 302 to the CDN. Never transliterate this key. pt_BR-faber-medium
-      (CC0) is the Brazilian contrast voice for pronunciation clips, not a substitute for
-      the European Portuguese primary.
-    alternatives:
-      - { key: "pt_BR-cadu-medium", quality: medium, num_speakers: 1, licence: "CC0", licence_ok: true }
-      - { key: "pt_BR-faber-medium", quality: medium, num_speakers: 1, licence: "CC0", licence_ok: true }
-      - { key: "pt_BR-jeff-medium", quality: medium, num_speakers: 1, licence: "CC0", licence_ok: true }
-      - { key: "pt_BR-edresson-low", quality: low, num_speakers: 1, licence: "CC BY 4.0", licence_ok: true }
-
-  - code: rki
-    language: "Russian"
-    iso: ru
-    status: candidate
-    voice: "ru_RU-denis-medium"
-    quality: medium
-    num_speakers: 1
-    licence: "CC0"
-    licence_ok: true
-    dataset: "https://github.com/OHF-Voice/voice-datasets"
-    model_url: "https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/denis/medium/ru_RU-denis-medium.onnx"
-    verified_at: 2026-08-21
-    note: >-
-      ru_RU-irina-medium, named as primary at rki/ROADMAP.md:29,79, states License:
-      Unknown and cannot ship. ru_RU-ruslan-medium is CC BY-NC-SA 4.0 and cannot ship
-      either. denis and dmitri are both CC0 and both medium, which gives the alternating
-      speaker pair the ROADMAP asks for. Strip U+0301 before synthesis; keep ё.
-    alternatives:
-      - { key: "ru_RU-dmitri-medium", quality: medium, num_speakers: 1, licence: "CC0", licence_ok: true }
-      - { key: "ru_RU-irina-medium", quality: medium, num_speakers: 1, licence: "Unknown", licence_ok: false }
-      - { key: "ru_RU-ruslan-medium", quality: medium, num_speakers: 1, licence: "https://creativecommons.org/licenses/by-nc-sa/4.0/", licence_ok: false }
-
-  - code: tfl
-    language: "Turkish"
-    iso: tr
-    status: none
-    voice: null
-    quality: null
-    num_speakers: 0
-    licence: null
+    licence: https://creativecommons.org/licenses/by-nc-sa/4.0/
     licence_ok: false
-    dataset: null
-    model_url: null
-    verified_at: 2026-08-21
-    note: >-
-      tr_TR-dfki-medium is the only Turkish voice in the catalogue and its dataset is
-      CC BY-NC-SA 4.0, which cannot be redistributed inside a CC BY-SA 4.0 work.
-      Transcript-only until an openly-licensed Turkish voice appears. tfl/ROADMAP.md:79-85
-      already books an audition gate and the rule "do not ship wrong"; the outcome is now
-      determined, and the blocker is licence, not quality.
-    alternatives:
-      - { key: "tr_TR-dfki-medium", quality: medium, num_speakers: 1, licence: "https://creativecommons.org/licenses/by-nc-sa/4.0/", licence_ok: false }
-
-  - code: ufl
-    language: "Ukrainian"
-    iso: uk
-    status: candidate
-    voice: "uk_UA-ukrainian_tts-medium"
+  piper_key: ru_RU-denis-medium
+  tts_lang: ru
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/denis/medium/ru_RU-denis-medium.onnx
+  md5: 76c2f14e521fef3ed574f97ad492728e
+  sample_rate: 22050
+  second_voice: ru_RU-dmitri-medium
+  must_render:
+  - ё
+  - ́
+  - щ
+  - ъ
+  - ы
+  licence_verified_at: '2026-08-21'
+- code: tfl
+  language: Turkish
+  iso: tr
+  status: none
+  quality: null
+  num_speakers: 0
+  licence: null
+  dataset: null
+  model_url: null
+  note: tr_TR-dfki-medium is the only Turkish voice in the catalogue and its dataset is CC BY-NC-SA 4.0,
+    which cannot be redistributed inside a CC BY-SA 4.0 work. Transcript-only until an openly-licensed
+    Turkish voice appears. tfl/ROADMAP.md:79-85 already books an audition gate and the rule "do not ship
+    wrong"; the outcome is now determined, and the blocker is licence, not quality.
+  alternatives:
+  - key: tr_TR-dfki-medium
     quality: medium
-    num_speakers: 3
-    licence: "CC0"
+    num_speakers: 1
+    licence: https://creativecommons.org/licenses/by-nc-sa/4.0/
+    licence_ok: false
+  piper_key: null
+  tts_lang: tr
+  must_render:
+  - ç
+  - ğ
+  - ı
+  - İ
+  - ö
+  - ş
+  - ü
+  status_reason: tr_TR-dfki-medium is the only Turkish voice in the catalogue and is CC BY-NC-SA 4.0.
+    A NonCommercial model cannot ship inside CC BY-SA 4.0 content. Transcript-only; the blocker is licence,
+    not quality.
+  licence_verified_at: '2026-08-21'
+- code: ufl
+  language: Ukrainian
+  iso: uk
+  status: candidate
+  quality: medium
+  num_speakers: 3
+  licence: CC0
+  dataset: https://github.com/OHF-Voice/voice-datasets
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/uk/uk_UA/ukrainian_tts/medium/uk_UA-ukrainian_tts-medium.onnx
+  note: CC0, no obligation. Three speakers in one model, selected through speaker_id_map, so alternating
+    dialogue works from the primary alone. uk_UA-tetiana-high (Apache 2.0) is the high-tier fallback.
+    Strip U+0301 before synthesis; keep ґ, ї, є and the U+02BC/U+2019 apostrophe.
+  alternatives:
+  - key: uk_UA-mykyta-high
+    quality: high
+    num_speakers: 1
+    licence: Apache 2.0
     licence_ok: true
-    dataset: "https://github.com/OHF-Voice/voice-datasets"
-    model_url: "https://huggingface.co/rhasspy/piper-voices/resolve/main/uk/uk_UA/ukrainian_tts/medium/uk_UA-ukrainian_tts-medium.onnx"
-    verified_at: 2026-08-21
-    note: >-
-      CC0, no obligation. Three speakers in one model, selected through speaker_id_map,
-      so alternating dialogue works from the primary alone. uk_UA-tetiana-high
-      (Apache 2.0) is the high-tier fallback. Strip U+0301 before synthesis; keep ґ, ї, є
-      and the U+02BC/U+2019 apostrophe.
-    alternatives:
-      - { key: "uk_UA-mykyta-high", quality: high, num_speakers: 1, licence: "Apache 2.0", licence_ok: true }
-      - { key: "uk_UA-oleksa-high", quality: high, num_speakers: 1, licence: "Apache 2.0", licence_ok: true }
-      - { key: "uk_UA-tetiana-high", quality: high, num_speakers: 1, licence: "Apache 2.0", licence_ok: true }
-      - { key: "uk_UA-lada-x_low", quality: x_low, num_speakers: 1, licence: "Apache 2.0", licence_ok: true }
+  - key: uk_UA-oleksa-high
+    quality: high
+    num_speakers: 1
+    licence: Apache 2.0
+    licence_ok: true
+  - key: uk_UA-tetiana-high
+    quality: high
+    num_speakers: 1
+    licence: Apache 2.0
+    licence_ok: true
+  - key: uk_UA-lada-x_low
+    quality: x_low
+    num_speakers: 1
+    licence: Apache 2.0
+    licence_ok: true
+  piper_key: uk_UA-ukrainian_tts-medium
+  tts_lang: uk
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/uk/uk_UA/ukrainian_tts/medium/uk_UA-ukrainian_tts-medium.onnx
+  md5: 3366c3d4f31cb77966fb14d042956b4f
+  sample_rate: 22050
+  second_voice: uk_UA-tetiana-high
+  must_render:
+  - ґ
+  - ї
+  - є
+  - ''''
+  - ʼ
+  licence_verified_at: '2026-08-21'

@@ -1,8 +1,18 @@
-presentations: { other: "Slide decks" }
-worksheets: { other: "Worksheets" }
-presentation: { other: "Slide deck" }
-worksheet: { other: "Worksheet" }
-download: { other: "Download" }
-listen: { other: "Listen" }
-audio_intro: { other: "Native-voice audio for this unit." }
-exam: { other: "Exam" }
+audio_intro:
+  other: Native-voice audio for this unit.
+audio_unsupported: Your browser does not support audio playback.
+download:
+  other: Download
+exam:
+  other: Exam
+listen:
+  other: Listen
+presentation:
+  other: Slide deck
+presentations:
+  other: Slide decks
+show_text: Show text
+worksheet:
+  other: Worksheet
+worksheets:
+  other: Worksheets
