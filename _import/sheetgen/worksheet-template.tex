@@ -1,0 +1,57 @@
+% Example worksheet — boulingua design language.
+% Build:  xelatex worksheet-template.tex   (or lualatex)
+\documentclass[11pt]{article}
+\usepackage{boulingua-sheet}
+\blgsetlang{efl}   % English → signature accent (see the palette in the style)
+
+\begin{document}
+
+% \worksheetheader{Title}{Subtitle}{Badge}{badge colour: blgcefrA/B/C or blgaccent}
+\worksheetheader{Unit 2 — Growing Up}%
+  {English · Track G+M · Klasse 7 · Skill: Reading \& Writing}%
+  {Niveau M}{blgcefrB}
+
+\begin{sheetbody}
+\section{Vocabulary}
+Match each word to its definition.
+
+\begin{tabularx}{\linewidth}{@{}p{4cm}X@{}}
+\toprule
+\textbf{Word} & \textbf{Your definition} \\
+\midrule
+responsibility & \\[0.6em]
+to grow up     & \\[0.6em]
+allowance      & \\[0.6em]
+independent    & \\
+\bottomrule
+\end{tabularx}
+
+\section{Reading}
+Read the text on the unit page, then answer in full sentences.
+
+\begin{enumerate}
+  \item Who tells the story, and how old is the narrator?
+  \item Name two new responsibilities the narrator gets this year.
+\end{enumerate}
+\blglines[2]
+
+\section{Grammar — Frequency adverbs}
+Rewrite each sentence, adding the adverb in brackets in the correct position.
+\begin{enumerate}
+  \item I tidy my room. (\textit{always})
+  \item She is late for school. (\textit{never})
+\end{enumerate}
+\blglines[2]
+
+\section{Write}
+Write 5 sentences about your weekly routine using frequency adverbs
+(\textit{always, often, sometimes, never}).
+\blglines[5]
+
+\begin{blganswers}
+\textbf{Grammar.} 1) I \textbf{always} tidy my room. \quad
+2) She is \textbf{never} late for school.
+\end{blganswers}
+\end{sheetbody}
+
+\end{document}

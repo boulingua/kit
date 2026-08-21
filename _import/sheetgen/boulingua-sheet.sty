@@ -1,0 +1,125 @@
+% boulingua-sheet.sty — worksheet style in the boulingua design language.
+% Compile with XeLaTeX or LuaLaTeX (fontspec). Self-contained: bundles the
+% Source Sans 3 / JetBrains Mono fonts and the boulingua logo.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{boulingua-sheet}[2026/07/21 boulingua worksheet style]
+
+\RequirePackage{fontspec}
+\RequirePackage{xcolor}
+\RequirePackage[a4paper,top=2.4cm,bottom=2.6cm,left=2.2cm,right=2.2cm]{geometry}
+\RequirePackage{titlesec}
+\RequirePackage{enumitem}
+\RequirePackage{tabularx}
+\RequirePackage{booktabs}
+\RequirePackage{tcolorbox}
+\RequirePackage{graphicx}
+\RequirePackage{eso-pic}
+\RequirePackage{tikz}
+\usetikzlibrary{calc}
+\RequirePackage{fancyhdr}
+\RequirePackage{changepage}
+\RequirePackage{hyperref}
+% PDF metadata — attribute the author in the file's core properties.
+\hypersetup{pdfauthor={S. Le Boulanger},hidelinks}
+
+% Body indent: the title bar + accent rule run the full text width; the
+% worksheet content sits inside a slightly indented column beneath them.
+\newlength{\blgbodyindent}\setlength{\blgbodyindent}{8mm}
+\newenvironment{sheetbody}%
+  {\begin{adjustwidth}{\blgbodyindent}{0pt}}%
+  {\end{adjustwidth}}
+
+% ── Palette (mirrors the websites' design tokens) ───────────────────────────
+% Per-language accent colours (flag-safe; one signature hue per language, none
+% of which appears in that language's flag). Default is boulingua blue; call
+% e.g. \blgsetlang{daf} after \usepackage to switch the sheet to that language.
+\definecolor{blgaccent}{HTML}{1A73E8}\definecolor{blgaccenthover}{HTML}{0B57D0}
+\definecolor{acc-daf}{HTML}{1D87A7}\definecolor{acch-daf}{HTML}{176780}% German
+\definecolor{acc-efl}{HTML}{248D19}\definecolor{acch-efl}{HTML}{1A6612}% English
+\definecolor{acc-fle}{HTML}{4B8D19}\definecolor{acch-fle}{HTML}{366612}% French
+\definecolor{acc-afl}{HTML}{4A23C7}\definecolor{acch-afl}{HTML}{3B1CA0}% Arabic
+\definecolor{acc-cfl}{HTML}{2334C7}\definecolor{acch-cfl}{HTML}{1C2AA0}% Chinese
+\definecolor{acc-ele}{HTML}{198D81}\definecolor{acch-ele}{HTML}{12665D}% Spanish
+\definecolor{acc-gfl}{HTML}{C74A23}\definecolor{acch-gfl}{HTML}{A03B1C}% Greek
+\definecolor{acc-ils}{HTML}{8023C7}\definecolor{acch-ils}{HTML}{671CA0}% Italian
+\definecolor{acc-jfl}{HTML}{867B18}\definecolor{acch-jfl}{HTML}{5F5811}% Japanese
+\definecolor{acc-lle}{HTML}{C72334}\definecolor{acch-lle}{HTML}{A01C2A}% Latin
+\definecolor{acc-nsf}{HTML}{6D8618}\definecolor{acch-nsf}{HTML}{4D5F11}% Norwegian
+\definecolor{acc-nvt}{HTML}{198D34}\definecolor{acch-nvt}{HTML}{126626}% Dutch
+\definecolor{acc-pfl}{HTML}{AD701F}\definecolor{acch-pfl}{HTML}{865618}% Polish
+\definecolor{acc-ple}{HTML}{B723C7}\definecolor{acch-ple}{HTML}{931CA0}% Portuguese
+\definecolor{acc-rki}{HTML}{198D5B}\definecolor{acch-rki}{HTML}{126642}% Russian
+\definecolor{acc-tfl}{HTML}{C7236A}\definecolor{acch-tfl}{HTML}{A01C56}% Turkish
+\definecolor{acc-ufl}{HTML}{C723A1}\definecolor{acch-ufl}{HTML}{A01C82}% Ukrainian
+% \blglangmark[height] draws the language's abstract icon (accent-filled);
+% it is a no-op until \blgsetlang{code} points it at brand/icons/<code>.pdf.
+\newcommand{\blglangmark}[1][12mm]{}
+\newcommand{\blgsetlang}[1]{\colorlet{blgaccent}{acc-#1}\colorlet{blgaccenthover}{acch-#1}%
+  \renewcommand{\blglangmark}[1][12mm]{\includegraphics[height=##1]{brand/icons/#1.pdf}}}
+\definecolor{blgfg}{HTML}{23272B}
+\definecolor{blgmuted}{HTML}{6B7280}
+\definecolor{blgrule}{HTML}{E4E7EB}
+\definecolor{blgsurface}{HTML}{F7F8FA}
+\definecolor{blgcefrA}{HTML}{4CAF50}
+\definecolor{blgcefrB}{HTML}{1A73E8}
+\definecolor{blgcefrC}{HTML}{8E24AA}
+\color{blgfg}
+
+% ── Fonts (bundled) ─────────────────────────────────────────────────────────
+\setmainfont{SourceSans3}[
+  Path=fonts/, Extension=.ttf,
+  UprightFont=*-Regular, BoldFont=*-Bold, FontFace={l}{n}{*-Light}]
+\newfontfamily\blgsemibold{SourceSans3-Semibold}[Path=fonts/, Extension=.ttf]
+\setmonofont{JetBrainsMono-Regular}[Path=fonts/, Extension=.ttf]
+\newfontfamily\blgmarker{PermanentMarker-Regular}[Path=fonts/, Extension=.ttf]
+
+% ── Section styling ─────────────────────────────────────────────────────────
+\titleformat{\section}{\blgsemibold\Large\color{blgfg}}{\thesection.}{0.5em}{}[{\color{blgrule}\titlerule[1pt]}]
+\titleformat{\subsection}{\blgsemibold\large\color{blgaccenthover}}{}{0em}{}
+\titlespacing*{\section}{0pt}{1.4em}{0.6em}
+\setlist{leftmargin=1.4em,itemsep=0.25em,topsep=0.3em}
+
+% ── Level badge (CEFR / Niveau) ─────────────────────────────────────────────
+\newcommand{\blgbadge}[2][blgaccent]{%
+  \tikz[baseline=(b.base)]\node[fill=#1,text=white,rounded corners=3pt,
+    inner xsep=6pt,inner ysep=2pt,font=\blgsemibold\footnotesize](b){#2};}
+
+% ── Worksheet header ────────────────────────────────────────────────────────
+% \worksheetheader{Title}{Subtitle line}{Badge label}{badge color}
+\newcommand{\worksheetheader}[4]{%
+  \gdef\blgtitle{#1}%
+  \thispagestyle{empty}%
+  {\blgsemibold\LARGE\color{blgfg} #1\hfill\raisebox{-3.2mm}[0pt][0pt]{\blglangmark[11mm]}\par}%
+  \vspace{0.35em}%
+  % Level (Niveau) as plain text — no coloured highlight. #4 (badge colour)
+  % is accepted for signature compatibility but intentionally unused here.
+  {\color{blgmuted}\normalsize #2 \hfill {\blgsemibold\color{blgfg}#3}}\par
+  \vspace{0.35em}{\color{blgaccent}\rule{\linewidth}{1.4pt}}\par
+  \vspace{1.1em}}
+
+% ── Answer-key box ──────────────────────────────────────────────────────────
+\newtcolorbox{blganswers}{colback=blgsurface,colframe=blgrule,boxrule=0.6pt,
+  arc=3pt,left=8pt,right=8pt,top=6pt,bottom=6pt,
+  title={\blgsemibold\small Solutions},fonttitle=\color{blgfg},
+  coltitle=blgfg,attach title to upper=\ }
+
+% Writing lines for hand-written answers
+\newcommand{\blglines}[1][3]{\par\vspace{0.3em}%
+  \foreach \n in {1,...,#1}{\noindent\color{blgrule}\rule{\linewidth}{0.4pt}\par\vspace{1.1em}}}
+
+% ── Watermark: icon + © author · title, centred at the foot of every page ───
+\newcommand{\blgtitle}{}   % set by \worksheetheader to the sheet's title
+\newcommand{\blgwatermark}{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \node[anchor=south,inner sep=0pt] at ($(current page.south)+(0,10mm)$)
+      {\raisebox{-1.15mm}{\includegraphics[height=4.4mm]{assets/boulingua-logo.png}}%
+       \hspace{1.6mm}{\blgsemibold\footnotesize\color{blgmuted}%
+         \textcopyright\ S.~Le Boulanger \ \textbullet\ \blgtitle}};
+  \end{tikzpicture}}
+\AddToShipoutPictureFG{\blgwatermark}
+
+% Footer: page number, muted, right
+\pagestyle{fancy}\fancyhf{}\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancyfoot[R]{\color{blgmuted}\footnotesize\thepage}
+\endinput
