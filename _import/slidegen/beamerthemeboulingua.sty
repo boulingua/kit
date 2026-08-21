@@ -1,0 +1,100 @@
+% beamerthemeboulingua.sty — Beamer theme in the boulingua design language.
+% Compile decks with XeLaTeX or LuaLaTeX (fontspec). Self-contained: bundles
+% the Source Sans 3 / JetBrains Mono fonts and the boulingua logo.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{beamerthemeboulingua}[2026/07/21 boulingua beamer theme]
+
+\RequirePackage{fontspec}
+\RequirePackage{tikz}
+\usetikzlibrary{calc}
+% PDF metadata — attribute the author in the file's core properties.
+\hypersetup{pdfauthor={S. Le Boulanger}}
+\AtBeginDocument{\hypersetup{pdftitle={\inserttitle}}}
+
+% ── Palette ─────────────────────────────────────────────────────────────────
+% Per-language accent colours (flag-safe; one signature hue per language, none
+% of which appears in that language's flag). Default is boulingua blue; call
+% e.g. \blgsetlang{daf} after \usetheme to switch the deck to that language.
+\definecolor{blgaccent}{HTML}{1A73E8}\definecolor{blgaccenthover}{HTML}{0B57D0}
+\definecolor{acc-daf}{HTML}{1D87A7}\definecolor{acch-daf}{HTML}{176780}% German
+\definecolor{acc-efl}{HTML}{248D19}\definecolor{acch-efl}{HTML}{1A6612}% English
+\definecolor{acc-fle}{HTML}{4B8D19}\definecolor{acch-fle}{HTML}{366612}% French
+\definecolor{acc-afl}{HTML}{4A23C7}\definecolor{acch-afl}{HTML}{3B1CA0}% Arabic
+\definecolor{acc-cfl}{HTML}{2334C7}\definecolor{acch-cfl}{HTML}{1C2AA0}% Chinese
+\definecolor{acc-ele}{HTML}{198D81}\definecolor{acch-ele}{HTML}{12665D}% Spanish
+\definecolor{acc-gfl}{HTML}{C74A23}\definecolor{acch-gfl}{HTML}{A03B1C}% Greek
+\definecolor{acc-ils}{HTML}{8023C7}\definecolor{acch-ils}{HTML}{671CA0}% Italian
+\definecolor{acc-jfl}{HTML}{867B18}\definecolor{acch-jfl}{HTML}{5F5811}% Japanese
+\definecolor{acc-lle}{HTML}{C72334}\definecolor{acch-lle}{HTML}{A01C2A}% Latin
+\definecolor{acc-nsf}{HTML}{6D8618}\definecolor{acch-nsf}{HTML}{4D5F11}% Norwegian
+\definecolor{acc-nvt}{HTML}{198D34}\definecolor{acch-nvt}{HTML}{126626}% Dutch
+\definecolor{acc-pfl}{HTML}{AD701F}\definecolor{acch-pfl}{HTML}{865618}% Polish
+\definecolor{acc-ple}{HTML}{B723C7}\definecolor{acch-ple}{HTML}{931CA0}% Portuguese
+\definecolor{acc-rki}{HTML}{198D5B}\definecolor{acch-rki}{HTML}{126642}% Russian
+\definecolor{acc-tfl}{HTML}{C7236A}\definecolor{acch-tfl}{HTML}{A01C56}% Turkish
+\definecolor{acc-ufl}{HTML}{C723A1}\definecolor{acch-ufl}{HTML}{A01C82}% Ukrainian
+% \blglangmark[height] draws the language's abstract icon (accent-filled);
+% it is a no-op until \blgsetlang{code} points it at brand/icons/<code>.pdf.
+\newcommand{\blglangmark}[1][12mm]{}
+\newcommand{\blgsetlang}[1]{\colorlet{blgaccent}{acc-#1}\colorlet{blgaccenthover}{acch-#1}%
+  \renewcommand{\blglangmark}[1][12mm]{\includegraphics[height=##1]{brand/icons/#1.pdf}}}
+\definecolor{blgfg}{HTML}{23272B}
+\definecolor{blgmuted}{HTML}{6B7280}
+\definecolor{blgrule}{HTML}{E4E7EB}
+\definecolor{blgsurface}{HTML}{F7F8FA}
+\definecolor{blgcefrA}{HTML}{4CAF50}
+\definecolor{blgcefrB}{HTML}{1A73E8}
+\definecolor{blgcefrC}{HTML}{8E24AA}
+
+% ── Fonts (bundled) ─────────────────────────────────────────────────────────
+\setmainfont{SourceSans3}[Path=fonts/, Extension=.ttf,
+  UprightFont=*-Regular, BoldFont=*-Bold, FontFace={l}{n}{*-Light}]
+\newfontfamily\blgsemibold{SourceSans3-Semibold}[Path=fonts/, Extension=.ttf]
+\setmonofont{JetBrainsMono-Regular}[Path=fonts/, Extension=.ttf]
+\newfontfamily\blgmarker{PermanentMarker-Regular}[Path=fonts/, Extension=.ttf]
+
+% ── Colours & fonts of beamer elements ──────────────────────────────────────
+\setbeamercolor{normal text}{fg=blgfg}
+\setbeamercolor{structure}{fg=blgaccent}
+\setbeamercolor{frametitle}{fg=blgfg}
+\setbeamercolor{title}{fg=blgfg}
+\setbeamercolor{itemize item}{fg=blgaccent}
+\setbeamercolor{itemize subitem}{fg=blgmuted}
+\setbeamercolor{block title}{fg=white,bg=blgaccent}
+\setbeamercolor{block body}{bg=blgsurface}
+\setbeamerfont{frametitle}{family=\blgsemibold,size=\LARGE}
+\setbeamerfont{title}{family=\blgsemibold,size=\huge}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{itemize item}{\small\raise0.5pt\hbox{\textbullet}}
+\setbeamertemplate{blocks}[rounded][shadow=false]
+
+% ── Frame title: accent rule underneath ─────────────────────────────────────
+\setbeamertemplate{frametitle}{%
+  \vskip0.6em\hbox{\usebeamerfont{frametitle}\usebeamercolor[fg]{frametitle}\insertframetitle}%
+  \vskip2pt{\color{blgaccent}\rule{\linewidth}{1.4pt}}\vskip0.2em}
+
+% ── Watermark: icon + © author · title, centred at the foot of every slide ──
+\setbeamertemplate{background}{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \node[anchor=south,inner sep=0pt] at ($(current page.south)+(0,3.4mm)$)
+      {\raisebox{-1.0mm}{\includegraphics[height=3.8mm]{assets/boulingua-logo.png}}%
+       \hspace{1.5mm}{\blgsemibold\scriptsize\color{blgmuted}%
+         \textcopyright\ S.~Le Boulanger \ \textbullet\ \inserttitle}};
+  \end{tikzpicture}}
+
+% ── Footline: slide number, muted, right ────────────────────────────────────
+\setbeamertemplate{footline}{%
+  \hfill\usebeamercolor[fg]{blgmuted}\color{blgmuted}\scriptsize
+  \insertframenumber\hspace{6mm}\vskip3mm}
+
+% ── Title page ──────────────────────────────────────────────────────────────
+% Author + date are carried by the foot watermark, so the title slide shows
+% only the title, accent rule and subtitle.
+\setbeamertemplate{title page}{%
+  \vfill
+  {\blglangmark[15mm]\par}\vskip12pt
+  {\usebeamerfont{title}\usebeamercolor[fg]{title}\inserttitle\par}
+  \vskip4pt{\color{blgaccent}\rule{0.42\linewidth}{2pt}}\par
+  \vskip10pt{\color{blgmuted}\large\insertsubtitle\par}
+  \vfill}
+\endinput
