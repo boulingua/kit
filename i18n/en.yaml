@@ -1,17 +1,34 @@
+# Chrome strings. Every key the kit's layouts reference must exist here and in
+# every other language file, or gate A9 fails.
+#
+# The layouts carry `| default "…"` fallbacks so a missing key degrades to
+# English rather than to blank. That is a safety net and not a licence: an
+# English fallback on a German course reads as a bug to the learner, and the
+# whole point of A9 is that it can never be reached silently.
 audio_intro:
   other: Native-voice audio for this unit.
 audio_unsupported: Your browser does not support audio playback.
+built_with: Built with Hugo.
+contact: Contact
 download:
   other: Download
 exam:
   other: Exam
+extension: Extension
+gap: gap to fill
+licence_pair: MIT / CC BY-SA 4.0
 listen:
   other: Listen
 presentation:
   other: Slide deck
 presentations:
   other: Slide decks
+recycles: Builds on
 show_text: Show text
+vocab: Vocabulary
+vocab_example: Example
+vocab_gloss: Meaning
+vocab_term: Term
 worksheet:
   other: Worksheet
 worksheets:

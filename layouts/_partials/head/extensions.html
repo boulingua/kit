@@ -37,3 +37,21 @@ body.colorscheme-dark{--boulingua-accent:{{ .dark }};--boulingua-accent-hover:{{
 <script defer data-domain="{{ $p.domain }}" src="{{ or $p.src "https://plausible.io/js/script.js" }}"></script>
 <script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
 {{- end }}
+
+{{- /* Font preloads, declared per course rather than hard-coded.
+
+   daf and website self-host faces the kit does not cut — a display face and
+   two weights that are in no kit tier — and each preloaded them from its own
+   copy of this partial. That copy is the fork the module exists to remove, and
+   the two preloads were the only reason it survived.
+
+   Gate C11 caps this at two: a third preload competes with the first two for
+   the same connection and delays the text it was added to speed up. */ -}}
+{{- with site.Params.font_preload -}}
+  {{- range first 2 . }}
+<link rel="preload" as="font" type="font/woff2" crossorigin href="{{ . | relURL }}">
+  {{- end }}
+  {{- if gt (len .) 2 }}
+    {{- warnf "params.font_preload lists %d fonts; only the first 2 are preloaded (gate C11)" (len .) }}
+  {{- end }}
+{{- end -}}
