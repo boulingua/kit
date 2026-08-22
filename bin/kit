@@ -72,6 +72,7 @@ def battery(repo: Path, cfg: dict) -> list[tuple[str, list[str]]]:
             ("D2  PDF metadata", [PY, str(SCRIPTS / "verify_pdf_metadata.py"), str(repo)]),
             ("D1  downloads",    [PY, str(SCRIPTS / "verify_downloads.py"), str(repo)]),
             ("A5  vendored lock", [PY, str(SCRIPTS / "verify_kit_lock.py"), str(repo)]),
+            ("A2  curriculum",    [PY, str(SCRIPTS / "verify_curriculum_block.py"), str(repo)]),
         ]
         if cfg.get("gates", {}).get("network_graph"):
             gates.append(("C13 JS budget",
