@@ -304,7 +304,14 @@ def cmd_vgwort(a) -> int:
         built = Path(a.built) if a.built else repo / "public"
         return _echo([PY, str(SCRIPTS / "vgwort_lock.py"), str(repo), str(built),
                       "--base", base], repo)
-    print("::error::only `lock` is implemented. assign/reconcile write the private "
+    if a.action == "rekey":
+        built = Path(a.built) if a.built else repo / "public"
+        return _echo([PY, str(SCRIPTS / "vgwort_rekey.py"), str(repo),
+                      "--built", str(built.relative_to(repo) if built.is_relative_to(repo)
+                                     else built),
+                      "--base", base.rstrip("/"),
+                      "--apply" if getattr(a, "apply", False) else "--plan"], repo)
+    print("::error::only `lock` and `rekey` are implemented. assign/reconcile write the private "
           "ledger, which is derived from the T.O.M. export — deferred to the "
           "closing phase per ADR-0020.", file=sys.stderr)
     return 1
@@ -340,6 +347,15 @@ def cmd_new(a) -> int:
     return 0
 
 
+def cmd_bundles(a) -> int:
+    repo = Path(a.repo).resolve()
+    cmd = [PY, str(SCRIPTS / "to_bundles.py"), str(repo)]
+    if a.only:
+        cmd += ["--only", a.only]
+    cmd.append("--apply" if a.apply else "--plan")
+    return _echo(cmd, repo)
+
+
 def cmd_menu(a) -> int:
     import yaml
     accents = yaml.safe_load((KIT / "data" / "accents.yaml").read_text(encoding="utf-8"))
@@ -363,15 +379,20 @@ def main() -> int:
     m = sub.add_parser("materials"); m.add_argument("repo"); m.add_argument("--thumbs", action="store_true")
     au = sub.add_parser("audio"); au.add_argument("action", choices=["build", "audition"])
     au.add_argument("repo", nargs="?"); au.add_argument("--code")
-    v = sub.add_parser("vgwort"); v.add_argument("action", choices=["lock", "assign", "reconcile"])
+    v = sub.add_parser("vgwort"); v.add_argument("action", choices=["lock", "assign", "reconcile", "rekey"])
+    v.add_argument("--apply", action="store_true")
     v.add_argument("repo"); v.add_argument("--built")
     n = sub.add_parser("new"); n.add_argument("code"); n.add_argument("--into")
+    b = sub.add_parser("bundles", help="flat page -> leaf bundle, URL-proved")
+    b.add_argument("repo"); b.add_argument("--only", default=None)
+    b.add_argument("--apply", action="store_true")
     sub.add_parser("menu")
 
     a = ap.parse_args()
     return {"check": cmd_check, "design": cmd_design, "sync": cmd_sync,
             "urldiff": cmd_urldiff, "materials": cmd_materials, "audio": cmd_audio,
-            "vgwort": cmd_vgwort, "new": cmd_new, "menu": cmd_menu}[a.cmd](a)
+            "vgwort": cmd_vgwort, "new": cmd_new, "menu": cmd_menu,
+            "bundles": cmd_bundles}[a.cmd](a)
 
 
 if __name__ == "__main__":
