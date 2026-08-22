@@ -366,8 +366,18 @@ gates:
   needs: built
   severity: blocking
   status: live
-  battery: false
-  runs: pre-merge on the three live courses
+  battery: true
+  note: >-
+    Asserts PRESENCE, where A3 asserts stability. A3 does catch a mark that
+    stops rendering — verified against a deliberately broken daf, exit 1 with
+    each code reported VANISHED — so this is a second, differently-shaped
+    assertion rather than the only net: C2 checks that each locked code renders
+    on exactly one page and on the page it is locked to.
+
+    It spent its whole life until now resolving its lock from __file__, so it
+    read the kit's vgwort/ directory while standing in a course, crashed with
+    FileNotFoundError and returned non-zero. That looks like a failing gate and
+    is an absent one. It also read a pixel_url column the lock has never had.
 
 - id: C3
   title: no mark on hub, paginated or legal pages

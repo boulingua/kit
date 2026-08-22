@@ -1,49 +1,104 @@
 #!/usr/bin/env python3
-"""Verify every VG Wort pixel URL in vgwort/url-lock-provisional.csv appears in the
-rendered Hugo output under public/. This is the deploy-gate verification.
+"""Gate C2 — every locked mark renders, on exactly one page, the right page.
+
+    verify_rendered_pixels.py REPO [BUILT]
+
+A3 proves no URL moved. It cannot see the failure that costs money, because
+that failure moves no URL: a flat-to-bundle conversion keeps every address and
+changes .File.Path, so a path:-keyed registry stops matching and the pixel
+disappears from a page that is still there. Measured on daf, that is 60 of 68
+marks going dark while A3 passes clean and the build exits 0.
+
+So C2 asserts PRESENCE, not stability, and it is the gate that had to exist
+before P3.2 could be merged.
+
+It also used to resolve its own lock from __file__, which meant it read the
+KIT's vgwort/ directory while standing in a course — the file is not there, so
+it crashed with FileNotFoundError and returned non-zero. It looked like a
+failing gate and it was an absent one: it had never run against a course at
+all. That is the fifth script in this kit found deriving its target from its
+own location rather than from its argument.
 """
 from __future__ import annotations
 
 import csv
+import re
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+PIXEL_RE = re.compile(r"met\.vgwort\.de/na/([0-9a-f]{32})")
 
 
 def main() -> int:
-    lock = ROOT / "vgwort" / "url-lock-provisional.csv"
-    rows = list(csv.DictReader(
-        l for l in lock.open(encoding="utf-8") if not l.startswith("#")))
-    public = ROOT / "public"
+    repo = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path.cwd()
+    public = Path(sys.argv[2]).resolve() if len(sys.argv) > 2 else repo / "public"
+    lock = repo / "vgwort" / "url-lock-provisional.csv"
+    if not lock.exists():
+        print(f"::error::vgwort/url-lock-provisional.csv is missing. A course "
+              f"carrying registered marks must carry the lock.", file=sys.stderr)
+        return 2
+    rows = [r for r in csv.DictReader(
+        l for l in lock.open(encoding="utf-8") if not l.startswith("#"))
+        if r.get("url") and r.get("code")]
+    if not rows:
+        print("::error::the lock is empty or has no url/code columns. An empty "
+              "lock is not a passing gate — it is the trivial pass that "
+              "verify-vgwort.sh has printed against a header-only manifest for "
+              "a year.", file=sys.stderr)
+        return 2
     if not public.is_dir():
-        print("public/ missing — run `hugo --minify` first", file=sys.stderr)
+        print(f"::error::{public} missing — build the site first", file=sys.stderr)
         return 2
 
-    # Index every URL once across the entire build output.
-    found: dict[str, int] = {}
-    for html in public.rglob("*.html"):
-        try:
-            txt = html.read_text(encoding="utf-8")
-        except Exception:
+    # Index the whole build once: code -> [url, ...]. Alias stubs are skipped;
+    # they are meta-refresh pages and carry no pixel by design.
+    rendered: dict[str, list[str]] = {}
+    for html in sorted(public.rglob("index.html")):
+        txt = html.read_text(encoding="utf-8", errors="replace")
+        if 'http-equiv="refresh"' in txt[:1200]:
             continue
-        # Aliases redirect-pages contain just a meta refresh, no pixel; skip.
-        if '<meta http-equiv="refresh"' in txt[:500]:
-            continue
-        for r in rows:
-            if r["pixel_url"] in txt:
-                found[r["pixel_url"]] = found.get(r["pixel_url"], 0) + 1
+        rel = "/" if html.parent == public else \
+            "/" + html.parent.relative_to(public).as_posix() + "/"
+        for c in set(PIXEL_RE.findall(txt)):
+            rendered.setdefault(c, []).append(rel)
 
-    total = len(rows)
-    missing = [r for r in rows if r["pixel_url"] not in found]
-    if missing:
-        print("MISSING pixels in rendered output:")
-        for r in missing[:20]:
-            print(f"  {r['qmd_path']}: {r['pixel_url']}")
-        print(f"\n{len(missing)} of {total} pixels missing from public/.")
+    base = ""
+    first = next((r["url"] for r in rows), "")
+    for cand in (repo.name,):
+        if first.startswith(f"/{cand}/"):
+            base = f"/{cand}"
+
+    missing, wrong, dup = [], [], []
+    for r in rows:
+        want = r["url"] if r["url"].startswith("/") else "/" + r["url"]
+        want = want[len(base):] if base and want.startswith(base) else want
+        where = rendered.get(r["code"], [])
+        if not where:
+            missing.append((r["code"], want))
+        elif len(where) > 1:
+            dup.append((r["code"], where))
+        elif where[0].rstrip("/") != want.rstrip("/"):
+            wrong.append((r["code"], want, where[0]))
+
+    for c, u in missing[:25]:
+        print(f"::error::{c} is locked to {u} and renders on NO page. The page "
+              f"may still exist at that address — a mark that stops rendering "
+              f"costs money and moves no URL, so gate A3 cannot see it.")
+    if len(missing) > 25:
+        print(f"::error::… and {len(missing) - 25} more missing")
+    for c, w in dup[:10]:
+        print(f"::error::{c} renders on {len(w)} pages ({', '.join(w[:3])}). "
+              f"VG Wort counts one work per mark.")
+    for c, want, got in wrong[:10]:
+        print(f"::error::{c} is locked to {want} but renders at {got}")
+
+    bad = len(missing) + len(dup) + len(wrong)
+    if bad:
+        print(f"\nC2 FAIL — {bad} of {len(rows)} locked mark(s) wrong",
+              file=sys.stderr)
         return 1
-    print(f"All {total} pixels found in public/. (Total occurrences: "
-          f"{sum(found.values())} across {len([h for h in public.rglob('*.html')])} pages.)")
+    print(f"C2 OK — {len(rows)} locked mark(s), each rendering on exactly one "
+          f"page, and on the page it is locked to")
     return 0
 
 

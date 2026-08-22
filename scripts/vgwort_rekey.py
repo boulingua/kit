@@ -34,6 +34,7 @@ import re
 import sys
 from collections import defaultdict
 from pathlib import Path
+from urllib.parse import quote
 
 import yaml
 
@@ -59,10 +60,28 @@ def built_index(built: Path) -> dict[str, list[str]]:
     return idx
 
 
+NON_ASCII = re.compile(r"[^\x00-\x7F]")
+
+
 def strip_base(url: str, base: str) -> str:
     if base and url.startswith(base):
         url = url[len(base):]
     return "/" + url.strip("/") + "/" if url.strip("/") else "/"
+
+
+def encode_like_hugo(url: str) -> str:
+    """Percent-encode the way .RelPermalink does.
+
+    This is measured from the built directory NAME, which is the decoded form:
+    Hugo writes `public/tags/modul-hören/` on disk but .RelPermalink is
+    `/tags/modul-h%C3%B6ren/`. The resolver compares `eq .url $rel` against the
+    encoded form, so a key taken literally off the filesystem silently never
+    matches — the page builds, Hugo warns about nothing, and the pixel is
+    absent. daf transliterates its slugs (begruessung, not begrüßung) so no
+    mark hits this today, but German course content is exactly where an umlaut
+    slug appears next, and `hören` already reaches a URL in this repo's tags.
+    """
+    return "/".join(quote(seg, safe="") for seg in url.split("/"))
 
 
 def main() -> int:
@@ -96,7 +115,13 @@ def main() -> int:
             continue
         urls = idx.get(code or "", [])
         if len(urls) == 1:
-            mapped.append((e, strip_base(urls[0], base)))
+            key = strip_base(urls[0], base)
+            if NON_ASCII.search(key):
+                enc = encode_like_hugo(key)
+                print(f"::notice::{key} contains non-ASCII; keyed as {enc} to "
+                      f"match .RelPermalink, which is percent-encoded")
+                key = enc
+            mapped.append((e, key))
         elif not urls:
             dead.append(e)
         else:
@@ -153,8 +178,12 @@ def main() -> int:
         out.append(row)
     body = yaml.dump(out, allow_unicode=True, sort_keys=False, default_flow_style=False)
     reg.write_text("".join(head) + body, encoding="utf-8")
-    print(f"\nrekey OK — {len(mapped)} mark(s) re-keyed from path: to url:. "
-          f"The move that makes this necessary must land in the SAME commit.")
+    print(f"\nrekey OK — {len(mapped)} mark(s) re-keyed from path: to url:.")
+    print("  Land this BEFORE the file move, as its own commit. A url: key "
+          "resolves identically on a flat file and on a bundle, so this commit "
+          "is a no-op to the rendered site and the next one is provably safe — "
+          "which is two verifiable steps instead of one unverifiable atomic one. "
+          "The same-commit rule is for URL-CHANGING work; this changes no URL.")
     return 0
 
 

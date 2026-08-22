@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -38,8 +39,18 @@ from pathlib import Path
 HUGO = os.path.expanduser("~/.local/bin/hugo")
 
 
-def hugo_urls(repo: Path) -> set[str]:
-    """Every RelPermalink the repo renders, from a throwaway build."""
+PIXEL_RE = re.compile(r"met\.vgwort\.de/na/([0-9a-f]{32})")
+
+
+def hugo_state(repo: Path) -> tuple[set[str], dict[str, str]]:
+    """(URL set, code -> URL) from a throwaway build.
+
+    Both halves, because they fail independently and the second one fails
+    silently. A flat-to-bundle move keeps every URL and changes .File.Path,
+    which is what a path:-keyed mark registry matches on — so the pixel
+    disappears from a page that is still there, at the same address, and a
+    URL-only diff reports success. Gate A3 passes for exactly that reason.
+    """
     out = Path(tempfile.mkdtemp(prefix="blgurl-"))
     r = subprocess.run(
         [HUGO if Path(HUGO).exists() else "hugo",
@@ -47,17 +58,28 @@ def hugo_urls(repo: Path) -> set[str]:
         cwd=repo, capture_output=True, text=True)
     if r.returncode:
         shutil.rmtree(out, ignore_errors=True)
-        raise SystemExit(f"hugo failed:\n{r.stdout}\n{r.stderr}")
-    urls = set()
+        # RuntimeError, not SystemExit. SystemExit inherits from BaseException,
+        # not Exception, so `except Exception` below did not match it — and the
+        # one realistic way the second build fails is a module fetch flake AFTER
+        # all 60 files have already moved. The script printed a build error, did
+        # not revert, and left the repo in exactly the half-applied state the
+        # same-commit rule exists to prevent. The docstring's guarantee was false
+        # on the only path where it mattered.
+        raise RuntimeError(f"hugo failed:\n{r.stdout}\n{r.stderr}")
+    urls: set[str] = set()
+    pixels: dict[str, str] = {}
     for p in out.rglob("index.html"):
-        head = p.read_text(encoding="utf-8", errors="replace")[:1200]
+        body = p.read_text(encoding="utf-8", errors="replace")
+        head = body[:1200]
         # Alias stubs are meta-refresh pages Hugo writes for old URLs. They are
         # real URLs and must be compared too — an alias that stops rendering is
         # a reader's dead link, even though it carries no pixel.
         rel = "/" if p.parent == out else "/" + p.parent.relative_to(out).as_posix() + "/"
         urls.add(rel + ("  [alias]" if 'http-equiv="refresh"' in head else ""))
+        for code in set(PIXEL_RE.findall(body)):
+            pixels[code] = rel
     shutil.rmtree(out, ignore_errors=True)
-    return urls
+    return urls, pixels
 
 
 def plan(repo: Path) -> list[tuple[Path, Path]]:
@@ -110,9 +132,9 @@ def main() -> int:
         print(f"\n{len(moves)} file(s) would move; run with --apply to move and prove")
         return 0
 
-    print(f"  before: building {repo.name} to snapshot its URL set")
-    before = hugo_urls(repo)
-    print(f"  before: {len(before)} URL(s)")
+    print(f"  before: building {repo.name} to snapshot its URL and pixel state")
+    before, before_px = hugo_state(repo)
+    print(f"  before: {len(before)} URL(s), {len(before_px)} VG Wort pixel(s)")
 
     done: list[tuple[Path, Path]] = []
     try:
@@ -127,15 +149,27 @@ def main() -> int:
             done.append((src, dst))
         print(f"  moved {len(done)} file(s)")
 
-        after = hugo_urls(repo)
+        after, after_px = hugo_state(repo)
         gone, new = sorted(before - after), sorted(after - before)
-        if gone or new:
-            for g in gone[:20]:
-                print(f"::error::URL DISAPPEARED: {g}")
-            for n in new[:20]:
-                print(f"::error::URL APPEARED: {n}")
-            raise RuntimeError(f"{len(gone)} lost, {len(new)} gained")
-    except Exception as e:
+        for g in gone[:20]:
+            print(f"::error::URL DISAPPEARED: {g}")
+        for n in new[:20]:
+            print(f"::error::URL APPEARED: {n}")
+
+        # The pixel half. This is the failure the URL half cannot see: every URL
+        # survives and 60 of them stop earning.
+        lost = sorted(set(before_px) - set(after_px))
+        moved = sorted(c for c in set(before_px) & set(after_px)
+                       if before_px[c] != after_px[c])
+        for c in lost[:20]:
+            print(f"::error::PIXEL LOST: {c} no longer renders anywhere "
+                  f"(was {before_px[c]}). The page is still there; the mark is not.")
+        for c in moved[:20]:
+            print(f"::error::PIXEL MOVED: {c} {before_px[c]} -> {after_px[c]}")
+        if gone or new or lost or moved:
+            raise RuntimeError(f"{len(gone)} URL(s) lost, {len(new)} gained, "
+                               f"{len(lost)} pixel(s) lost, {len(moved)} moved")
+    except BaseException as e:
         print(f"\n::error::{e}\n  reverting {len(done)} move(s)", file=sys.stderr)
         for src, dst in reversed(done):
             r = subprocess.run(["git", "mv", str(dst), str(src)],
@@ -149,9 +183,9 @@ def main() -> int:
         print("  reverted. Nothing moved.", file=sys.stderr)
         return 1
 
-    print(f"  after:  {len(after)} URL(s)")
-    print(f"\nto_bundles OK — {len(done)} file(s) converted, "
-          f"URL set identical ({len(before)} URLs, 0 changed)")
+    print(f"  after:  {len(after)} URL(s), {len(after_px)} VG Wort pixel(s)")
+    print(f"\nto_bundles OK — {len(done)} file(s) converted; {len(before)} URLs "
+          f"and {len(before_px)} pixels, none lost, none moved")
     return 0
 
 
