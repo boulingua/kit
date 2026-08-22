@@ -47,6 +47,10 @@ body.colorscheme-dark{--boulingua-accent:{{ .dark }};--boulingua-accent-hover:{{
 
    Gate C11 caps this at two: a third preload competes with the first two for
    the same connection and delays the text it was added to speed up. */ -}}
+{{- /* A course that declares its own faces gets ONLY those. The kit otherwise
+       preloads its core subset — but doing both puts three preloads on the
+       page, and gate C11 caps it at two for a reason: each one competes for
+       the same connection as the text it was added to speed up. */ -}}
 {{- with site.Params.font_preload -}}
   {{- range first 2 . }}
 <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ . | relURL }}">
