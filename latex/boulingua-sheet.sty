@@ -61,8 +61,40 @@
 % Defaults to german and is a no-op in the four shipped script tiers: it
 % records the distinction now so unit sources carry it, and becomes a real
 % \setmainlanguage when polyglossia lands with bidi at wave 5 (ADR-0008).
+\usepackage{etoolbox}   % \ifdefstring, for the UI strings below
 \newcommand{\blguilang}{german}
-\newcommand{\blgsetui}[1]{\renewcommand{\blguilang}{#1}}
+
+% Printed strings, following the instruction language. The answer box was
+% labelled with a hardcoded English "Solutions" and shipped that way on all 56
+% German worksheets that have one — the only English word on a page otherwise
+% entirely in German, sitting over the answers. The mechanism to fix it existed
+% here already; only the string did not use it.
+%
+% These stay in step with kit/i18n/<lang>.yaml. When D5's pre-flight reads the
+% i18n file it fails on a missing key rather than printing an English word into
+% a German worksheet.
+\newcommand{\blgui@solutions}{Solutions}
+\newcommand{\blgui@vocab}{Vocabulary}
+\newcommand{\blgui@worksheet}{Worksheet}
+\newcommand{\blgsetui}[1]{\renewcommand{\blguilang}{#1}%
+  % Reset to the English defaults FIRST. Without this each branch only ever
+  % adds, so \blgsetui{french} followed by \blgsetui{english} left the French
+  % strings in place — a setter that cannot set back is not a setter, and the
+  % failure only shows in the second call, which no single-language sheet makes.
+  \renewcommand{\blgui@solutions}{Solutions}%
+  \renewcommand{\blgui@vocab}{Vocabulary}%
+  \renewcommand{\blgui@worksheet}{Worksheet}%
+  \ifdefstring{\blguilang}{german}{%
+    \renewcommand{\blgui@solutions}{L\"osungen}%
+    \renewcommand{\blgui@vocab}{Wortschatz}%
+    \renewcommand{\blgui@worksheet}{Arbeitsblatt}}{}%
+  \ifdefstring{\blguilang}{french}{%
+    \renewcommand{\blgui@solutions}{Corrig\'e}%
+    \renewcommand{\blgui@vocab}{Vocabulaire}%
+    \renewcommand{\blgui@worksheet}{Fiche}}{}}
+% The default is german, so apply it once at load rather than waiting for a
+% caller — a sheet that never calls \blgsetui must not silently print English.
+\blgsetui{german}
 
 \newcommand{\blgsetlang}[1]{\colorlet{blgaccent}{acc-#1}\colorlet{blgaccenthover}{acch-#1}%
   \renewcommand{\blglangmark}[1][12mm]{\includegraphics[height=##1]{brand/icons/#1.pdf}}}
@@ -136,7 +168,7 @@
 % ── Answer-key box ──────────────────────────────────────────────────────────
 \newtcolorbox{blganswers}{colback=blgsurface,colframe=blgrule,boxrule=0.6pt,
   arc=3pt,left=8pt,right=8pt,top=6pt,bottom=6pt,
-  title={\blgsemibold\small Solutions},fonttitle=\color{blgfg},
+  title={\blgsemibold\small \blgui@solutions},fonttitle=\color{blgfg},
   coltitle=blgfg,attach title to upper=\ }
 
 % Writing lines for hand-written answers

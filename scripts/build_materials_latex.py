@@ -180,15 +180,35 @@ def move_lines(secs):
             out.append(s)
     return out[:4]
 
+MATCHED_TITLES: list[str] = []
+
+
 def answer_keys(md, secs):
     """Answer keys, wherever the site keeps them: callout/details blocks titled
     Answer key / Lösungen / Solutions / Corrigé (EFL, DaF), or a dedicated
     ## Solutions / ## Lösungen / ## Corrigé section (FLE)."""
     out = []
-    pat = (r'\{\{<\s*(?:callout|details)[^>]*title="(?:Answer key|L\wsungen?|'
-           r'Solutions?|Corrig\w)"[^>]*>\}\}(.*?)\{\{<\s*/(?:callout|details)\s*>\}\}')
+    # The title is matched as a SUBSTRING, not as the whole string. The exact
+    # match this replaces recognised "Lösungen" and nothing else, so every
+    # variant an author reached for — "Lösungen Prüfung", "Musterlösung",
+    # "Lösungen (für Lehrkräfte)", "Lösungen & Punkte-Rubrik" — was silently
+    # dropped from the worksheet. Measured on daf: 61 of 87 answer-key blocks
+    # matched, and FOUR of the sixty shipped worksheet PDFs contain no answer
+    # key at all as a result. Nothing failed; the sheet simply came out without
+    # its solutions, and it has been shipping that way.
+    #
+    # Widening it risks a false positive on a block that merely discusses
+    # solutions. That trade is not close: an answer key wrongly included is
+    # visible on the page the moment anyone looks at the sheet, and an answer
+    # key wrongly dropped is invisible until a teacher needs it in a lesson.
+    pat = (r'\{\{<\s*(?:callout|details)[^>]*title="([^"]*)"[^>]*>\}\}'
+           r'(.*?)\{\{<\s*/(?:callout|details)\s*>\}\}')
+    KEYWORD = re.compile(r'(l\wsung|answer\s*key|solution|corrig)', re.I)
     for m in re.finditer(pat, md, re.S):
-        for ln in m.group(1).strip().split('\n'):
+        if not KEYWORD.search(m.group(1)):
+            continue
+        MATCHED_TITLES.append(m.group(1))
+        for ln in m.group(2).strip().split('\n'):
             s = ln.strip()
             if s and not s.startswith('|'): out.append(s)
     for ln in find_sec(secs, *SEC["solutions"]).split('\n'):
