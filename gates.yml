@@ -1,0 +1,613 @@
+# The gate register. Every check in this organisation has an ID here, and this
+# file is the only place a check is defined.
+#
+# WHY IT IS A FILE AND NOT A SECTION OF THE PLAN. Nine `continue-on-error`
+# suppressions accumulated in this org, and four gates were found that could
+# not fail at all — one audited its own repository, one printed "passing
+# trivially" on an empty manifest, one greped a PDF field while 432 PDFs
+# shipped missing a different one, and one always skipped. None of that was
+# dishonest. Each was a check whose definition lived in the workflow that ran
+# it, so nothing outside that workflow could notice it had stopped meaning
+# anything. A register in prose has the same defect; this one is read by
+# `bin/kit` to build the battery and by `verify_gate_register.py` to check
+# itself, so a gate that drifts from its description fails something.
+#
+# FIELDS
+#   id        A1–A19 source · B1–B4 build · C1–C15 rendered · D1–D6 artefacts
+#             · E1 deploy. IDs are permanent and never reused. A withdrawn
+#             gate becomes status: withdrawn and keeps its number.
+#   owner     which repo holds the implementation: kit, .github, curriculum
+#   scripts   [] while planned. More than one is allowed where an ID's
+#             contract genuinely has separable halves (A1, A12).
+#   needs     what must exist before it can run:
+#             source · built · materials · audio · none
+#   severity  blocking | warn
+#   ramp      REQUIRED when severity is warn. A warn gate with no route to
+#             blocking is a suppression wearing a gate's clothes, and the
+#             register verifier fails on one. This field is the difference
+#             between "not yet" and "never".
+#   status    live | partial | planned | withdrawn
+#             partial REQUIRES `gap:` — what the ID promises and the script
+#             does not yet do. An ID marked live whose script does half the
+#             job is how a battery grows a hole nobody can see.
+#   booked    REQUIRED when planned: the phase that delivers it.
+#   battery   true if `kit check` runs it. A live gate outside the battery
+#             must say where it runs instead, in `runs`.
+
+version: 1
+framework_pin: null   # A16 reads its thresholds from the curriculum checkout,
+                      # never from a constant here — see S2's coverage rule.
+
+gates:
+
+# ── Stage A · source, before Hugo ────────────────────────────────────────────
+
+- id: A1
+  title: kit drift
+  owner: .github
+  scripts: [scripts/kit_drift.py, kit:scripts/verify_kit_lock.py]
+  needs: source
+  severity: blocking
+  status: partial
+  gap: >-
+    Covers kit-owned code in a course, step-level continue-on-error, `|| true`
+    on a gate command, and the _materials/ digest lock. Does NOT yet check the
+    hugo.toml key allowlist, an override's kit_base minor distance, or
+    deploy.yml equality with the template.
+  battery: true
+
+- id: A2
+  title: front matter and curriculum block
+  owner: kit
+  scripts: [scripts/verify_curriculum_block.py]
+  needs: source
+  severity: warn
+  ramp: >-
+    Severity is read per repo from `milestone:` in boulingua.yml, not decided
+    per pull request: M0 warns, M1 requires it on touched pages, M2 repo-wide,
+    M3 adds coverage. Malformed and too-narrow ids fail at every milestone —
+    only the missing-block requirement ramps, because an id that is present
+    must be right.
+  status: partial
+  gap: >-
+    Enforces implements, its id grammar and the breadth rule. Does not yet
+    validate the full page schema (page_type, unit_nr, material_slug, closed
+    enums, asset resolution) — that arrives with the JSON Schema in F9.
+  battery: true
+
+- id: A3
+  title: VG Wort URL lock
+  owner: kit
+  scripts: [scripts/vgwort_urldiff.py, scripts/vgwort_lock.py]
+  needs: built
+  severity: blocking
+  status: partial
+  gap: >-
+    Runs in NEUTRALITY MODE. It proves a change moved no URL. It cannot prove
+    the URLs it defends are the ones registered at VG Wort, because the lock is
+    derived from the built sitemap and no T.O.M. export exists yet. The
+    filename says so — url-lock-provisional.csv. Becomes complete at 15.4.
+  battery: false
+  runs: pre-merge on the three live courses; blocking there since P0.8
+
+- id: A4
+  title: licence set
+  owner: kit
+  scripts: [scripts/verify_fonts.py]
+  needs: source
+  severity: blocking
+  status: partial
+  gap: >-
+    The font half is done: every shipped .woff2 traced to a licence and an
+    ATTRIBUTION entry. The repo half — LICENSE, LICENSE-CONTENT.md, NOTICE.md,
+    REUSE.toml, CITATION.cff — is not checked yet.
+  battery: true
+
+- id: A5
+  title: source placeholders
+  owner: kit
+  scripts: [scripts/verify_legal_placeholders.py]
+  args: ["--source"]
+  needs: source
+  severity: blocking
+  status: live
+  battery: true
+
+- id: A6
+  title: Quarto residue
+  owner: kit
+  scripts: []
+  needs: source
+  severity: blocking
+  status: planned
+  booked: P3.3
+  battery: false
+
+- id: A7
+  title: design tokens
+  owner: kit
+  scripts: [scripts/verify_tokens.py]
+  needs: source
+  severity: blocking
+  status: live
+  battery: true
+
+- id: A8
+  title: logical CSS
+  owner: kit
+  scripts: [scripts/verify_logical_css.py]
+  needs: source
+  severity: blocking
+  status: live
+  battery: true
+
+- id: A9
+  title: chrome i18n
+  owner: kit
+  scripts: []
+  needs: source
+  severity: warn
+  ramp: >-
+    Blocking org-wide once kit/i18n/de.yaml covers every key kit/layouts/**
+    references. Today the org's entire German chrome vocabulary is zero files,
+    while chrome_language: de is the default for fifteen courses — so this is a
+    prerequisite for Stage 1, not an afterthought.
+  status: planned
+  booked: F9
+  battery: false
+
+- id: A10
+  title: contrast and accent separation
+  owner: kit
+  scripts: []
+  needs: source
+  severity: warn
+  ramp: >-
+    Blocking org-wide when S5 lands. Measured today it fails on 10 of 18
+    accents, which is why S5 exists; turning it on first would red every repo
+    for a defect none of them introduced.
+  status: planned
+  booked: S5
+  battery: false
+
+- id: A11
+  title: brand assets
+  owner: kit
+  scripts: []
+  needs: source
+  severity: blocking
+  status: planned
+  booked: P3.1
+  battery: false
+  note: >-
+    make_icon.py --check exists and is correct; what is missing is the gate
+    that also checks the registry count, the PNG sizes and the website pins.
+
+- id: A12
+  title: EQS structure
+  owner: kit
+  scripts: [scripts/verify_eqs.py]
+  needs: built
+  severity: warn
+  ramp: >-
+    Blocking per repo when that repo's EQS retrofit is content-complete, and
+    blocking from unit 1 on every new course. Existing content is never
+    retro-failed on a content gate.
+  status: partial
+  gap: >-
+    Checks the shortcode accessibility contracts. Does not yet check step order,
+    budgets, vocab row count, input flood, pitfalls, or Reflect-to-implements
+    correspondence. Those read heading ANCHORS, never heading text — efl, fle
+    and daf write their steps in three languages and a checker keyed on English
+    prose would reject two courses entirely.
+  battery: true
+
+- id: A13
+  title: assessment arithmetic
+  owner: kit
+  scripts: []
+  needs: source
+  severity: warn
+  ramp: as A12
+  status: planned
+  booked: S6
+  battery: false
+
+- id: A14
+  title: differentiation
+  owner: kit
+  scripts: [scripts/verify_eqs.py]
+  needs: built
+  severity: warn
+  ramp: as A12
+  status: partial
+  gap: >-
+    The niveau marker contract is checked. The three-variant rule, the
+    output_words bands, strictly increasing openness and the no-forked-input
+    rule are not.
+  battery: true
+
+- id: A15
+  title: inclusion and sourcing
+  owner: kit
+  scripts: []
+  needs: source
+  severity: warn
+  ramp: as A12
+  status: planned
+  booked: S6
+  battery: false
+
+- id: A16
+  title: conformance resolution
+  owner: curriculum
+  scripts: [scripts/conformance_audit.py]
+  needs: source
+  severity: warn
+  ramp: >-
+    Follows A2's milestone. Its thresholds are read from the pinned framework
+    checkout and never from a constant, because F8 re-derives two scales and
+    every coverage number in the programme moves when it lands.
+  status: live
+  battery: false
+  runs: course-build.yml, against the pinned curriculum checkout
+
+- id: A17
+  title: review record
+  owner: kit
+  scripts: []
+  needs: source
+  severity: blocking
+  status: planned
+  booked: S6
+  battery: false
+  note: >-
+    The 24-hour separation between G1 and G2 is read from git log, not from the
+    front-matter date strings. Two dates a author typed in one sitting are not
+    two reviews.
+
+- id: A18
+  title: marked non-unit page contract
+  owner: kit
+  scripts: []
+  needs: source
+  severity: blocking
+  status: planned
+  booked: P3.1
+  battery: false
+  note: >-
+    Closes the hole EQS leaves. efl marks /appendices/*, /about and /references;
+    daf marks content/anhaenge/*, danksagung and formate. Revenue-bearing pages
+    that no gate examines.
+
+- id: A19
+  title: shortcode contract
+  owner: kit
+  scripts: []
+  needs: source
+  severity: warn
+  ramp: as A12
+  status: planned
+  booked: S6
+  battery: false
+  note: >-
+    Raw HTML is invisible to the LaTeX emitter. efl carries 180 files with
+    <div class="notes">, fle 198 raw divs across 25 files, daf ~95 across 17 —
+    every one a block that silently vanishes from the worksheet.
+
+# ── Stage B · build ──────────────────────────────────────────────────────────
+
+- id: B1
+  title: module graph
+  owner: kit
+  scripts: []
+  needs: source
+  severity: blocking
+  status: planned
+  booked: P3.1
+  battery: false
+
+- id: B2
+  title: hugo --panicOnWarning
+  owner: kit
+  scripts: []
+  needs: source
+  severity: blocking
+  status: live
+  battery: false
+  runs: course-build.yml build step — the gate is the flag, not a script
+  note: >-
+    This is why P0.4 had to retire the deprecated data API first. The flag and
+    a deprecation warning together hard-fail every site.
+
+- id: B3
+  title: search index
+  owner: kit
+  scripts: [scripts/verify_pagefind.py]
+  needs: built
+  severity: blocking
+  status: live
+  battery: true
+  opt_in: pagefind
+
+- id: B4
+  title: relative-baseURL rebuild
+  owner: kit
+  scripts: []
+  needs: built
+  severity: blocking
+  status: planned
+  booked: P3.1
+  battery: false
+  note: fle and daf each invented this separately; it belongs in one place.
+
+# ── Stage C · rendered ───────────────────────────────────────────────────────
+
+- id: C1
+  title: marks registry integrity
+  owner: kit
+  scripts: [scripts/vgwort_audit.py]
+  needs: source
+  severity: warn
+  ramp: >-
+    Blocking on efl and daf from kit v1.1.0 — their dates are in-repo. Warn on
+    fle for the whole programme and blocking at 15.4, because fle's 349
+    front-matter marks carry no registered_at anywhere: the dates exist only in
+    T.O.M. The sentinel unknown-pre-programme is accepted ONLY for codes already
+    in the provisional lock at the P0.8 freeze, never for one assigned after.
+  status: partial
+  gap: hex/uniqueness/date-field checks not yet separated from the coverage walk
+  battery: true
+
+- id: C2
+  title: one mark, one page, right page
+  owner: kit
+  scripts: [scripts/verify_rendered_pixels.py]
+  needs: built
+  severity: blocking
+  status: live
+  battery: false
+  runs: pre-merge on the three live courses
+
+- id: C3
+  title: no mark on hub, paginated or legal pages
+  owner: kit
+  scripts: []
+  needs: built
+  severity: blocking
+  status: planned
+  booked: P0.8 follow-up
+  battery: false
+
+- id: C4
+  title: Mindestumfang coverage
+  owner: kit
+  scripts: [scripts/verify_vgwort_coverage.py]
+  needs: source
+  severity: warn
+  ramp: >-
+    Stays warn on existing pages permanently and is blocking on any NEW marked
+    page. Registration is asynchronous — a page can be complete and correct for
+    weeks before its mark exists — so a blocking coverage gate would punish the
+    author for VG Wort's queue. That is the one ramp in this file with no end
+    date, and the asymmetry is the reason.
+  status: live
+  battery: true
+
+- id: C5
+  title: pixel delivery shape
+  owner: kit
+  scripts: []
+  needs: built
+  severity: blocking
+  status: planned
+  booked: P0.8 follow-up
+  battery: false
+  note: >-
+    One preload, one eager img, zero loading=lazy on a met.vgwort.de src, no
+    display:none ancestor, no script injection. A lazily-loaded counting pixel
+    is registered, present in the HTML, and earns nothing.
+
+- id: C6
+  title: rendered length floor
+  owner: kit
+  scripts: []
+  needs: built
+  severity: warn
+  ramp: as C4 — blocking on new marked pages
+  status: planned
+  booked: S6
+  battery: false
+
+- id: C7
+  title: rendered placeholders
+  owner: kit
+  scripts: [scripts/verify_legal_placeholders.py]
+  needs: built
+  severity: blocking
+  status: live
+  battery: true
+
+- id: C8
+  title: author meta
+  owner: kit
+  scripts: [scripts/verify_author_meta.py]
+  needs: built
+  severity: blocking
+  status: live
+  battery: true
+
+- id: C9
+  title: analytics domain matches params
+  owner: kit
+  scripts: [scripts/verify_qa_basics.py]
+  needs: built
+  severity: blocking
+  status: partial
+  gap: replaces five separate greps; the domain-vs-params comparison is not in it yet
+  battery: true
+
+- id: C10
+  title: sitemap, feed, robots, 404
+  owner: kit
+  scripts: [scripts/verify_qa_basics.py]
+  needs: built
+  severity: blocking
+  status: live
+  battery: true
+
+- id: C11
+  title: font coverage
+  owner: kit
+  scripts: []
+  needs: built
+  severity: blocking
+  status: planned
+  booked: P3.1
+  battery: false
+  note: >-
+    Every rendered codepoint covered by a declared unicode-range AND present in
+    that face's cmap. The two halves are different bugs: a range that does not
+    cover the character, and a range that claims it while the cmap lacks it.
+
+- id: C12
+  title: RTL and language islands
+  owner: kit
+  scripts: [scripts/verify_eqs.py]
+  needs: built
+  severity: blocking
+  status: partial
+  gap: the tl lang check is live; dir, forced-LTR code blocks and inline style physical properties are not
+  battery: true
+
+- id: C13
+  title: internal links
+  owner: kit
+  scripts: []
+  needs: built
+  severity: blocking
+  status: planned
+  booked: P3.1
+  battery: false
+  note: lychee --offline. External links are advisory and weekly, never here.
+
+- id: C14
+  title: accessibility sweep
+  owner: kit
+  scripts: []
+  needs: built
+  severity: blocking
+  status: planned
+  booked: P3.1
+  note: >-
+    scripts/pa11y.json exists and is correct, but a config is not a gate until
+    something runs it — nothing does yet.
+  staging: >-
+    Two sweeps, staged deliberately. The one with ignore:[color-contrast] is
+    blocking on adoption. The one with ignore:[] is warn until one release
+    after BOTH S5 and F2, then blocking — because those two changes move every
+    accent, the surface, the rule colour and the callout wash at once, and
+    flipping contrast at the same moment produces a wall of violations with no
+    way to separate a token bug from a content bug. The flip date is recorded
+    in docs/release-policy.md so it is a commitment.
+  battery: false
+
+- id: C15
+  title: JavaScript budget
+  owner: kit
+  scripts: [scripts/verify_js_budget.py]
+  needs: built
+  severity: blocking
+  status: live
+  battery: true
+  opt_in: network_graph
+
+# ── Stage D · artefacts ──────────────────────────────────────────────────────
+
+- id: D1
+  title: downloads resolve, no orphans
+  owner: kit
+  scripts: [scripts/verify_downloads.py]
+  needs: materials
+  severity: blocking
+  status: partial
+  gap: >-
+    Checks that every referenced artefact exists. Does NOT yet check the
+    reverse — an orphan PDF left behind by a deleted unit. No version of this
+    check in the org has ever looked in that direction.
+  battery: true
+
+- id: D2
+  title: PDF metadata
+  owner: kit
+  scripts: [scripts/verify_pdf_metadata.py]
+  needs: materials
+  severity: blocking
+  status: live
+  battery: true
+  note: >-
+    The predecessor greped /Author only, and 432 PDFs shipped with no /Title
+    while it reported success. All five fields are checked now.
+
+- id: D3
+  title: thumbnails
+  owner: kit
+  scripts: []
+  needs: materials
+  severity: blocking
+  status: planned
+  booked: P3.2
+  note: >-
+    One renderer exists. The lock digest match and the 1000px ±2 width rule are
+    not enforced yet; the 492 committed PNGs are recorded as standard:legacy
+    and re-rendered when their source PDF next changes.
+  battery: false
+
+- id: D4
+  title: print parity
+  owner: kit
+  scripts: []
+  needs: materials
+  severity: blocking
+  status: planned
+  booked: P3.4b
+  battery: false
+
+- id: D5
+  title: glyph coverage
+  owner: kit
+  scripts: []
+  needs: materials
+  severity: blocking
+  status: planned
+  booked: F5 follow-up
+  battery: false
+  note: >-
+    XeLaTeX prints "Missing character" and exits 0. The current builder checks
+    only that a file appeared, so it ships tofu as a success. Two halves:
+    pre-flight against the cmap, post-flight for glyph id 0 and U+FFFD.
+
+- id: D6
+  title: audio manifest
+  owner: kit
+  scripts: []
+  needs: audio
+  severity: blocking
+  status: planned
+  booked: F6 follow-up
+  battery: false
+
+# ── Stage E · deploy ─────────────────────────────────────────────────────────
+
+- id: E1
+  title: deploy shape
+  owner: .github
+  scripts: []
+  needs: built
+  severity: blocking
+  status: live
+  battery: false
+  runs: >-
+    course-build.yml — main only, upload-pages-artifact@v3 into deploy-pages@v4.
+    Pull requests run A+B+C+D and deploy nothing. Enforced by the workflow's own
+    structure and by the org audit's no-write rule, not by a script.

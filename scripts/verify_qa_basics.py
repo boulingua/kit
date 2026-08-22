@@ -19,6 +19,9 @@ import re
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from urllib.parse import unquote, urlparse
+
+PAGE_N = re.compile(r'(?:^|/)page/\d+$')
 
 # The repo under test is an ARGUMENT, never this script's own location.
 #
@@ -28,8 +31,13 @@ from pathlib import Path
 # never looked at. That is the same defect F7 removed from the generators
 # (SITE = REPO.name), and it is worth restating: a shared tool must be told
 # what it is operating on.
-REPO = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path.cwd()
-PUBLIC = REPO / "public"
+# The argument is the BUILT SITE, not the repo. Appending "public" to it —
+# which these did — makes the gate unrunnable in any repo that builds
+# elsewhere, and "no site found" then reads as a failure of the build
+# rather than of the gate. The kit itself builds to build/site.
+ARG = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path.cwd()
+PUBLIC = ARG if (ARG / "index.html").exists() else ARG / "public"
+REPO = ARG
 
 
 def err(msg: str) -> None:
@@ -50,10 +58,57 @@ def main() -> int:
         else:
             ns = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
             urls = root.findall("sm:url", ns)
-            if len(urls) < 50:
-                err(f"sitemap.xml has only {len(urls)} URLs (expected ~80+)"); failures += 1
-            else:
-                print(f"  sitemap.xml: {len(urls)} URLs")
+            # This compared against a hard-coded "~80+", a number carried over
+            # from the one repo the check was written in. A threshold borrowed
+            # from another site's page count is not a check of THIS site: it
+            # fails a small course for being small and passes a large one whose
+            # sitemap lost half its pages. The invariant is the join — every
+            # built page is listed, and nothing is listed that was not built.
+            # An alias is a meta-refresh stub Hugo writes for an old URL. It
+            # is correctly absent from the sitemap and must not be demanded
+            # here — daf alone has 80 of them, efl 405. The same detection
+            # matters elsewhere for a harder reason: an alias stub carries no
+            # VG Wort pixel, which is the open question in docs/vgwort-
+            # operations.md.
+            built = set()
+            for q in PUBLIC.rglob("index.html"):
+                head = q.read_text(encoding="utf-8", errors="replace")[:1200]
+                if 'http-equiv="refresh"' in head or "http-equiv='refresh'" in head:
+                    continue
+                built.add("" if q.parent == PUBLIC
+                          else q.parent.relative_to(PUBLIC).as_posix().strip("/"))
+            raw = []
+            for u in urls:
+                loc = u.find("sm:loc", ns)
+                if loc is not None and loc.text:
+                    # Non-ASCII in a URL is percent-encoded in the sitemap and
+                    # is not in the directory name. daf's /tags/modul-hören/ was
+                    # reported missing purely because of the ö.
+                    raw.append(unquote(urlparse(loc.text).path).strip("/"))
+            # A site published under a path baseURL — which every GitHub Pages
+            # project site is — lists /<project>/about/ while the built tree
+            # holds about/. Comparing them raw marks every page missing, which
+            # is a gate that fails loudest on the sites it understands least.
+            # The homepage entry carries the prefix, so take it from there.
+            prefix = min(raw, key=len) if raw else ""
+            listed = {r[len(prefix):].strip("/") if prefix and r.startswith(prefix)
+                      else r for r in raw}
+            if not urls:
+                err("sitemap.xml lists no URLs at all"); failures += 1
+            # /section/page/1/ is Hugo's paginated first page — byte-identical
+            # to /section/ and correctly absent from the sitemap. It is the same
+            # category of surface C3 forbids a VG Wort mark on, for the same
+            # reason: it is a duplicate of a page that already exists.
+            built = {b for b in built if not PAGE_N.search(b)}
+            missing = sorted(built - listed - {""})
+            if missing:
+                for m in missing[:8]:
+                    err(f"sitemap.xml omits a built page: /{m}/")
+                if len(missing) > 8:
+                    err(f"… and {len(missing) - 8} more")
+                failures += 1
+            print(f"  sitemap.xml: {len(urls)} URLs, {len(built)} built page(s), "
+                  f"{len(missing)} omitted")
 
     rss = PUBLIC / "index.xml"
     if not rss.exists():

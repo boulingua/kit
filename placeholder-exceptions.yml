@@ -1,0 +1,41 @@
+# Files allowed to carry ⟨…⟩, and nowhere else.
+#
+# A5 and C7 are blocking, which means the kit's own example site has to be
+# clean — a reference implementation that trips the gate it demonstrates is
+# worse than no reference at all. Three files cannot be cleaned, and the reason
+# is worth stating rather than working around.
+#
+# An Impressum is a statutory notice under § 5 DDG. Filling one with an invented
+# name and postal address would not be scaffolding, it would be a fabricated
+# legal document sitting in a public repository, and a course author copying the
+# example would inherit somebody else's fiction as their own liability notice.
+# So these three stay as templates, they are named here, and A5 blocks any
+# COURSE that still carries them unfilled. The exception is for the template,
+# never for a course — which is the whole point of writing it down.
+#
+# `expect` is checked: a listed file that no longer contains its placeholders
+# has been filled, and the exception is then stale and fails. An exception list
+# that outlives its reason is how a suppression becomes permanent.
+
+templates:
+  - path: example/impressum.md
+    expect: ["⟨VOR- UND NACHNAME⟩", "⟨STRASSE UND HAUSNUMMER⟩", "⟨PLZ ORT⟩",
+             "⟨LAND⟩", "⟨E-MAIL-ADRESSE⟩", "⟨NAME⟩"]
+    reason: >-
+      Statutory § 5 DDG notice. The author's real name and postal address are
+      required and cannot be invented for a demonstration.
+    filled_by: each course, at Gate 0, before its first publish
+  - path: example/datenschutz.md
+    expect: ["⟨NAME⟩", "⟨STAND-DATUM⟩", "⟨ZUSTÄNDIGE AUFSICHTSBEHÖRDE⟩",
+             "⟨ANALYTICS-DOMAIN⟩"]
+    reason: >-
+      Art. 13 DSGVO notice. Names the controller and the competent supervisory
+      authority, both of which depend on where the author actually lives.
+    filled_by: each course, at Gate 0
+  - path: example/haftungsausschluss.md
+    expect: ["⟨CONTENT_LICENSE", "⟨CODE_LICENSE"]
+    reason: >-
+      The licence pair is a per-course decision — four of the eighteen courses
+      ship transcript-only audio precisely because their source material's
+      licence differs. A default here would be copied without being chosen.
+    filled_by: each course, at Gate 0; must match hugo.toml [params].license

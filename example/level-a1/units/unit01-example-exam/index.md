@@ -24,12 +24,18 @@ exam:
   file: /downloads/a1/unit01-example-exam.pdf
 ---
 
-## Reading (⟨points⟩)
+## Reading (40 points)
 
 Exam tasks go here. Exams are first-class HTML pages (like EFL), with the PDF as
 a download artifact under `static/downloads/<level>/`. FLE's exams — currently
 stranded as `.qmd` — should be migrated into this shape.
 
-## Writing (⟨points⟩)
+## Writing (30 points)
 
 ...
+
+## Listening (30 points)
+
+Exam tasks go here. Three parts, 40 + 30 + 30 = 100, matching
+`total_points` — A13 checks that sum, so an example that did not
+add up would be demonstrating the failure rather than the shape.

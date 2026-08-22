@@ -27,6 +27,14 @@ from pathlib import Path
 import yaml
 
 KIT = Path(__file__).resolve().parent.parent
+# A4 runs against a COURSE as well as against the kit, and the two ask
+# different questions. In the kit: are the cut faces reproducible and licensed.
+# In a course: does every .woff2 this repo actually ships trace to a licence
+# and an attribution entry. Deriving the target from __file__ answered the kit
+# question every time and reported "67 font files, all attributed" while
+# standing in a course directory — a true sentence about the wrong repository,
+# which is the most durable kind of vacuous pass.
+REPO = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else KIT
 MANIFEST = KIT / "design" / "fonts.yaml"
 ATTR = KIT / "design" / "fonts" / "ATTRIBUTION.md"
 FONT_SUFFIXES = {".woff2", ".otf", ".ttf"}
@@ -34,7 +42,7 @@ FONT_SUFFIXES = {".woff2", ".otf", ".ttf"}
 
 def shipped() -> list[Path]:
     out: list[Path] = []
-    for root in (KIT / "static" / "fonts", KIT / "fonts"):
+    for root in (REPO / "static" / "fonts", REPO / "fonts"):
         if root.exists():
             out += [p for p in root.rglob("*") if p.suffix in FONT_SUFFIXES]
     # design/fonts/src/ is the upstream working copy, not a shipped payload.
@@ -52,7 +60,7 @@ def main() -> int:
     files = shipped()
     missing = [p for p in files if p.name not in text]
     for p in missing:
-        print(f"::error::{p.relative_to(KIT)} ships with no ATTRIBUTION.md row")
+        print(f"::error::{p.relative_to(REPO)} ships with no ATTRIBUTION.md row")
     bad += len(missing)
 
     for fam, spec in m["families"].items():

@@ -25,8 +25,13 @@ from pathlib import Path
 # never looked at. That is the same defect F7 removed from the generators
 # (SITE = REPO.name), and it is worth restating: a shared tool must be told
 # what it is operating on.
-REPO = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path.cwd()
-PUBLIC = REPO / "public"
+# The argument is the BUILT SITE, not the repo. Appending "public" to it —
+# which these did — makes the gate unrunnable in any repo that builds
+# elsewhere, and "no site found" then reads as a failure of the build
+# rather than of the gate. The kit itself builds to build/site.
+ARG = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path.cwd()
+PUBLIC = ARG if (ARG / "index.html").exists() else ARG / "public"
+REPO = ARG
 NEEDLE = "S. Le Boulanger"
 
 META_RE = re.compile(

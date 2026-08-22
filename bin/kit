@@ -54,58 +54,143 @@ def run(cmd: list[str], label: str, cwd: Path | None = None) -> tuple[str, int]:
 
 
 # ── the battery ─────────────────────────────────────────────────────────────
-# One list. A gate reachable from CI but not from here, or the reverse, is the
-# drift this file exists to prevent — `kit check --list` prints it and the
-# kit's own CI asserts the workflow adds nothing of its own.
-def battery(repo: Path, cfg: dict) -> list[tuple[str, list[str]]]:
-    gates: list[tuple[str, list[str]]] = [
-        ("A7  design tokens", [PY, str(SCRIPTS / "verify_tokens.py")]),
-        ("A8  logical CSS",   [PY, str(SCRIPTS / "verify_logical_css.py")]),
-        ("A4  font licences", [PY, str(SCRIPTS / "verify_fonts.py")]),
-    ]
-    built = repo / "build" / "site" if repo == KIT else repo / "public"
-    if built.exists():
-        gates.append(("A12 teaching markup",
-                      [PY, str(SCRIPTS / "verify_eqs.py"), str(built)]))
-    if repo != KIT:
-        gates += [
-            ("D2  PDF metadata", [PY, str(SCRIPTS / "verify_pdf_metadata.py"), str(repo)]),
-            ("D1  downloads",    [PY, str(SCRIPTS / "verify_downloads.py"), str(repo)]),
-            ("A5  vendored lock", [PY, str(SCRIPTS / "verify_kit_lock.py"), str(repo)]),
-            ("A2  curriculum",    [PY, str(SCRIPTS / "verify_curriculum_block.py"), str(repo)]),
-        ]
-        if cfg.get("gates", {}).get("network_graph"):
-            gates.append(("C13 JS budget",
-                          [PY, str(SCRIPTS / "verify_js_budget.py"), str(repo / "public")]))
-        if cfg.get("gates", {}).get("pagefind"):
-            gates.append(("B3  search index",
-                          [PY, str(SCRIPTS / "verify_pagefind.py"), str(repo / "public")]))
-    return gates
+# Read from gates.yml, never written out here. The previous version of this
+# function was a hand-kept list, and by the time it was replaced two of its
+# labels were wrong — it called verify_kit_lock.py "A5", which is legal
+# placeholders, and verify_js_budget.py "C13", which is lychee. Nobody
+# introduced those; they are what a second copy of a definition does on its own.
+REGISTER = KIT / "gates.yml"
+
+
+def register() -> list[dict]:
+    import yaml
+    return yaml.safe_load(REGISTER.read_text(encoding="utf-8"))["gates"]
+
+
+def battery(repo: Path, cfg: dict) -> tuple[list, list]:
+    """Return (runnable, skipped). Skipped is returned, never swallowed.
+
+    A gate that cannot run is not a gate that passed. Every earlier version of
+    this battery in the org treated a missing prerequisite as a silent skip,
+    which is how the audio gate ran for months against a file extension nothing
+    produced and reported success every time.
+
+    Several ids share one script — A12, A14 and C12 are three contracts checked
+    by one pass over the built HTML. They are GROUPED onto one entry rather than
+    deduplicated, because the first version of this function deduplicated and
+    left A14 and C12 holding an empty command list: two gates that ran nothing
+    and printed ok. A gate with no work to do must not be able to look green.
+    """
+    built = (repo / "build" / "site") if repo == KIT else (repo / "public")
+    have = {"source": True,
+            "built": built.exists(),
+            "materials": repo != KIT,
+            "audio": (repo / "static" / "audio").exists(),
+            "none": True}
+    org = KIT.parent
+    order: list[tuple] = []
+    by_cmd: dict[tuple, list] = {}
+    skip = []
+    for g in register():
+        if not g.get("battery"):
+            continue
+        opt = g.get("opt_in")
+        if opt and not cfg.get("gates", {}).get(opt):
+            skip.append((g["id"], g["title"], f"opt-in `{opt}` not enabled"))
+            continue
+        if not have.get(g["needs"], False):
+            skip.append((g["id"], g["title"], f"needs {g['needs']}"))
+            continue
+        if not g["scripts"]:
+            skip.append((g["id"], g["title"], "no script — see gates.yml"))
+            continue
+        for spec in g["scripts"]:
+            if spec.startswith("kit:"):
+                path = KIT / spec[4:]
+            elif g["owner"] == "kit":
+                path = KIT / spec
+            else:
+                path = org / g["owner"] / spec
+            arg = str(built) if g["needs"] == "built" else str(repo)
+            cmd = (PY, str(path), arg, *(g.get("args") or []))
+            if cmd not in by_cmd:
+                by_cmd[cmd] = []
+                order.append(cmd)
+            by_cmd[cmd].append(g)
+
+    run_ = []
+    for cmd in order:
+        gs = by_cmd[cmd]
+        ids = "/".join(g["id"] for g in gs)
+        title = gs[0]["title"] if len(gs) == 1 else Path(cmd[1]).stem.replace("verify_", "")
+        sev = "blocking" if any(g["severity"] == "blocking" for g in gs) else "warn"
+        st = "partial" if any(g["status"] == "partial" for g in gs) else "live"
+        run_.append((ids, title, sev, st, [list(cmd)]))
+    return run_, skip
 
 
 def cmd_check(a) -> int:
     repo = Path(a.repo).resolve() if a.repo else Path.cwd()
     cfg = load_cfg(repo)
-    gates = battery(repo, cfg)
+    # The register is checked before anything it defines. A battery built from
+    # a register that disagrees with the disk is not a weaker battery, it is a
+    # meaningless one — it would report on gates that are not there.
+    out, rc = run([PY, str(SCRIPTS / "verify_gate_register.py"), str(KIT.parent)],
+                  "gate register")
+    if rc:
+        print("gates.yml is inconsistent with the tree — battery not run\n",
+              file=sys.stderr)
+        print(out, file=sys.stderr)
+        return 1
+
+    gates, skipped = battery(repo, cfg)
     if a.list:
-        for name, cmd in gates:
-            print(f"  {name:20s} {Path(cmd[1]).name}")
+        for gid, title, sev, st, cmds in gates:
+            print(f"  {gid:4s} {title:34s} {sev:8s} {st:8s} "
+                  + " ".join(Path(c[1]).name for c in cmds))
+        for gid, title, why in skipped:
+            print(f"  {gid:4s} {title:34s} SKIP     {why}")
         return 0
     print(f"kit check — {repo.name}"
           + (f" ({cfg.get('code')}, tier {cfg.get('script_tier')})" if cfg else ""))
-    failed = []
-    for name, cmd in gates:
-        out, rc = run(cmd, name, cwd=repo)
-        last = out.splitlines()[-1] if out else ""
-        print(f"  {'FAIL' if rc else 'ok  '}  {name:20s} {last[:78]}")
+    failed, warned = [], []
+    for gid, title, sev, st, cmds in gates:
+        out, rc = "", 0
+        for c in cmds:
+            o, r = run(c, title, cwd=repo)
+            out += (o + "\n"); rc = rc or r
+        last = out.strip().splitlines()[-1] if out.strip() else ""
+        mark = "ok  " if not rc else ("warn" if sev == "warn" else "FAIL")
+        flag = "~" if st == "partial" else " "
+        print(f"  {mark}{flag} {gid:4s} {title:34s} {last[:64]}")
         if rc:
-            failed.append((name, out))
+            (warned if sev == "warn" else failed).append((gid, title, out))
+
+    # Skips are printed, always, and counted in the summary line. In --ci they
+    # are a failure: a CI run that quietly examined nine gates instead of
+    # thirteen is the exact shape of every vacuous pass this kit was built to
+    # remove.
+    for gid, title, why in skipped:
+        print(f"  SKIP {gid:4s} {title:34s} {why}")
+
+    for gid, title, out in warned:
+        print(f"::warning::{gid} {title} — warn gate, see gates.yml for its ramp")
     if failed:
         print(f"\n{len(failed)} gate(s) failed:\n", file=sys.stderr)
-        for name, out in failed:
-            print(f"── {name} ──\n{out}\n", file=sys.stderr)
+        for gid, title, out in failed:
+            print(f"── {gid} {title} ──\n{out}\n", file=sys.stderr)
         return 1
-    print(f"\nkit check OK — {len(gates)} gates")
+    if a.ci and skipped:
+        print(f"\n{len(skipped)} gate(s) could not run in CI — a skipped gate is "
+              f"not a passing gate:", file=sys.stderr)
+        for gid, title, why in skipped:
+            print(f"  {gid} {title}: {why}", file=sys.stderr)
+        return 1
+    n = len(gates)
+    print(f"\nkit check OK — {n} gate(s) run, {len(warned)} warning(s), "
+          f"{len(skipped)} skipped"
+          + (f", {sum(1 for g in gates if g[3] == 'partial')} partial "
+             f"(see gap: in gates.yml)" if any(g[3] == 'partial' for g in gates) else ""))
     return 0
 
 

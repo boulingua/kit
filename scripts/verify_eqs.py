@@ -108,6 +108,18 @@ def main() -> int:
             continue
         seen += 1
         bad += check(html, str(f.relative_to(root)))
+    # Zero pages examined is a finding, not a pass. daf uses none of these
+    # shortcodes today, so this gate walked its whole built site, matched
+    # nothing and printed OK — indistinguishable from a course whose contracts
+    # are all met. Every gate in this org that could not fail started exactly
+    # here.
+    if seen == 0:
+        pages = sum(1 for _ in root.rglob("index.html"))
+        print(f"::warning::0 of {pages} built page(s) use any teaching shortcode. "
+              f"This gate examined nothing, so its OK means only that there was "
+              f"nothing to check — not that the contracts are met. For a course "
+              f"that has adopted the kit's shortcodes, this is a defect.")
+
     for b in bad:
         print(f"::error::{b}")
     if bad:
