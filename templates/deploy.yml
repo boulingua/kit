@@ -1,12 +1,20 @@
-# The twelve-line caller. Byte-identical in every course.
+# The caller. Byte-identical in every course, and deliberately so.
 #
 # The job body is `kit check --ci` and nothing else, and that is the contract:
 # if it passes locally it passes here, because this runs exactly it. Any gate
 # added to this file instead of to the battery breaks that property and is
 # caught by the kit's own drift test.
+#
+# There is no `with:` block. Everything configurable lives in the course's
+# boulingua.yml, read by the scripts themselves — which keeps this file a
+# constant, and a constant is drift-gatable.
 name: Build and deploy
 on:
   push: { branches: [main] }
+  # Pull requests run the whole battery and publish nothing. The reusable
+  # workflow's deploy job is main-only and holds the write permissions on its
+  # own; nothing here can publish from a branch.
+  pull_request: { branches: [main] }
   workflow_dispatch:
 permissions: { contents: read, pages: write, id-token: write }
 concurrency: { group: pages, cancel-in-progress: false }

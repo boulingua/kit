@@ -27,6 +27,8 @@ import argparse
 import hashlib
 import json
 import sys
+import math
+import itertools
 from pathlib import Path
 
 import yaml
@@ -271,6 +273,56 @@ def emit_json(t: dict, sha: str) -> str:
 
 
 # ── artefact 5: the public colour page ──────────────────────────────────────
+
+# ── conformance, computed rather than claimed ───────────────────────────────
+# The design page used to assert "at least 20° apart" and "WCAG AA on white".
+# Neither was true: 10 of 18 accents fail AA on white and 13 pairs sit closer
+# than 20° — eight of them closer than the 15° gate A10 actually enforces. A
+# public design page claiming AA compliance it does not have is a false
+# accessibility statement, and the fact that it was written as an aspiration
+# does not change how a reader takes it. So the page now measures the palette
+# it is printing and says what it finds. After S5 re-derives the accents the
+# same code will print zero, without anybody remembering to edit a sentence.
+def _lin(c: float) -> float:
+    c /= 255
+    return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
+
+
+def _lum(hx: str) -> float:
+    r, g, b = (_lin(int(hx[i:i + 2], 16)) for i in (1, 3, 5))
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+
+def contrast(a: str, b: str) -> float:
+    la, lb = _lum(a), _lum(b)
+    hi, lo = max(la, lb), min(la, lb)
+    return (hi + 0.05) / (lo + 0.05)
+
+
+def oklch_hue(hx: str) -> float:
+    r, g, b = (_lin(int(hx[i:i + 2], 16)) for i in (1, 3, 5))
+    l = (0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b) ** (1 / 3)
+    m = (0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b) ** (1 / 3)
+    s2 = (0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b) ** (1 / 3)
+    A = 1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s2
+    B = 0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s2
+    return math.degrees(math.atan2(B, A)) % 360
+
+
+def conformance(accs: list[dict], floor: float = 15.0) -> dict:
+    fails = [(a["code"], contrast(a["accent"], "#FFFFFF")) for a in accs
+             if contrast(a["accent"], "#FFFFFF") < 4.5]
+    hues = {a["code"]: oklch_hue(a["accent"]) for a in accs}
+    close = []
+    for x, y in itertools.combinations(sorted(hues), 2):
+        d = abs(hues[x] - hues[y])
+        d = min(d, 360 - d)
+        if d < floor:
+            close.append((x, y, d))
+    return {"aa": sorted(fails, key=lambda z: z[1]),
+            "close": sorted(close, key=lambda z: z[2]), "floor": floor}
+
+
 def emit_design_md(t: dict, sha: str) -> str:
     rows = [
         f"| `{a['code']}` | {a['language']} | "
@@ -279,6 +331,32 @@ def emit_design_md(t: dict, sha: str) -> str:
         f"{'live' if a['published'] else 'planned'} |"
         for a in t["accents"] if a["code"] != "template"
     ]
+    accs = [a for a in t["accents"] if a["code"] != "template"]
+    conf = conformance(accs)
+    if not conf["aa"] and not conf["close"]:
+        conf_text = ("Nothing. Every accent clears 4.5:1 on white and no two sit "
+                     f"closer than {conf['floor']:.0f}° apart.")
+    else:
+        parts = []
+        if conf["aa"]:
+            worst = ", ".join(f"`{c}` {r:.2f}:1" for c, r in conf["aa"][:4])
+            parts.append(
+                f"**{len(conf['aa'])} of {len(accs)} accents fall below 4.5:1 on "
+                f"white** ({worst}{', …' if len(conf['aa']) > 4 else ''}). They are "
+                f"legible, but they do not meet AA at body-text size. Naming "
+                f"them here is the honest position while they are re-derived; "
+                f"the alternative was a page that claimed compliance the "
+                f"palette did not have.")
+        if conf["close"]:
+            worst = ", ".join(f"`{x}`/`{y}` {d:.1f}°" for x, y, d in conf["close"][:3])
+            parts.append(
+                f"**{len(conf['close'])} pairs sit closer than "
+                f"{conf['floor']:.0f}°** ({worst}"
+                f"{', …' if len(conf['close']) > 3 else ''}). The neighbouring "
+                f"greens are the pressure point: English, French, Dutch and "
+                f"Norwegian all want the same part of the wheel.")
+        conf_text = "\n\n".join(parts)
+
     cefr = t["colour"]["cefr"]
     a_l, c_l = cefr["a"]["light"], cefr["c"]["light"]
     hub = t["colour"]["brand"]["hub"]["light"]
@@ -302,11 +380,19 @@ A language's accent must be:
    Colour should signal *which course you are in*, not which country a language
    is spoken in — a language is not a nation, and several of these are spoken
    across many.
-2. **At least 20° apart** from every other accent on the hue wheel, so two
-   courses are never mistaken for each other.
-3. **WCAG AA on white**, because it is used for links and rules, not decoration.
+2. **At least {conf["floor"]:.0f}° apart** from every other accent on the OKLCH hue
+   wheel, so two courses are never mistaken for each other.
+3. **WCAG AA on white** — 4.5:1 — because an accent is used for links and rules,
+   not decoration.
 4. **Not hub blue** — `{hub}` is reserved for this umbrella site and for
    anything that belongs to no single course.
+
+### Where the palette does not meet them yet
+
+These rules are the specification, and this section is measured from the same
+file the table below is printed from — so it cannot quietly stop being true.
+
+{conf_text}
 
 ## The palette
 
@@ -330,6 +416,46 @@ nineteenth language is one entry there, not an edit in nineteen places.
 """)
 
 
+def patch_readme(t: dict, path: Path) -> str | None:
+    """Replace the accent table in the website README between its markers.
+
+    The table was hand-kept and had 17 rows against a registry of 18 — Persian
+    was added to the data and to the world map and never reached the README.
+    Fifteen more languages arrive in the build-out waves, and a table that must
+    be edited fifteen more times will be wrong fifteen more times. A README
+    cannot run Hugo templates, so it is patched between markers instead.
+    """
+    if not path.exists():
+        return None
+    body = path.read_text(encoding="utf-8")
+    rows = "\n".join(
+        f"| `{a['code']}` | {a['language']} | `{a['accent']}` | `{a['dark']}` |"
+        for a in t["accents"] if a["code"] != "template")
+    block = (BEGIN + "\n"
+             "| Code | Language | Light accent | Dark accent |\n"
+             "|------|----------|--------------|-------------|\n"
+             + rows + "\n" + END)
+    if BEGIN in body and END in body:
+        head, rest = body.split(BEGIN, 1)
+        _, tail = rest.split(END, 1)
+        return head + block + tail
+    # First run: replace the existing hand-written table in place.
+    lines, out, i, done = body.splitlines(True), [], 0, False
+    while i < len(lines):
+        if not done and lines[i].startswith("| Code | Language |"):
+            while i < len(lines) and lines[i].startswith("|"):
+                i += 1
+            out.append(block + "\n")
+            done = True
+            continue
+        out.append(lines[i]); i += 1
+    return "".join(out) if done else None
+
+
+BEGIN = "<!-- BEGIN generated accent table — design/build_tokens.py. Do not edit. -->"
+END = "<!-- END generated accent table -->"
+
+
 # ── driver ──────────────────────────────────────────────────────────────────
 def show(p: Path) -> str:
     """Display path relative to the org checkout where possible, else absolute.
@@ -348,7 +474,11 @@ def artefacts(t: dict, sha: str, website: Path | None) -> dict[Path, str]:
         KIT / "design" / "tokens.json": emit_json(t, sha),
     }
     if website:
-        out[website.resolve() / "content" / "design.md"] = emit_design_md(t, sha)
+        w = website.resolve()
+        out[w / "content" / "design.md"] = emit_design_md(t, sha)
+        readme = patch_readme(t, w / "README.md")
+        if readme is not None:
+            out[w / "README.md"] = readme
     return out
 
 

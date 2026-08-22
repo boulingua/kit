@@ -1,0 +1,31 @@
+{{- /*
+  {{< languages >}} — every scaffolded language, from the accent registry.
+
+  platforms.md said "a growing family of languages is being scaffolded" and
+  then named none of them. Fifteen arrive in the build-out waves, and a
+  hand-written list would be stale from the first one. The world map already
+  ranges over this data; the page's own prose did not.
+
+  Reads hugo.Data.accents, which the kit ships and build_tokens.py generates.
+  `status` comes from the site's own data/worldmap.yaml where present, so a
+  course that goes live is reflected here by the same edit that lights it up
+  on the map — not by a second one nobody remembers.
+*/ -}}
+{{- $status := dict -}}
+{{- range hugo.Data.worldmap -}}
+  {{- $status = merge $status (dict .code .status) -}}
+{{- end -}}
+{{- $rows := where hugo.Data.accents "code" "!=" "template" -}}
+<ul class="language-list">
+{{- range $rows -}}
+  {{- $st := index $status .code | default "upcoming" -}}
+  {{- if ne $st "active" -}}
+  <li>
+    <span class="language-dot" style="background:{{ .accent }}" aria-hidden="true"></span>
+    <a href="https://github.com/boulingua/{{ .code }}" lang="en">{{ .language }}</a>
+    <code>{{ .code }}</code>
+    <span class="language-status">in Vorbereitung</span>
+  </li>
+  {{- end -}}
+{{- end -}}
+</ul>

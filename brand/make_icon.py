@@ -164,7 +164,26 @@ def main() -> int:
     ap.add_argument("code", nargs="?", help="site code; default reads hugo.toml")
     ap.add_argument("--all", action="store_true", help="emit all 18 icon sets")
     ap.add_argument("--check", action="store_true", help="regenerate and diff")
+    ap.add_argument("--website", type=Path, metavar="REPO",
+                    help="also write <REPO>/static/icons/<code>.svg for the "
+                         "world map. The map is the only place outside a course "
+                         "that renders every accent, so its icons must come from "
+                         "the same generator or the platform reads as eighteen "
+                         "unrelated sites on the one page that shows them together.")
     a = ap.parse_args()
+
+    if a.website:
+        n = 0
+        dest = a.website / "static" / "icons"
+        dest.mkdir(parents=True, exist_ok=True)
+        for acc in accents():
+            if acc["code"] == "template":
+                continue        # a scaffold placeholder, not a language
+            (dest / f"{acc['code']}.svg").write_text(svg_for(acc["accent"]),
+                                                     encoding="utf-8")
+            n += 1
+        print(f"  {n} website icon(s) written to {dest}")
+        return 0
 
     if a.check:
         tmp = Path(tempfile.mkdtemp(prefix="blgicon-"))

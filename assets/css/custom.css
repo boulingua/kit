@@ -1106,3 +1106,22 @@ div.tl { display: block; margin-block: 1rem; }
              border-inline-start: 3px solid var(--boulingua-accent);
              padding-inline-start: var(--boulingua-space-3); }
 .extension > summary { cursor: pointer; font-weight: 600; }
+
+/* {{< languages >}} — the scaffolded-language list on the hub's platforms page.
+   The dot carries the accent and nothing else does, so it is decorative and
+   aria-hidden; the language name is the link text. */
+.language-list { list-style: none; padding-inline-start: 0; }
+.language-list li {
+  display: flex; align-items: baseline; gap: .55rem;
+  padding-block: .3rem;
+  border-block-end: 1px solid var(--boulingua-rule);
+}
+.language-dot {
+  inline-size: .7rem; block-size: .7rem; border-radius: 50%;
+  flex: 0 0 auto; align-self: center;
+}
+.language-list code { font-size: .85em; color: var(--boulingua-fg-muted); }
+.language-status {
+  margin-inline-start: auto;
+  font-size: .85em; color: var(--boulingua-fg-muted);
+}

@@ -54,6 +54,16 @@ def main() -> int:
         print("::error::design/fonts/ATTRIBUTION.md is missing", file=sys.stderr)
         return 1
     text = ATTR.read_text(encoding="utf-8")
+    # A repo may ship faces the kit does not cut — the hub uses Permanent Marker
+    # for one display heading and Google's 300/500 weights of Source Sans, none
+    # of which are in the kit's tiers. Those files are still shipped fonts and
+    # still need an attribution, so the repo carries its own and A4 reads both.
+    # What is NOT allowed is shipping a face documented nowhere, which is the
+    # state all five content repos were in: 36 files, no rows.
+    local = REPO / "static" / "fonts" / "ATTRIBUTION.md"
+    if local.exists():
+        text += "\n" + local.read_text(encoding="utf-8")
+        print(f"  + {local.relative_to(REPO)} (repo-local faces)")
     m = yaml.safe_load(MANIFEST.read_text(encoding="utf-8"))
     bad = 0
 
