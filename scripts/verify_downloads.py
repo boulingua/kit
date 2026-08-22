@@ -62,9 +62,20 @@ def main() -> int:
         print('verify-downloads: no unit content yet — nothing to resolve.')
         return 0
     missing: list[tuple[str, str]] = []
-    units = sorted(CONTENT.glob("kurs_*/units/unit*.md"))
+    # Both bundle forms, and no course-specific section name. The glob here was
+    # `kurs_*/units/unit*.md` — daf's own directory naming, and flat-only, so it
+    # matched 60 files before the leaf-bundle conversion and zero after. This
+    # script was promoted into the kit without being generalised, which is the
+    # cost of promoting a working script rather than a general one.
+    #
+    # _has_units() twenty lines above already had the right rule. Two ways of
+    # asking the same question in one file is how they drift apart.
+    units = sorted(p for p in CONTENT.rglob("*.md")
+                   if "/units/" in p.as_posix() and p.name != "_index.md")
     if not units:
-        print("no unit articles found", file=sys.stderr)
+        print("::error::no unit article found under any content/**/units/ path, "
+              "but _has_units() said this course has units. The two disagree — "
+              "that is a bug here, not an empty course.", file=sys.stderr)
         return 1
 
     for md in units:

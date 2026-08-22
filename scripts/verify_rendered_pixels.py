@@ -24,6 +24,8 @@ from __future__ import annotations
 import csv
 import re
 import sys
+
+ALIAS_RE = re.compile(r"""http-equiv\s*=\s*["']?refresh""", re.I)
 from pathlib import Path
 
 PIXEL_RE = re.compile(r"met\.vgwort\.de/na/([0-9a-f]{32})")
@@ -42,9 +44,35 @@ def main() -> int:
         repo, public = arg.parent, arg
     lock = repo / "vgwort" / "url-lock-provisional.csv"
     if not lock.exists():
-        print(f"::error::vgwort/url-lock-provisional.csv is missing. A course "
-              f"carrying registered marks must carry the lock.", file=sys.stderr)
-        return 2
+        # A repo with no marks is not a repo with a missing lock. The hub
+        # carries zero Zählmarken by design — it is navigation, not the
+        # author's Sprachwerke — so demanding a lock there is a gate failing
+        # for being inapplicable.
+        #
+        # But "no lock" must not be the same as "nothing to check": that is the
+        # trivial pass this battery exists to remove. So the absence is only
+        # accepted when the repo demonstrably has no marks — no registry
+        # entries AND no pixel anywhere in the built output. A repo that
+        # renders pixels without a lock is a finding.
+        reg = repo / "data" / "vgwort.yaml"
+        entries = []
+        if reg.exists():
+            import yaml
+            entries = yaml.safe_load(reg.read_text(encoding="utf-8")) or []
+        rendered = 0
+        if public.is_dir():
+            rendered = sum(1 for f in public.rglob("index.html")
+                           if PIXEL_RE.search(f.read_text(encoding="utf-8",
+                                                          errors="replace")))
+        if entries or rendered:
+            print(f"::error::no vgwort/url-lock-provisional.csv, but this repo has "
+                  f"{len(entries)} registry entr(ies) and renders {rendered} "
+                  f"pixel-bearing page(s). Unlocked marks are undefended: nothing "
+                  f"can tell you when one stops earning.", file=sys.stderr)
+            return 1
+        print("C2 n/a — this repo registers no Zählmarken and renders none. "
+              "Verified both ways, not assumed from a missing file.")
+        return 0
     rows = [r for r in csv.DictReader(
         l for l in lock.open(encoding="utf-8") if not l.startswith("#"))
         if r.get("url") and r.get("code")]
@@ -63,7 +91,7 @@ def main() -> int:
     rendered: dict[str, list[str]] = {}
     for html in sorted(public.rglob("index.html")):
         txt = html.read_text(encoding="utf-8", errors="replace")
-        if 'http-equiv="refresh"' in txt[:1200]:
+        if ALIAS_RE.search(txt[:2000]):
             continue
         rel = "/" if html.parent == public else \
             "/" + html.parent.relative_to(public).as_posix() + "/"

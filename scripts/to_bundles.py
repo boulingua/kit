@@ -34,6 +34,8 @@ import shutil
 import subprocess
 import sys
 import tempfile
+
+ALIAS_RE = re.compile(r"""http-equiv\s*=\s*["']?refresh""", re.I)
 from pathlib import Path
 
 HUGO = os.path.expanduser("~/.local/bin/hugo")
@@ -75,7 +77,7 @@ def hugo_state(repo: Path) -> tuple[set[str], dict[str, str]]:
         # real URLs and must be compared too — an alias that stops rendering is
         # a reader's dead link, even though it carries no pixel.
         rel = "/" if p.parent == out else "/" + p.parent.relative_to(out).as_posix() + "/"
-        urls.add(rel + ("  [alias]" if 'http-equiv="refresh"' in head else ""))
+        urls.add(rel + ("  [alias]" if ALIAS_RE.search(head) else ""))
         for code in set(PIXEL_RE.findall(body)):
             pixels[code] = rel
     shutil.rmtree(out, ignore_errors=True)

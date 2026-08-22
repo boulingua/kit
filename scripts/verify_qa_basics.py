@@ -18,6 +18,8 @@ from __future__ import annotations
 import re
 import sys
 import xml.etree.ElementTree as ET
+
+ALIAS_RE = re.compile(r"""http-equiv\s*=\s*["']?refresh""", re.I)
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
@@ -73,7 +75,7 @@ def main() -> int:
             built = set()
             for q in PUBLIC.rglob("index.html"):
                 head = q.read_text(encoding="utf-8", errors="replace")[:1200]
-                if 'http-equiv="refresh"' in head or "http-equiv='refresh'" in head:
+                if ALIAS_RE.search(head):
                     continue
                 built.add("" if q.parent == PUBLIC
                           else q.parent.relative_to(PUBLIC).as_posix().strip("/"))
