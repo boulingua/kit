@@ -53,6 +53,7 @@ def main() -> int:
     milestone = str(cfg.get("milestone", "M0")).upper()
 
     missing, malformed, narrow, checked, inferred = [], [], [], 0, 0
+    deferred_breadth: list[str] = []
     for md in sorted((repo / "content").rglob("*.md")):
         m = FM.match(md.read_text(encoding="utf-8", errors="replace"))
         if not m:
@@ -84,9 +85,29 @@ def main() -> int:
                 malformed.append(f"{rel}: {i}")
         domains = {ID_RE.match(str(i)).group(2) for i in ids if ID_RE.match(str(i))}
         skills = fm.get("skills_focus") or []
-        primary = {PRIMARY.get(str(s)) for s in
-                   (skills if isinstance(skills, list) else [skills])} - {None}
-        if domains and primary and domains <= primary:
+        vals = [str(x) for x in (skills if isinstance(skills, list) else [skills])]
+        primary = {PRIMARY.get(v) for v in vals} - {None}
+        # A value outside the enum contributes NO domain, which quietly shrinks
+        # `primary` and makes the subset test easier to pass. That is not a
+        # hypothetical: `sprechen` and `speaking` are deliberately left
+        # unsplit until each unit's implements ids decide whether they are
+        # interaction or production, and while they sit there a page with
+        # skills ['reading', 'sprechen'] has primary == {REC}. Ids covering
+        # {REC, INT} then look broad and are not — the moment the split lands,
+        # primary becomes {REC, INT}, the same ids become a subset, and 37 daf
+        # pages flip from pass to fail with nobody having edited them.
+        #
+        # So an unmapped value is reported rather than dropped. The breadth
+        # verdict on that page is not yet knowable, and saying so is the only
+        # honest answer.
+        unmapped = sorted({v for v in vals if v not in PRIMARY})
+        if unmapped and ids:
+            deferred_breadth.append(
+                f"{rel}: skills_focus carries {unmapped}, which maps to no "
+                f"domain, so the breadth rule cannot be evaluated on this page. "
+                f"It is not passing — it is unjudged, and it will be judged the "
+                f"moment that value is split.")
+        if domains and primary and not unmapped and domains <= primary:
             narrow.append(f"{rel}: every id is in {sorted(domains)}, the page's own "
                           f"skill domain(s) — at least one must come from elsewhere")
 
@@ -107,6 +128,11 @@ def main() -> int:
         print(f"::error::malformed implements id — {x}")
     for x in narrow:
         print(f"::error::{x}")
+    for x in deferred_breadth[:6]:
+        print(f"::warning::{x}")
+    if len(deferred_breadth) > 6:
+        print(f"::warning::… and {len(deferred_breadth) - 6} more page(s) whose "
+              f"breadth cannot yet be evaluated")
 
     if missing:
         level = "error" if milestone in {"M2", "M3"} else "warning"
@@ -122,6 +148,9 @@ def main() -> int:
     if hard:
         print(f"\nA2 FAIL — {hard} problem(s)", file=sys.stderr)
         return 1
+    if deferred_breadth:
+        print(f"  {len(deferred_breadth)} page(s) UNJUDGED on breadth — an "
+              f"unmapped skills_focus value, not a pass")
     print("A2 OK")
     return 0
 

@@ -22,6 +22,15 @@ programme where descriptor ids drive a migration rather than follow it, and
 guessing here would put a wrong claim in a conformance manifest.
 
 Anything this script cannot resolve, it names and leaves.
+
+TAGS MOVE WITH IT. daf mirrors skills_focus into `tags:` as `skill-<value>` —
+verified: every one of its 299 tag occurrences across 22 terms is mechanically
+derivable from four front-matter fields, with zero extras and zero omissions on
+every page. Rewriting skills_focus alone would desynchronise 60 pages and leave
+six live taxonomy URLs (/tags/skill-lesen/ and friends) pointing at a
+vocabulary no page carries any more. Those URLs carry no VG Wort mark, so this
+costs a reader's dead link rather than income — but a migration that half-moves
+a taxonomy is how a taxonomy ends up with both spellings forever.
 """
 from __future__ import annotations
 
@@ -75,6 +84,41 @@ NOT_A_SKILL = {
 FM = re.compile(r"\A(---\n)(.*?)(\n---\n)", re.S)
 
 
+def replace_block(body: str, key: str, values: list) -> str:
+    """Replace a YAML block-sequence key, list items and all.
+
+    The first version used re.sub with `^key:.*?(?=^\\S|\\Z)` under (?ms).
+    A block-sequence item starts with `- ` at column zero, which IS \\S — so
+    the lookahead fired on the first item, the match consumed only the `key:`
+    line, and the new block was prepended while every old item stayed. Applied
+    to daf that produced `skills_focus: [reading, sprechen, lesen]` and a
+    duplicated tag on 59 files: not a crash, not a diff anyone would skim
+    twice, and a page carrying both vocabularies at once.
+
+    Parsing the boundary properly instead: a key's block runs until the next
+    line that is neither indented nor a `- ` item.
+    """
+    lines = body.splitlines()
+    out, i, done = [], 0, False
+    while i < len(lines):
+        if not done and re.match(rf"^{re.escape(key)}\s*:", lines[i]):
+            i += 1
+            while i < len(lines) and (lines[i].startswith(("- ", "  ", "\t"))
+                                      or not lines[i].strip()):
+                if lines[i].strip() and not lines[i].startswith(("- ", "  ", "\t")):
+                    break
+                if not lines[i].strip():
+                    break
+                i += 1
+            out.append(f"{key}:")
+            out += [f"- {v}" for v in values]
+            done = True
+            continue
+        out.append(lines[i])
+        i += 1
+    return "\n".join(out)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("repo", type=Path)
@@ -82,6 +126,7 @@ def main() -> int:
     a = ap.parse_args()
 
     changed = Counter()
+    retagged = Counter()
     deferred = Counter()
     notskill = Counter()
     files = 0
@@ -117,14 +162,48 @@ def main() -> int:
             else:
                 print(f"::error::{md}: unknown skills_focus value {v!r}")
                 out.append(v)
+        # The mirrored tags, in lockstep. A `skill-<old>` tag whose value this
+        # script just renamed becomes `skill-<new>`; a tag mirroring a value
+        # left deliberately unsplit is left alone too, so the two fields never
+        # disagree at any point in the migration.
+        tags = fm.get("tags")
+        newtags = None
+        if isinstance(tags, list):
+            nt, tagged = [], False
+            for t in tags:
+                t = str(t)
+                if t.startswith("skill-"):
+                    v = t[len("skill-"):]
+                    if v in MAP and v not in DEFER:
+                        # Hyphens in the tag, underscores in the enum. The enum
+                        # value is a key; the tag is a URL segment, and
+                        # /tags/skill-language_awareness/ mixes both
+                        # conventions in one path.
+                        slug = MAP[v].replace("_", "-")
+                        nt.append(f"skill-{slug}")
+                        retagged[f"skill-{v} -> skill-{slug}"] += 1
+                        tagged = True
+                        continue
+                nt.append(t)
+            if tagged:
+                newtags = sorted(set(nt))
+                touched = True
+
         if touched and a.apply:
-            new = yaml.dump({"skills_focus": sorted(set(out))},
-                            allow_unicode=True, sort_keys=False).rstrip("\n")
-            body = re.sub(r"(?ms)^skills_focus:.*?(?=^\S|\Z)", new + "\n", m.group(2))
+            body = m.group(2)
+            for key, val in (("skills_focus", sorted(set(out))),
+                             ("tags", newtags)):
+                if val is None:
+                    continue
+                body = replace_block(body, key, val)
             md.write_text(m.group(1) + body + m.group(3) + raw[m.end():], encoding="utf-8")
         files += 1 if touched else 0
 
     print(f"  {files} file(s) would change" + (" (applied)" if a.apply else ""))
+    if retagged:
+        print("  mirrored tags, moved in lockstep:")
+        for k, n in retagged.most_common():
+            print(f"    {n:4d}  {k}")
     for k, n in changed.most_common():
         print(f"    {n:4d}  {k}")
     if notskill:
