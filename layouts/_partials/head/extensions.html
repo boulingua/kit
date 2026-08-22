@@ -31,7 +31,11 @@ body.colorscheme-dark{--boulingua-accent:{{ .dark }};--boulingua-accent-hover:{{
        The face follows the course's script tier, so a Greek course preloads
        the Greek cut rather than a Latin one it will never use. */ -}}
 {{- $tier := site.Params.scriptTier | default "core" }}
+{{- /* Skipped when the course declares its own faces below: emitting
+       both put three preloads on daf and the cap is two. */ -}}
+{{- if not site.Params.font_preload }}
 <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ (printf "fonts/source-sans-3-400.%s.woff2" $tier) | relURL }}">
+{{- end }}
 <link rel="stylesheet" href="{{ "css/fonts.css" | relURL }}">
 {{- if and $p $p.domain }}
 <script defer data-domain="{{ $p.domain }}" src="{{ or $p.src "https://plausible.io/js/script.js" }}"></script>
