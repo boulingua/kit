@@ -251,6 +251,28 @@ def cmd_sync(a) -> int:
     if logo.exists():
         shutil.copy2(logo, dest / "assets" / logo.name); copied.append(dest / "assets" / logo.name)
 
+    # PRUNE. Sync was additive, so a file the kit no longer ships stayed
+    # vendored forever — and since it is not in the new lock, the next
+    # `kit check` fails with "not in kit.lock: it did not come from kit sync",
+    # which reads as a tampering warning about a file sync itself left behind.
+    # daf hit exactly this: the fonts moved from .ttf to .otf and four .ttf
+    # survived the sync that replaced them.
+    #
+    # _materials/ is kit-owned and digest-locked by definition, so anything
+    # not in the manifest is drift. Removing it is right; removing it silently
+    # is not, so each one is named.
+    keep = {q.resolve() for q in copied} | {(dest / "kit.lock").resolve()}
+    pruned = []
+    for q in sorted(dest.rglob("*")):
+        if q.is_file() and q.resolve() not in keep:
+            pruned.append(q.relative_to(dest).as_posix())
+            q.unlink()
+    for q in sorted(dest.rglob("*"), reverse=True):
+        if q.is_dir() and not any(q.iterdir()):
+            q.rmdir()
+    for q in pruned:
+        print(f"  pruned {q} — the kit no longer ships it")
+
     lock = ["# kit.lock — digests of the one vendored surface.",
             "#",
             "# XeLaTeX cannot read a Hugo module, so these files live in the course",

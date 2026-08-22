@@ -22,8 +22,27 @@ from pathlib import Path
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-REPO = Path(__file__).resolve().parent.parent
-SITE = REPO.name                 # efl | fle | daf -> \blgsetlang{SITE}, /SITE URLs
+# The repo is an ARGUMENT. Derived from __file__ this resolved to the kit, so
+# the emitter built the kit's example and called it "kit" — the sixth script in
+# this kit found taking its target from its own location. And SITE is read from
+# boulingua.yml rather than from the directory name: the code drives the accent,
+# the brand mark and the /SITE URL prefix, and a repo checked out under a
+# different directory name would silently get another course's colour.
+def _repo() -> Path:
+    for i, a in enumerate(sys.argv[1:], 1):
+        if not a.startswith("-"):
+            sys.argv.pop(i)
+            return Path(a).resolve()
+    return Path.cwd()
+
+
+REPO = _repo()
+_cfg = REPO / "boulingua.yml"
+if _cfg.exists():
+    import yaml as _y
+    SITE = (_y.safe_load(_cfg.read_text(encoding="utf-8")) or {}).get("code") or REPO.name
+else:
+    SITE = REPO.name
 MAT = REPO / "_materials"
 PRES = REPO / "static/materials/presentations"
 WORK = REPO / "static/materials/worksheets"
