@@ -30,8 +30,16 @@ PIXEL_RE = re.compile(r"met\.vgwort\.de/na/([0-9a-f]{32})")
 
 
 def main() -> int:
-    repo = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path.cwd()
-    public = Path(sys.argv[2]).resolve() if len(sys.argv) > 2 else repo / "public"
+    # The battery hands a needs:built gate the BUILT directory; a person runs
+    # it against the repo. Accept either rather than making the caller
+    # remember, because a gate that is awkward to invoke is a gate that gets
+    # invoked wrongly and then reported as broken.
+    arg = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path.cwd()
+    if (arg / "vgwort").is_dir() or (arg / "hugo.toml").exists():
+        repo, public = arg, (Path(sys.argv[2]).resolve()
+                             if len(sys.argv) > 2 else arg / "public")
+    else:
+        repo, public = arg.parent, arg
     lock = repo / "vgwort" / "url-lock-provisional.csv"
     if not lock.exists():
         print(f"::error::vgwort/url-lock-provisional.csv is missing. A course "
