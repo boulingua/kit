@@ -342,7 +342,16 @@ def cmd_new(a) -> int:
     (dest / "go.mod").write_text(
         f"module github.com/boulingua/{a.code}\n\ngo 1.26.1\n", encoding="utf-8")
     shutil.copy2(KIT / "templates" / "deploy.yml", dest / ".github" / "workflows" / "deploy.yml")
-    print(f"  {dest.name}/ created — content/, boulingua.yml, hugo.toml, go.mod, deploy.yml")
+    # Course-owned data files are COPIED, never inherited from the module. A
+    # data file the kit ships and a course also owns makes Hugo warn about
+    # shadowing, and --panicOnWarning turns that warning into a failed build on
+    # the day the course adopts the module.
+    src = KIT / "templates" / "course-data"
+    if src.is_dir():
+        (dest / "data").mkdir(parents=True, exist_ok=True)
+        for f in sorted(src.glob("*.yaml")):
+            shutil.copy2(f, dest / "data" / f.name)
+    print(f"  {dest.name}/ created — content/, data/, boulingua.yml, hugo.toml, go.mod, deploy.yml")
     print("  no layouts/, no assets/, no scripts/: those arrive as a Hugo module.")
     return 0
 
