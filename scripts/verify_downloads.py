@@ -24,7 +24,29 @@ STATIC = REPO / "static"
 FM_RE = re.compile(r"^---\n(.*?)\n---\n", re.S)
 
 
-SITE_PREFIX = "daf/"  # GitHub Pages project-pages path prefix; baked
+# Read from the repo, never hardcoded. This said "daf/" — the course it was
+# written in — so on fle every artefact path resolved to static/fle/… against
+# files that live at static/materials/…, and the gate reported 50 missing
+# downloads that are all present. A hardcoded prefix in a shared gate does not
+# fail loudly on the wrong repo; it fails confidently.
+def _site_prefix(repo: Path) -> str:
+    cfg = repo / "boulingua.yml"
+    if cfg.exists():
+        import yaml
+        code = (yaml.safe_load(cfg.read_text(encoding="utf-8")) or {}).get("code")
+        if code:
+            return f"{code}/"
+    hugo = repo / "hugo.toml"
+    if hugo.exists():
+        m = re.search(r'(?m)^\s*baseURL\s*=\s*["\']([^"\']+)', hugo.read_text(encoding="utf-8"))
+        if m:
+            seg = [x for x in m.group(1).split("//")[-1].split("/")[1:] if x]
+            if seg:
+                return f"{seg[0]}/"
+    return ""
+
+
+SITE_PREFIX = _site_prefix(REPO)
                       # into frontmatter URLs to satisfy Hugo's relURL.
 
 
