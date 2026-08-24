@@ -42,6 +42,13 @@ FM = re.compile(r"\A(---\n)(.*?)(\n---\n)", re.S)
 # /units/ is a unit even if it is called _index.md, and a legal page is legal
 # even though it sits at the top level with the reference pages.
 RULES = [
+    # Exam BEFORE unit: fle keeps its exams as sibling pages inside units/,
+    # named <unit>_exam, so a rule that only looks for /units/ calls all 156 of
+    # them units and disagrees with the page_type they already carry. daf has
+    # no exam pages at all — its exams are a `## Prüfung` section inside each
+    # unit — so this rule is inert there rather than wrong.
+    (lambda r: "/units/" in r
+     and re.search(r"_exam(/index)?\.md$|_exam/$", r) is not None, "exam"),
     (lambda r: "/units/" in r and not r.endswith("_index.md"), "unit"),
     (lambda r: Path(r).name in ("impressum.md", "datenschutz.md",
                                 "haftungsausschluss.md", "privacy.md",

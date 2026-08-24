@@ -129,6 +129,7 @@ def main() -> int:
     retagged = Counter()
     deferred = Counter()
     notskill = Counter()
+    orphaned: list[str] = []
     files = 0
 
     for md in sorted((a.repo / "content").rglob("*.md")):
@@ -153,8 +154,24 @@ def main() -> int:
                 out.append(v)
                 deferred[v] += 1
             elif v in NOT_A_SKILL:
-                notskill[v] += 1          # dropped from skills_focus
-                touched = True
+                # Dropped, but only after checking the fact survives elsewhere.
+                # These are Bildungsplan competence areas that ADR-0017 moves to
+                # bildungsplan.topic_codes; on fle all 21 pages carrying
+                # text_medien already list the matching 3.x.4 code in their
+                # bildungsplan block, so the value is a duplicate and removing
+                # it loses nothing. Where it is NOT duplicated the page is
+                # named and the value is LEFT, because a migration that quietly
+                # deletes the only copy of a fact is not a migration.
+                bp = " ".join(str(x) for x in (fm.get("bildungsplan") or []))
+                if re.search(r"3\.\d\.4|textuelle|m.diatique|Medien", bp, re.I):
+                    notskill[v] += 1
+                    touched = True
+                else:
+                    out.append(v)
+                    orphaned.append(f"{md}: {v!r} is not a skill, but this page's "
+                                    f"bildungsplan block does not carry the "
+                                    f"equivalent code — left in place rather than "
+                                    f"dropped")
             elif v in MAP:
                 out.append(MAP[v])
                 changed[f"{v} -> {MAP[v]}"] += 1
@@ -210,6 +227,8 @@ def main() -> int:
         print("  dropped from skills_focus — not skills:")
         for k, n in notskill.most_common():
             print(f"    {n:4d}  {k}: {NOT_A_SKILL[k]}")
+    for o in orphaned:
+        print(f"::warning::{o}")
     if deferred:
         print("  LEFT ALONE, deliberately:")
         for k, n in deferred.most_common():

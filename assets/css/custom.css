@@ -255,6 +255,28 @@ main.content h2:hover,
 .callout > p:first-child { margin-top: 0; }
 .callout > p:last-child { margin-bottom: 0; }
 
+/* Title, body and the collapsible form. The template gained `collapse` and
+   `icon` from efl, which uses them 900 and 375 times; without these rules the
+   summary is not obviously clickable and a collapsed answer key looks like a
+   heading nobody can open.
+
+   The summary keeps its marker: removing the disclosure triangle is the usual
+   instinct and it takes away the only affordance telling a learner there is
+   something behind it. */
+.callout-title { font-weight: 600; margin-block-end: 0.4rem; }
+.callout-body > p:first-child { margin-block-start: 0; }
+.callout-body > p:last-child { margin-block-end: 0; }
+.callout-collapsible > summary {
+  cursor: pointer;
+  font-weight: 600;
+  margin-block-end: 0.4rem;
+}
+.callout-collapsible > summary:focus-visible {
+  outline: 2px solid var(--boulingua-accent);
+  outline-offset: 2px;
+}
+.callout-collapsible[open] > summary { margin-block-end: 0.6rem; }
+
 .callout-note    { border-inline-start-color: var(--boulingua-accent); background: color-mix(in srgb, var(--boulingua-accent) 7%, transparent); }
 .callout-tip     { border-inline-start-color: var(--boulingua-semantic-tip); background: color-mix(in srgb, var(--boulingua-semantic-tip) 7%, transparent); }
 .callout-warning { border-inline-start-color: var(--boulingua-semantic-warning); background: color-mix(in srgb, var(--boulingua-semantic-warning) 7%, transparent); }

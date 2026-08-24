@@ -1,18 +1,37 @@
 {{/*
-  callout — Quarto-equivalent admonition.
+  callout — the admonition every course uses, and the one shortcode with real
+  parameters rather than just a body.
+
   Args:
-    type   = note | tip | warning | important | caution   (positional 0 or named)
-    title  = optional heading text (named)
-  Inner Markdown is rendered.
-  Example:
-    {{< callout type="note" >}}**Modell:** Einstieg → Input → ...{{< /callout >}}
-    {{< callout type="warning" title="Achtung" >}}…{{< /callout >}}
+    type      note | tip | warning | important | caution   (positional 0 or named)
+    title     optional heading text (named)
+    collapse  "true" renders <details>, so the body starts hidden
+    icon      "false" suppresses the type icon
+
+  collapse and icon came from efl, which uses them 900 and 375 times across
+  1,500 calls. They are not decoration: a collapsed callout is how that course
+  hides an answer key, so a kit callout without `collapse` would have rendered
+  900 answer keys open on the page, next to the questions. They belong in the
+  kit rather than in a course fork for exactly that reason — the next course to
+  hide an answer key should not have to rediscover the mechanism.
+
+  A collapsed callout needs a title: <details> with no <summary> gives the
+  reader nothing to click, so `collapse` without `title` is ignored rather than
+  producing an unopenable box.
 */}}
 {{- $type := or (.Get "type") (.Get 0) "note" -}}
 {{- $title := .Get "title" -}}
-<div class="callout callout-{{ $type }}">
-  {{- with $title -}}
-  <div class="callout-title">{{ . }}</div>
-  {{- end -}}
-  {{ .Inner | .Page.RenderString (dict "display" "block") }}
+{{- $collapse := and $title (eq (.Get "collapse") "true") -}}
+{{- $icon := ne (.Get "icon") "false" -}}
+{{- $body := .Inner | .Page.RenderString (dict "display" "block") -}}
+<div class="callout callout-{{ $type }}{{ if $icon }} has-icon{{ end }}">
+{{- if $collapse -}}
+  <details class="callout-collapsible">
+    <summary class="callout-title">{{ $title | safeHTML }}</summary>
+    <div class="callout-body">{{ $body }}</div>
+  </details>
+{{- else -}}
+  {{- with $title -}}<div class="callout-title">{{ . | safeHTML }}</div>{{- end -}}
+  <div class="callout-body">{{ $body }}</div>
+{{- end -}}
 </div>
