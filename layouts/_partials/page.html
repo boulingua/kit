@@ -19,7 +19,7 @@
     {{ $links := partial "material-links.html" . }}
     {{- with $links }}
     <section class="downloads-section" id="downloads">
-      <h2>Downloads</h2>
+      <h2>{{ i18n "downloads_heading" }}</h2>
       {{ . | safeHTML }}
     </section>
     {{- end }}

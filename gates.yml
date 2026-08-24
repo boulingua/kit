@@ -144,17 +144,20 @@ gates:
 - id: A9
   title: chrome i18n
   owner: kit
-  scripts: []
+  scripts: [scripts/verify_i18n_chrome.py]
   needs: source
-  severity: warn
-  ramp: >-
-    Blocking org-wide once kit/i18n/de.yaml covers every key kit/layouts/**
-    references. Today the org's entire German chrome vocabulary is zero files,
-    while chrome_language: de is the default for fifteen courses — so this is a
-    prerequisite for Stage 1, not an afterthought.
-  status: planned
-  booked: F9
-  battery: false
+  severity: blocking
+  status: live
+  battery: true
+  note: >-
+    Its own ramp condition is met: kit/i18n/de.yaml exists and covers every key
+    the layouts reference, so the gate that was waiting for it is blocking.
+
+    It found six German literals in the KIT's own layouts on its first run —
+    Foliensatz, Arbeitsblatt, Herunterladen, Downloads, and the aria-labels
+    Hauptmenü and Farbschema — which every course inherits through the module.
+    The aria-labels are the ones that matter most: they are what a screen
+    reader speaks, so a Greek course was announcing its menu in German.
 
 - id: A10
   title: contrast and accent separation

@@ -5,9 +5,11 @@
     title    = summary text (named, default "Mehr")
     type     = visual variant (note | tip | warning ...) — optional
   Example:
-    {{< details title="Lösungen" type="tip" >}}…{{< /details >}}
+    {{< details title="Answer key" type="tip" >}}…{{< /details >}}
 */}}
-{{- $title := or (.Get "title") "Mehr" -}}
+{{- /* The default is a translated key, not the German word it used to
+       be: a details block with no title on a Greek course said "Mehr". */ -}}
+{{- $title := or (.Get "title") (i18n "details_more") -}}
 {{- $type := or (.Get "type") "tip" -}}
 <details class="callout callout-{{ $type }}">
   <summary>{{ $title }}</summary>

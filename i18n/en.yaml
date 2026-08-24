@@ -33,3 +33,38 @@ worksheet:
   other: Worksheet
 worksheets:
   other: Worksheets
+
+audio_intro:
+  other: Native-voice audio for this unit.
+audio_unsupported: Your browser does not support audio playback.
+built_with: Built with Hugo.
+contact: Contact
+details_more: More
+download:
+  other: Download
+downloads_heading: Downloads
+exam:
+  other: Exam
+extension: Extension
+gap: gap to fill
+licence_pair: MIT / CC BY-SA 4.0
+listen:
+  other: Listen
+menu_toggle: Open or close the main menu
+presentation:
+  other: Slide deck
+presentations:
+  other: Slide decks
+preview_presentation: Preview of the slide deck
+preview_worksheet: Preview of the worksheet
+recycles: Builds on
+show_text: Show text
+theme_toggle: Switch colour scheme (light / dark)
+vocab: Vocabulary
+vocab_example: Example
+vocab_gloss: Meaning
+vocab_term: Term
+worksheet:
+  other: Worksheet
+worksheets:
+  other: Worksheets

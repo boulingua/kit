@@ -39,3 +39,39 @@ worksheet:
   other: Arbeitsblatt
 worksheets:
   other: Arbeitsblätter
+
+audio_intro:
+  other: Wortschatz, Dialoge und Texte dieser Einheit als Audio, gesprochen von einer
+    muttersprachlichen Stimme. Der gesprochene Text steht jeweils darunter.
+audio_unsupported: Ihr Browser unterstützt kein Audio.
+built_with: Erstellt mit Hugo.
+contact: Kontakt
+details_more: Mehr
+download:
+  other: Herunterladen
+downloads_heading: Downloads
+exam:
+  other: Prüfung
+extension: Zusatzaufgabe
+gap: Lücke
+licence_pair: MIT / CC BY-SA 4.0
+listen:
+  other: Hören
+menu_toggle: Hauptmenü öffnen / schließen
+presentation:
+  other: Foliensatz
+presentations:
+  other: Foliensätze
+preview_presentation: Vorschau des Foliensatzes
+preview_worksheet: Vorschau des Arbeitsblatts
+recycles: Baut auf
+show_text: Text anzeigen
+theme_toggle: Farbschema umschalten (hell / dunkel)
+vocab: Wortschatz
+vocab_example: Beispiel
+vocab_gloss: Bedeutung
+vocab_term: Begriff
+worksheet:
+  other: Arbeitsblatt
+worksheets:
+  other: Arbeitsblätter
