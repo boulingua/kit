@@ -62,19 +62,31 @@ def main() -> int:
                                     f"{lit!r} — every other language inherits this "
                                     f"word. Move it to i18n/ and call it by key.")
 
+    # A course has no i18n/ of its own: the files arrive from the kit through
+    # the Hugo module, and Hugo merges them. Checking only the repo's own
+    # directory failed every course for a directory it is correct not to have.
+    # What a course's layouts must satisfy is the MERGED view.
     files = sorted(i18n_dir.glob("*.yaml")) if i18n_dir.is_dir() else []
-    if not files:
-        print(f"::error::{root.name} has layouts calling i18n but no i18n/*.yaml. "
-              f"Every key falls through to its inline default, which is English.",
-              file=sys.stderr)
+    inherited = []
+    if root != KIT and (KIT / "i18n").is_dir():
+        inherited = sorted((KIT / "i18n").glob("*.yaml"))
+    if not files and not inherited:
+        print(f"::error::{root.name} has layouts calling i18n and neither it nor "
+              f"the kit provides an i18n file. Every key falls through to its "
+              f"inline default, which is English.", file=sys.stderr)
         return 1
 
+    merged: dict[str, set[str]] = {}
+    for f in inherited + files:      # course files override the kit's
+        merged.setdefault(f.stem, set()).update(
+            yaml.safe_load(f.read_text(encoding="utf-8")) or {})
+
     missing: list[str] = []
-    for f in files:
-        have = set(yaml.safe_load(f.read_text(encoding="utf-8")) or {})
+    for lang, have in sorted(merged.items()):
         for k in sorted(used - have):
-            missing.append(f"i18n/{f.name}: key {k!r} is used in layouts/ and not "
-                           f"translated here — the page prints the English default")
+            missing.append(f"{lang}: key {k!r} is used in {root.name}/layouts/ and "
+                           f"is in no i18n file, the kit's or this repo's — the "
+                           f"page prints the English default")
 
     for x in literals:
         print(f"::error::{x}")
@@ -84,7 +96,8 @@ def main() -> int:
     if bad:
         print(f"\nA9 FAIL — {bad} problem(s)", file=sys.stderr)
         return 1
-    print(f"A9 OK — {len(used)} key(s) used across {len(files)} language file(s), "
+    src = "own" if files and not inherited else ("inherited" if not files else "own + inherited")
+    print(f"A9 OK — {len(used)} key(s) used, {len(merged)} language(s) ({src}), "
           f"all translated, no chrome literal in a layout")
     return 0
 
