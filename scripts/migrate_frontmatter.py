@@ -47,12 +47,22 @@ RULES = [
     # them units and disagrees with the page_type they already carry. daf has
     # no exam pages at all — its exams are a `## Prüfung` section inside each
     # unit — so this rule is inert there rather than wrong.
+    # Both separators. fle names its exams unit12_x_exam, efl names them
+    # unit12-x-exam, and a rule that knows only one calls the other course's
+    # 180 exams units — which is not a wrong label on a page nobody reads, it
+    # is the wrong gate ramp and the wrong EQS contract applied to 180 pages.
     (lambda r: "/units/" in r
-     and re.search(r"_exam(/index)?\.md$|_exam/$", r) is not None, "exam"),
+     and re.search(r"[-_]exam(/index)?\.md$|[-_]exam/$", r) is not None, "exam"),
     (lambda r: "/units/" in r and not r.endswith("_index.md"), "unit"),
-    (lambda r: Path(r).name in ("impressum.md", "datenschutz.md",
-                                "haftungsausschluss.md", "privacy.md",
-                                "imprint.md", "disclaimer.md"), "legal"),
+    # Match the page's own slug, not just a flat filename. efl keeps its legal
+    # pages as leaf bundles — impressum/index.md — so a filename test sees
+    # "index.md" and files three statutory notices under `reference`, which is
+    # the page_type gate A18 uses to decide what a marked non-unit page must
+    # carry. daf and fle keep them flat, so the filename test worked there and
+    # the gap only appears on the third repo.
+    (lambda r: (Path(r).stem if Path(r).stem != "index" else Path(r).parent.name)
+     in ("impressum", "datenschutz", "haftungsausschluss", "privacy",
+         "imprint", "disclaimer", "mentions-legales"), "legal"),
     (lambda r: Path(r).name == "_index.md", "section"),
     (lambda r: r.startswith(("anhaenge/", "appendices/", "annexes/")), "appendix"),
     (lambda r: True, "reference"),
