@@ -31,7 +31,17 @@ ROOT = Path(__file__).resolve().parents[1]
 ARG = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else ROOT
 PUBLIC = ARG if (ARG / "index.html").exists() else ARG / "public"
 
-LEGAL_URLS = ("/impressum/", "/datenschutz/", "/haftungsausschluss/")
+# Slugs, not URLs, discovered at any depth. The hardcoded
+# ("/impressum/", "/datenschutz/", "/haftungsausschluss/") assumed a German
+# monolingual site rooted at /. ressources is de/en/fr with its notices at
+# /de/impressum/, /en/disclaimer/, /fr/mentions-legales/ — so the gate found
+# none of them, reported three pages missing, and examined nothing. A gate
+# that cannot find the pages it checks is not stricter than one that can.
+ALIAS_RE = re.compile(r"""http-equiv\s*=\s*["']?refresh""", re.I)
+
+LEGAL_SLUGS = ("impressum", "imprint", "mentions-legales",
+               "datenschutz", "privacy", "confidentialite",
+               "haftungsausschluss", "disclaimer", "avertissement")
 EXCEPTIONS = ROOT / "placeholder-exceptions.yml"
 
 
@@ -129,12 +139,23 @@ def main() -> int:
 
     violations: list[tuple[str, str]] = []
     waived_n: dict[str, int] = {}
-    for url in LEGAL_URLS:
-
-        page = PUBLIC / url.strip("/") / "index.html"
-        if not page.is_file():
-            violations.append((url, "page missing — has it been moved?"))
+    pages: list[tuple[str, Path]] = []
+    for f in sorted(PUBLIC.rglob("index.html")):
+        if f.parent.name not in LEGAL_SLUGS:
             continue
+        head = f.read_text(encoding="utf-8", errors="replace")[:2000]
+        if ALIAS_RE.search(head):
+            continue        # a meta-refresh stub for an old URL, not a page
+        rel = "/" + f.parent.relative_to(PUBLIC).as_posix() + "/"
+        pages.append((rel, f))
+    if not pages:
+        print(f"::error::no legal page found anywhere under {PUBLIC}. Every site "
+              f"in this organisation publishes a statutory notice; finding none "
+              f"is a failure of the site, or of this slug list — either way it "
+              f"is not a pass.", file=sys.stderr)
+        return 1
+
+    for url, page in pages:
         body = page.read_text(encoding="utf-8")
         allow = waived.get(url.strip("/"), set())
         for needle in PLACEHOLDERS:
@@ -172,7 +193,7 @@ def main() -> int:
         extra = ("; " + ", ".join(f"{u} {n} declared template fragment(s) waived"
                                   for u, n in sorted(waived_n.items()))
                  + " — the exception does not travel to a course")
-    print(f"C7 OK — {len(LEGAL_URLS)} pages checked, no undeclared placeholders, "
+    print(f"C7 OK — {len(pages)} legal page(s) found and checked, no undeclared placeholders, "
           f"no TODO/FIXME markers{extra}")
     return 0
 

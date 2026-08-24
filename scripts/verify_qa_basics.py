@@ -60,6 +60,41 @@ def main() -> int:
         else:
             ns = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
             urls = root.findall("sm:url", ns)
+            # A multilingual site with defaultContentLanguageInSubdir emits a
+            # sitemapINDEX at the root, listing /de/sitemap.xml and friends —
+            # no <url> elements at all. Parsing only <url> found none, reported
+            # "lists no URLs" and then flagged every built page as omitted. The
+            # index is not a broken sitemap, it is the correct shape for the
+            # site; the gate simply only knew one of the two.
+            if not urls:
+                for sm in root.findall("sm:sitemap", ns):
+                    loc = sm.find("sm:loc", ns)
+                    if loc is None or not loc.text:
+                        continue
+                    # The loc carries the site's baseURL path prefix
+                    # (/ressources/de/sitemap.xml) while PUBLIC is already the
+                    # site root, so joining them naively looks for
+                    # public/ressources/de/... . Drop leading segments until it
+                    # resolves rather than hardcoding the prefix — this gate
+                    # runs on five repos with five different prefixes.
+                    segs = unquote(urlparse(loc.text).path).strip("/").split("/")
+                    child = None
+                    for i in range(len(segs)):
+                        cand = PUBLIC.joinpath(*segs[i:])
+                        if cand.is_file():
+                            child = cand
+                            break
+                    if child is None:
+                        err(f"sitemap index points at {loc.text}, which is not "
+                            f"in the build"); failures += 1
+                    else:
+                        try:
+                            urls += ET.parse(child).getroot().findall("sm:url", ns)
+                        except ET.ParseError as e:
+                            err(f"{child.name}: {e}"); failures += 1
+                if urls:
+                    print(f"  sitemap.xml is an index over "
+                          f"{len(root.findall('sm:sitemap', ns))} language sitemap(s)")
             # This compared against a hard-coded "~80+", a number carried over
             # from the one repo the check was written in. A threshold borrowed
             # from another site's page count is not a check of THIS site: it
@@ -92,7 +127,24 @@ def main() -> int:
             # holds about/. Comparing them raw marks every page missing, which
             # is a gate that fails loudest on the sites it understands least.
             # The homepage entry carries the prefix, so take it from there.
-            prefix = min(raw, key=len) if raw else ""
+            # The site's baseURL path, taken as the longest common SEGMENT
+            # prefix of every listed URL. The previous heuristic used the
+            # shortest listed path, which is the homepage on a monolingual site
+            # and /<prefix>/<defaultlang>/ on a multilingual one — so on
+            # ressources it stripped the language too and reported every page
+            # missing. Common-prefix gives "ressources" there, "daf" on daf,
+            # and "" on a site published at a domain root.
+            prefix = ""
+            if raw:
+                parts = [r.split("/") for r in raw]
+                common = []
+                for i in range(min(len(x) for x in parts)):
+                    seg = parts[0][i]
+                    if all(x[i] == seg for x in parts) and any(len(x) > i + 1 for x in parts):
+                        common.append(seg)
+                    else:
+                        break
+                prefix = "/".join(common)
             listed = {r[len(prefix):].strip("/") if prefix and r.startswith(prefix)
                       else r for r in raw}
             if not urls:
@@ -112,10 +164,25 @@ def main() -> int:
             print(f"  sitemap.xml: {len(urls)} URLs, {len(built)} built page(s), "
                   f"{len(missing)} omitted")
 
+    # A multilingual site with defaultContentLanguageInSubdir emits
+    # /de/index.xml, /en/index.xml and /fr/index.xml and nothing at the root.
+    # Nothing requires a root feed — a reader follows <link rel="alternate">
+    # from the page it is on — so demanding one failed a correct site. The 404
+    # is the opposite case and was fixed in the site rather than here: GitHub
+    # Pages serves the ROOT 404.html for any path it cannot resolve, so a site
+    # without one shows GitHub's generic page.
     rss = PUBLIC / "index.xml"
     if not rss.exists():
-        err("public/index.xml (RSS) missing"); failures += 1
-    else:
+        langs = sorted(f for f in PUBLIC.glob("*/index.xml"))
+        if langs:
+            print(f"  index.xml: {len(langs)} per-language feed(s) "
+                  f"({', '.join(f.parent.name for f in langs)}), no root feed — "
+                  f"correct for a site with defaultContentLanguageInSubdir")
+            rss = langs[0]
+        else:
+            err("public/index.xml (RSS) missing, and no per-language feed either")
+            failures += 1
+    if rss.exists():
         try:
             root = ET.fromstring(rss.read_text(encoding="utf-8"))
         except ET.ParseError as e:
