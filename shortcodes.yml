@@ -1,0 +1,168 @@
+# The closed shortcode set. Gate A19 fails a course using anything outside it.
+#
+# WHY CLOSED. Raw <div class="card"> in a Markdown file is invisible to every
+# tool that is not a browser: the LaTeX emitter never sees it, a future
+# renderer cannot style it, and nothing can tell you which pages use it. A
+# shortcode is a name the whole toolchain agrees on.
+#
+# EACH ENTRY SHIPS FOUR THINGS and is not done until all four exist:
+#   html      the renderer in layouts/_shortcodes/
+#   latex     the emitter symbol in latex/*.sty — a shortcode with no emitter
+#             silently vanishes from the printed worksheet
+#   a11y      the accessibility contract, checked in the BUILT html by A12/A14
+#   owns      the CSS class it emits
+#   kind      content (default) or furniture
+#
+# RAW MARKUP ON AN OWNED CLASS is a hard failure for a CONTENT shortcode and a
+# warning for FURNITURE, and the difference was measured rather than argued.
+# Content in a raw div is invisible to the LaTeX emitter and silently absent
+# from the printed worksheet. Furniture never reaches the emitter at all — it
+# globs unit content, and these blocks live on landing pages.
+#
+# And converting furniture is not free. Built and checked: a heading inside a
+# raw <div> reaches .TableOfContents, and the identical heading inside a
+# shortcode does not. Converting daf's 65 card blocks would drop 60 unit
+# headings out of five landing-page outlines to satisfy a rule that protects
+# something furniture cannot lose.
+
+version: 1
+
+shortcodes:
+
+  # ── the EQS five ───────────────────────────────────────────────────────────
+  - name: vocab
+    html: layouts/_shortcodes/vocab.html
+    latex: blgvocab
+    owns: [vocab]
+    a11y: >-
+      Per-column lang. A vocabulary table is the one place on a page where two
+      languages sit in adjacent cells, and without it a screen reader reads the
+      target terms in the chrome language's phonology — unusable for exactly
+      the learner who most needs audio. Plus <th scope="col">.
+
+  - name: niveau
+    html: layouts/_shortcodes/niveau.html
+    latex: blgniveau
+    owns: [niveau, niveau-badge]
+    a11y: >-
+      The letter must be TEXT. Colour is the only thing distinguishing G from M
+      from E at a glance, so a coloured chip alone fails anyone who cannot see
+      it.
+
+  - name: recycles
+    html: layouts/_shortcodes/recycles.html
+    latex: blgrecycles
+    owns: [recycles]
+    a11y: >-
+      The link text names the unit, never "here". An unresolved reference
+      renders visibly rather than as a broken link, and A12 fails on it.
+
+  - name: gap
+    html: layouts/_shortcodes/gap.html
+    latex: blggap
+    owns: [gap]
+    a11y: >-
+      aria-label, never a bare underscore run. This is the one where the naive
+      version is actively hostile: an empty bordered span is read as a sentence
+      with a word missing, so the learner never learns a task was there.
+
+  - name: extension
+    html: layouts/_shortcodes/extension.html
+    latex: blgextension
+    owns: [extension]
+    a11y: >-
+      <details>, so it is keyboard-reachable with no script, and its summary is
+      a real heading in the document outline. Additive only — A14 fails it
+      inside the Input step.
+
+  # ── the bidi mechanism ─────────────────────────────────────────────────────
+  - name: tl
+    html: layouts/_shortcodes/tl.html
+    latex: null
+    latex_deferred: >-
+      No emitter yet. \tl{} is specified to become a polyglossia language
+      switch, and polyglossia lands with bidi at wave 5 (ADR-0008). Until then
+      target-language runs print in the surrounding font, which is correct for
+      the four shipped Latin-script tiers and wrong for the first RTL course —
+      so this is declared, not forgotten.
+    owns: [tl]
+    a11y: "lang and dir on every run; <bdi> for Latin inside RTL. Gate C12."
+
+  # ── general-purpose, pre-dating EQS ────────────────────────────────────────
+  - name: callout
+    html: layouts/_shortcodes/callout.html
+    latex: null
+    latex_deferred: >-
+      No macro, and none is needed: the emitter handles callout and details
+      specially. strip_callouts() removes them from the body and answer_keys()
+      lifts the ones whose title names a solution into the worksheet's answer
+      box. So the content does not vanish — it is relocated, which is the
+      point of the block.
+    owns: [callout, callout-title, callout-body, callout-collapsible]
+    a11y: >-
+      collapse renders <details>; collapse without a title is ignored, because
+      a <details> with no <summary> gives the reader nothing to click.
+
+  - name: details
+    html: layouts/_shortcodes/details.html
+    latex: null
+    latex_deferred: "As callout — relocated by the emitter, not dropped."
+    owns: []
+    a11y: "Native <details>/<summary>; the title is a translated key."
+
+  - name: downloads
+    html: layouts/_shortcodes/downloads.html
+    latex: null
+    latex_deferred: "No-op by design — page.html renders downloads exactly once."
+    owns: []
+    a11y: "n/a — renders nothing."
+
+  - name: card
+    kind: furniture
+    html: layouts/_shortcodes/card.html
+    latex: null
+    latex_deferred: >-
+      Layout furniture on landing pages, which the emitter never reads: it
+      globs unit content only.
+    owns: [card]
+    a11y: "n/a"
+
+  - name: card-grid
+    kind: furniture
+    html: layouts/_shortcodes/card-grid.html
+    latex: null
+    latex_deferred: "As card."
+    owns: [card-grid]
+    a11y: "n/a"
+
+  - name: hero
+    kind: furniture
+    html: layouts/_shortcodes/hero.html
+    latex: null
+    latex_deferred: "As card."
+    owns: [hero, hero-kicker, hero-block]
+    a11y: "n/a"
+
+  - name: kicker
+    kind: furniture
+    html: layouts/_shortcodes/kicker.html
+    latex: null
+    latex_deferred: "As card."
+    owns: [kicker]
+    a11y: "n/a"
+
+  - name: lead
+    kind: furniture
+    html: layouts/_shortcodes/lead.html
+    latex: null
+    latex_deferred: "As card."
+    owns: [lead]
+    a11y: "n/a"
+
+  - name: languages
+    kind: furniture
+    html: layouts/_shortcodes/languages.html
+    latex: null
+    latex_deferred: "Hub-only; the emitter never reads the hub."
+    owns: [language-list, language-dot, language-status]
+    a11y: "The accent dot is decorative and aria-hidden; the name is the link."

@@ -293,17 +293,25 @@ gates:
 - id: A19
   title: shortcode contract
   owner: kit
-  scripts: []
+  scripts: [scripts/verify_shortcode_contract.py]
   needs: source
-  severity: warn
-  ramp: as A12
-  status: planned
-  booked: S6
-  battery: false
+  severity: blocking
+  status: live
+  battery: true
   note: >-
-    Raw HTML is invisible to the LaTeX emitter. efl carries 180 files with
-    <div class="notes">, fle 198 raw divs across 25 files, daf ~95 across 17 —
-    every one a block that silently vanishes from the worksheet.
+    Checks three things: raw markup on a class a CONTENT shortcode owns, a
+    shortcode used but not declared in kit/shortcodes.yml, and a declared
+    shortcode whose LaTeX emitter symbol no .sty defines. The third found two
+    on its first run — callout and details declared emitters that do not
+    exist, because the emitter relocates those blocks rather than typesetting
+    them.
+
+    Content and furniture are separated, and the line was measured not argued:
+    built and checked, a heading inside a raw <div> reaches .TableOfContents
+    and the identical heading inside a shortcode does not. Converting daf's 65
+    card blocks would drop 60 unit headings out of five landing-page outlines
+    to satisfy a rule that protects the printed worksheet — which furniture
+    never reaches, because the emitter globs unit content only.
 
 # ── Stage B · build ──────────────────────────────────────────────────────────
 
