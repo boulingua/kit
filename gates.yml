@@ -162,16 +162,23 @@ gates:
 - id: A10
   title: contrast and accent separation
   owner: kit
-  scripts: []
+  scripts: [scripts/verify_contrast.py]
   needs: source
-  severity: warn
-  ramp: >-
-    Blocking org-wide when S5 lands. Measured today it fails on 10 of 18
-    accents, which is why S5 exists; turning it on first would red every repo
-    for a defect none of them introduced.
-  status: planned
-  booked: S5
-  battery: false
+  severity: blocking
+  status: live
+  battery: true
+  note: >-
+    Its ramp condition is met: S5 re-derived the palette, so the gate that was
+    waiting for it is blocking. Ten of eighteen accents were below 4.5:1 on
+    white and eight pairs sat under 15°; the worst figures now are 4.62:1 and
+    16.4°.
+
+    It measures tokens.yaml, not the round-tripped hex, and that distinction
+    earned itself during S5: the solver converged on 17° of separation, wrote
+    8-bit hex, and read back 11.3°. Darkening a saturated colour at constant
+    chroma walks it out of the sRGB gamut and clamping the channels does not
+    preserve the hue. Raising the solve margin made it worse, which is what
+    finally identified the cause.
 
 - id: A11
   title: brand assets
