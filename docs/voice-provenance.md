@@ -96,3 +96,29 @@ are withheld — `file` moved to `file_withheld`, transcripts still rendering,
 recordings still on disk. Every clip has a transcript, verified, so this costs
 the audio and no teaching content. Restoring is one command once the clips are
 regenerated.
+
+### How the replacements were verified
+
+A fan-out searched the catalogue per language and independently proposed the
+same five voices. Its adversarial confirmation stage then returned nothing —
+seven of twelve agents produced empty results — so the candidates were never
+attacked by a second reader, and that is worth writing down rather than
+letting the phase's existence imply it ran.
+
+What stands in its place is direct verification at primary sources, per voice:
+the MODEL_CARD for the Training line, and the dataset's own page for the
+licence, because a model card can be stale or wrong about someone else's data.
+
+  no_NO-nvcc  model card + nb.no sbr-75 catalogue page, live, CC0
+  fr_FR-mls   model card + openslr.org/94, CC BY 4.0
+  de_DE-mls   model card; same openslr.org/94 corpus, licence checked once
+  nl_NL-mls   model card; same corpus
+  en_GB-cori  model card + LibriVox public-domain dedication
+
+The MLS licence was verified once at the corpus and applied to all three MLS
+voices, which is sound because it is literally the same dataset — and worth
+stating so nobody reads three checks where one was done.
+
+MLS being CC BY 4.0 while derived from public-domain LibriVox is not a
+contradiction: the attribution attaches to the compilation, not to the
+underlying recordings. We attribute MLS, which is what the licence asks.
