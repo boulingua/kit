@@ -215,13 +215,44 @@ gates:
 - id: A13
   title: assessment arithmetic
   owner: kit
-  scripts: []
+  scripts: [scripts/verify_assessment.py]
   needs: source
-  severity: warn
-  ramp: as A12
-  status: planned
-  booked: S6
-  battery: false
+  severity: blocking
+  status: live
+  battery: true
+  note: >-
+    Reads the BODY, not the front matter. No exam page in this organisation
+    carries total_points or notenschluessel, so a gate written against those
+    fields would have examined nothing across 336 exams and reported success.
+    The data is where the author wrote it: a stated total, per-task BE
+    headings, and a grading-scale callout.
+
+    Verifies 168 efl papers: tasks sum to the stated total, and the
+    Notenschlüssel partitions 0…total with no gap and no overlap. A gap means a
+    pupil with that mark has no grade; an overlap means they have two.
+
+    Twelve Kl 13 papers are declared exam_scope: rehearsal — they drill one
+    section of the 90-BE Klausur and state no total of their own. Declared, not
+    inferred from prose: inferring would let a genuinely incomplete paper hide
+    behind a keyword.
+
+- id: A15
+  title: inclusion and sourcing
+  owner: kit
+  scripts: [scripts/verify_inclusion.py]
+  needs: source
+  severity: blocking
+  status: partial
+  gap: >-
+    Half of EQS 5.5, and the half that is missing is missing for a stated
+    reason. Sourcing and speaker-name consistency are checked across all 396
+    units. Gender share and cast-fact consistency are NOT, because they need a
+    declared cast with declared attributes and no repo has one — the audio
+    manifests carry file, label and transcript and nothing else. Inferring
+    gender from a first name would be unreliable in German and French and
+    inappropriate in any language, so the gate reports the absence rather than
+    manufacturing a number. The fix is a cast declaration, which is authoring.
+  battery: true
 
 - id: A14
   title: differentiation
@@ -236,17 +267,6 @@ gates:
     output_words bands, strictly increasing openness and the no-forked-input
     rule are not.
   battery: true
-
-- id: A15
-  title: inclusion and sourcing
-  owner: kit
-  scripts: []
-  needs: source
-  severity: warn
-  ramp: as A12
-  status: planned
-  booked: S6
-  battery: false
 
 - id: A16
   title: conformance resolution
