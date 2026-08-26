@@ -348,32 +348,56 @@ def cmd_new(a) -> int:
               file=sys.stderr)
         return 1
     dest = Path(a.into or a.code).resolve()
-    if dest.exists() and any(dest.iterdir()):
-        print(f"::error::{dest} exists and is not empty", file=sys.stderr)
-        return 1
+    # A scaffold is not an obstacle. All fifteen queued languages already exist
+    # as repos holding LICENSE, README.md, ROADMAP.md and a brand mark, and the
+    # ROADMAP is real authored work — several hundred lines of language-specific
+    # decisions that Stage 1 reads rather than replaces. Refusing a non-empty
+    # directory meant the one command that creates a course could not be run on
+    # any of the courses waiting to be created.
+    #
+    # What is still refused is OVERWRITING. Anything already present is left
+    # exactly as it is and reported, so a second run adds what is missing and
+    # changes nothing else.
+    dest.mkdir(parents=True, exist_ok=True)
+    existing = sorted(q.relative_to(dest).as_posix() for q in dest.rglob("*")
+                      if q.is_file() and ".git" not in q.parts)
+    kept = []
+
+    def put(rel: str, text: str | None = None, copy_from: Path | None = None):
+        q = dest / rel
+        if q.exists():
+            kept.append(rel)
+            return False
+        q.parent.mkdir(parents=True, exist_ok=True)
+        if copy_from is not None:
+            shutil.copy2(copy_from, q)
+        else:
+            q.write_text(text or "", encoding="utf-8")
+        return True
     (dest / "content").mkdir(parents=True, exist_ok=True)
-    (dest / ".github" / "workflows").mkdir(parents=True, exist_ok=True)
     cfg = (KIT / "templates" / "boulingua.yml").read_text(encoding="utf-8")
-    (dest / "boulingua.yml").write_text(cfg.replace("code: template", f"code: {a.code}"),
-                                        encoding="utf-8")
+    put("boulingua.yml", cfg.replace("code: template", f"code: {a.code}"))
     hugo = (KIT / "hugo.defaults.toml").read_text(encoding="utf-8")
     hugo = hugo.replace('code = "template"', f'code = "{a.code}"')
     hugo = hugo.replace("https://boulingua.github.io/CHANGEME/",
                         f"https://boulingua.github.io/{a.code}/")
-    (dest / "hugo.toml").write_text(hugo, encoding="utf-8")
-    (dest / "go.mod").write_text(
-        f"module github.com/boulingua/{a.code}\n\ngo 1.26.1\n", encoding="utf-8")
-    shutil.copy2(KIT / "templates" / "deploy.yml", dest / ".github" / "workflows" / "deploy.yml")
+    put("hugo.toml", hugo)
+    put("go.mod", f"module github.com/boulingua/{a.code}\n\ngo 1.26.1\n")
+    put(".github/workflows/deploy.yml",
+        copy_from=KIT / "templates" / "deploy.yml")
     # Course-owned data files are COPIED, never inherited from the module. A
     # data file the kit ships and a course also owns makes Hugo warn about
     # shadowing, and --panicOnWarning turns that warning into a failed build on
     # the day the course adopts the module.
     src = KIT / "templates" / "course-data"
     if src.is_dir():
-        (dest / "data").mkdir(parents=True, exist_ok=True)
         for f in sorted(src.glob("*.yaml")):
-            shutil.copy2(f, dest / "data" / f.name)
-    print(f"  {dest.name}/ created — content/, data/, boulingua.yml, hugo.toml, go.mod, deploy.yml")
+            put(f"data/{f.name}", copy_from=f)
+    if kept:
+        print(f"  {len(kept)} file(s) already present and left untouched: "
+              + ", ".join(kept[:6]) + (" …" if len(kept) > 6 else ""))
+    print(f"  {dest.name}/ scaffolded — boulingua.yml, hugo.toml, go.mod, "
+          f"content/, data/, deploy.yml")
     print("  no layouts/, no assets/, no scripts/: those arrive as a Hugo module.")
     return 0
 

@@ -142,5 +142,16 @@ enableRobotsTXT = true
   url = "/haftungsausschluss/"
 
 [module]
+  # Import order is load-bearing, and it is the opposite of what reads
+  # naturally. Hugo resolves module files FIRST-MATCH-WINS in listed order, so
+  # the kit must come BEFORE hugo-coder to override it — the theme ships its own
+  # empty body/extensions.html and head/extensions.html stubs, and listed second
+  # the kit is never reached. On a course with registered VG Wort marks that
+  # removes every counting pixel from the site on a green build.
+  #
+  # The kit was missing from this template entirely, so every course scaffolded
+  # from it would have been created without the platform.
+  [[module.imports]]
+    path = "github.com/boulingua/kit"
   [[module.imports]]
     path = "github.com/luizdepra/hugo-coder"
