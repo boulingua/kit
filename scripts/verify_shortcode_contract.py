@@ -41,6 +41,17 @@ USED = re.compile(r"\{\{<\s*/?\s*([a-z][a-z0-9_-]*)")
 def main() -> int:
     repo = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path.cwd()
     decl = yaml.safe_load((KIT / "shortcodes.yml").read_text(encoding="utf-8"))["shortcodes"]
+    # A repo may ship a shortcode the kit does not — website's {{< worldmap >}}
+    # renders a map no course has. Closed means "declared somewhere", not
+    # "declared in the kit": a course inventing one silently is the failure,
+    # and a course declaring one in its own file has done exactly what the
+    # contract asks. Its entries carry the same four requirements.
+    local = repo / "shortcodes.yml"
+    if local.exists():
+        extra = (yaml.safe_load(local.read_text(encoding="utf-8")) or {}).get("shortcodes") or []
+        for e in extra:
+            e["_local"] = True
+        decl = decl + extra
     names = {d["name"] for d in decl}
     owned = {c: d for d in decl for c in (d.get("owns") or [])}
 
@@ -52,7 +63,11 @@ def main() -> int:
     for d in decl:
         sym = d.get("latex")
         if sym:
-            if not re.search(rf"\\(newcommand|newenvironment|newtcolorbox)\{{?\\?{re.escape(sym)}\b", sty):
+            hay = sty
+            if d.get("_local"):
+                hay += "\n".join(p.read_text(encoding="utf-8", errors="replace")
+                                  for p in (repo / "latex").glob("*.sty")) if (repo / "latex").is_dir() else ""
+            if not re.search(rf"\\(newcommand|newenvironment|newtcolorbox)\{{?\\?{re.escape(sym)}\b", hay):
                 bad.append(f"shortcodes.yml: {d['name']} declares LaTeX emitter "
                            f"{sym!r}, which no .sty defines. A block with no "
                            f"emitter renders on the page and vanishes from the "
@@ -103,8 +118,11 @@ def main() -> int:
     if bad:
         print(f"\nA19 FAIL — {len(bad)} problem(s)", file=sys.stderr)
         return 1
-    print(f"A19 OK — {len(names)} declared shortcode(s), every emitter present or "
-          f"deferred with a reason, no raw markup on an owned class")
+    n_local = sum(1 for d in decl if d.get("_local"))
+    print(f"A19 OK — {len(names)} declared shortcode(s)"
+          + (f" ({n_local} declared by this repo)" if n_local else "")
+          + f", every emitter present or deferred with a reason, no raw markup "
+            f"on an owned class")
     return 0
 
 
