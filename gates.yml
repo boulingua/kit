@@ -299,16 +299,26 @@ gates:
 - id: A18
   title: marked non-unit page contract
   owner: kit
-  scripts: []
+  scripts: [scripts/verify_page_contract.py]
   needs: source
   severity: blocking
-  status: planned
-  booked: P3.1
-  battery: false
+  status: live
+  battery: true
   note: >-
-    Closes the hole EQS leaves. efl marks /appendices/*, /about and /references;
-    daf marks content/anhaenge/*, danksagung and formate. Revenue-bearing pages
-    that no gate examines.
+    EQS-1 governs units and says nothing about the other 89 marked pages in
+    this organisation — glossaries, appendices, about pages. They carry
+    registered marks exactly as units do and nothing examined them at all.
+
+    It fails, and the findings are real: 20 marked pages below VG Wort's 1,800
+    character Mindestumfang, 11 marked pages whose page_type is section, 9 with
+    no author, and 22 fle pages that carry a mark while saying the content is
+    still to come.
+
+    The sources requirement is a WARNING, not a failure. Whether a page owes
+    sources depends on whether it makes claims about the world, and a gate
+    cannot tell a glossary of the course's own terminology from an appendix
+    summarising external facts. Failing 48 pages on that distinction would
+    teach people to stop reading the output.
 
 - id: A19
   title: shortcode contract
@@ -420,12 +430,11 @@ gates:
 - id: C3
   title: no mark on hub, paginated or legal pages
   owner: kit
-  scripts: []
+  scripts: [scripts/verify_pixel_delivery.py]
   needs: built
   severity: blocking
-  status: planned
-  booked: P0.8 follow-up
-  battery: false
+  status: live
+  battery: true
 
 - id: C4
   title: Mindestumfang coverage
@@ -445,27 +454,27 @@ gates:
 - id: C5
   title: pixel delivery shape
   owner: kit
-  scripts: []
+  scripts: [scripts/verify_pixel_delivery.py]
   needs: built
   severity: blocking
-  status: planned
-  booked: P0.8 follow-up
-  battery: false
+  status: live
+  battery: true
   note: >-
-    One preload, one eager img, zero loading=lazy on a met.vgwort.de src, no
-    display:none ancestor, no script injection. A lazily-loaded counting pixel
-    is registered, present in the HTML, and earns nothing.
+    A2 and C2 prove a mark is PRESENT. VG Wort counts a request, not a tag, and
+    every failure here produces a page that looks correct in a diff, renders
+    correctly in a browser, and earns nothing: loading="lazy" on a 1x1 pixel
+    positioned off-screen is exactly what a lazy loader declines to fetch; a
+    display:none ancestor stops the fetch where visibility:hidden does not; a
+    script-injected pixel does not exist for a reader with JS off.
 
 - id: C6
   title: rendered length floor
   owner: kit
-  scripts: []
-  needs: built
-  severity: warn
-  ramp: as C4 — blocking on new marked pages
-  status: planned
-  booked: S6
-  battery: false
+  scripts: [scripts/verify_page_contract.py]
+  needs: source
+  severity: blocking
+  status: live
+  battery: true
 
 - id: C7
   title: rendered placeholders
