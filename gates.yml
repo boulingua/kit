@@ -649,11 +649,19 @@ gates:
     half is not: manifest-to-disk both ways, transcript non-empty, source in
     {tts,human}, one channel at 64 kbit/s.
 
-    It fails today, and the failure is real: efl, fle and daf are all marked
-    status: ready and none has an audition file, while between them they ship
-    323 audio manifests. Three live courses published synthetic audio with no
-    recorded verdict that the voice is acceptable to put in front of a child.
-    Nobody can fix that by editing a gate; somebody has to listen.
+    It fails today on two counts and both are real.
+
+    No audition: efl, fle and daf are all marked status: ready and none has an
+    audition file, while between them they ship 323 audio manifests. Somebody
+    has to listen.
+
+    PROVENANCE: all five voices this organisation has selected — including all
+    three that have shipped audio — are fine-tuned from en_US-lessac-medium,
+    whose training corpus is non-commercial only and non-sublicensable. Each
+    advertises an allowlist-clean DATASET licence, so the registry's licence
+    check passed every one of them; the encumbrance is in the model card's
+    Training line, which the registry had no field for. A sweep of the upstream
+    catalogue found 76 of 175 voices in the same position.
   battery: true
   note: >-
     Licences are matched AFTER normalising. The registry spells one licence

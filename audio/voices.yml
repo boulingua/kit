@@ -212,6 +212,15 @@ languages:
     licence: CC BY-NC-SA 4.0
     licence_ok: false
   piper_key: en_GB-alba-medium
+  base_model: en_US-lessac-medium
+  provenance: blocked
+  provenance_note: >-
+    Its MODEL_CARD Training line reads "Finetuned from U.S. English
+    lessac voice". That base is trained on the Blizzard 2013 Lessac
+    corpus, which is non-commercial only and non-sublicensable, so the
+    derived weights cannot produce audio distributable under
+    CC BY-SA 4.0. Verified against the model card on 2026-08-26; see
+    docs/voice-provenance.md.
   tts_lang: en
   url: https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/alba/medium/en_GB-alba-medium.onnx
   md5: c07f313752bb3aba8061041666251654
@@ -262,6 +271,15 @@ languages:
     licence: AGPLv3
     licence_ok: false
   piper_key: fr_FR-siwis-medium
+  base_model: en_US-lessac-medium
+  provenance: blocked
+  provenance_note: >-
+    Its MODEL_CARD Training line reads "Finetuned from U.S. English
+    lessac voice". That base is trained on the Blizzard 2013 Lessac
+    corpus, which is non-commercial only and non-sublicensable, so the
+    derived weights cannot produce audio distributable under
+    CC BY-SA 4.0. Verified against the model card on 2026-08-26; see
+    docs/voice-provenance.md.
   tts_lang: fr
   url: https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/siwis/medium/fr_FR-siwis-medium.onnx
   md5: 20e876e8c839e9b11a26085858f2300c
@@ -332,6 +350,15 @@ languages:
     licence: See URL
     licence_ok: false
   piper_key: de_DE-thorsten-medium
+  base_model: en_US-lessac-medium
+  provenance: blocked
+  provenance_note: >-
+    Its MODEL_CARD Training line reads "Finetuned from U.S. English
+    lessac voice". That base is trained on the Blizzard 2013 Lessac
+    corpus, which is non-commercial only and non-sublicensable, so the
+    derived weights cannot produce audio distributable under
+    CC BY-SA 4.0. Verified against the model card on 2026-08-26; see
+    docs/voice-provenance.md.
   tts_lang: de
   url: https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/medium/de_DE-thorsten-medium.onnx
   md5: a129b00fb3078df43c96bab6c94535c0
@@ -629,6 +656,15 @@ languages:
     licence: CC0
     licence_ok: true
   piper_key: no_NO-talesyntese-medium
+  base_model: en_US-lessac-medium
+  provenance: blocked
+  provenance_note: >-
+    Its MODEL_CARD Training line reads "Finetuned from U.S. English
+    lessac voice". That base is trained on the Blizzard 2013 Lessac
+    corpus, which is non-commercial only and non-sublicensable, so the
+    derived weights cannot produce audio distributable under
+    CC BY-SA 4.0. Verified against the model card on 2026-08-26; see
+    docs/voice-provenance.md.
   tts_lang: 'no'
   url: https://huggingface.co/rhasspy/piper-voices/resolve/main/no/no_NO/talesyntese/medium/no_NO-talesyntese-medium.onnx
   md5: 9fc876e7edc6593086b4f2f34889f44b
@@ -697,6 +733,15 @@ languages:
     licence: CC0 1.0 Universal
     licence_ok: true
   piper_key: nl_NL-ronnie-medium
+  base_model: en_US-lessac-medium
+  provenance: blocked
+  provenance_note: >-
+    Its MODEL_CARD Training line reads "Finetuned from U.S. English
+    lessac voice". That base is trained on the Blizzard 2013 Lessac
+    corpus, which is non-commercial only and non-sublicensable, so the
+    derived weights cannot produce audio distributable under
+    CC BY-SA 4.0. Verified against the model card on 2026-08-26; see
+    docs/voice-provenance.md.
   tts_lang: nl
   url: https://huggingface.co/rhasspy/piper-voices/resolve/main/nl/nl_NL/ronnie/medium/nl_NL-ronnie-medium.onnx
   md5: f74c8e7779cb05f935367d661de5b380

@@ -101,6 +101,28 @@ def main() -> int:
             bad.append(f"{code}: status ready with no licence at all — this is the "
                        f"state where audio gets generated from an unknown model")
 
+        # PROVENANCE, which is a different question from the dataset licence
+        # and the one the registry was not asking. Every voice this
+        # organisation has shipped audio with advertises an allowlist-clean
+        # dataset — CC0, CC BY 4.0 — while its Training line reads "Finetuned
+        # from U.S. English lessac voice". That base is trained on the Blizzard
+        # 2013 corpus, which is non-commercial only and non-sublicensable, and
+        # upstream's own ku_TR-berfin_renas-medium declares the identical
+        # derivation CC BY-NC 4.0 for exactly that reason.
+        #
+        # A sweep of the upstream catalogue found 76 of 175 voices in this
+        # position. Reading only the dataset line passes all 76.
+        if r.get("provenance") == "blocked":
+            bad.append(f"{code}: {r.get('piper_key')} is provenance-blocked — "
+                       f"{r.get('base_model')} descends from a non-commercial "
+                       f"corpus, and this course publishes under CC BY-SA 4.0, "
+                       f"which grants downstream commercial use. See "
+                       f"docs/voice-provenance.md.")
+        elif raw_lic and not r.get("base_model") and status in ("ready", "candidate"):
+            notes.append(f"{code}: no base_model recorded. The dataset licence is "
+                         f"not the whole question — check the model card's Training "
+                         f"line before this reaches ready.")
+
         aud = root / "audio" / "auditions" / f"{code}.md"
         if status == "ready":
             if not aud.exists():
