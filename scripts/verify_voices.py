@@ -118,10 +118,22 @@ def main() -> int:
                        f"corpus, and this course publishes under CC BY-SA 4.0, "
                        f"which grants downstream commercial use. See "
                        f"docs/voice-provenance.md.")
-        elif raw_lic and not r.get("base_model") and status in ("ready", "candidate"):
+        elif raw_lic and "base_model" not in r and status in ("ready", "candidate"):
             notes.append(f"{code}: no base_model recorded. The dataset licence is "
                          f"not the whole question — check the model card's Training "
                          f"line before this reaches ready.")
+        elif r.get("base_model") and r.get("provenance") == "clean":
+            # A named base that is nonetheless clean has to say why. lessac is
+            # not the only encumbered base: en_US-ryan is trained from scratch
+            # and its corpus is CC BY-NC-SA 4.0, so a check that only greps for
+            # "lessac" passes every ryan derivative. base_model: null is not
+            # evidence on its own — the base's own dataset licence is the
+            # question.
+            if not str(r.get("provenance_note", "")).strip():
+                bad.append(f"{code}: declares base_model {r['base_model']} and "
+                           f"provenance clean with no note. A fine-tune is clean "
+                           f"only if the BASE's dataset licence permits it, and "
+                           f"that reasoning has to be written down.")
 
         aud = root / "audio" / "auditions" / f"{code}.md"
         if status == "ready":

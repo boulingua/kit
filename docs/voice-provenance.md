@@ -122,3 +122,34 @@ stating so nobody reads three checks where one was done.
 MLS being CC BY 4.0 while derived from public-domain LibriVox is not a
 contradiction: the attribution attaches to the compilation, not to the
 underlying recordings. We attribute MLS, which is what the licence asks.
+
+## Two more traps, found while searching for replacements
+
+**lessac is not the only encumbered base.** `en_US-ryan` is itself "Trained
+from scratch" and therefore passes a naive provenance check — but its corpus,
+RyanSpeech, is **CC BY-NC-SA 4.0**. Non-commercial taint transfers through it
+exactly as Blizzard's does through lessac. In `en_GB`, *every* fine-tune in the
+catalogue is encumbered by one of those two datasets; `cori` is the only
+escape. So `base_model: null` is not sufficient evidence of cleanliness — the
+base's own dataset licence has to be read too, and a provenance check that only
+greps for "lessac" will pass ryan derivatives.
+
+**Near-identical names, opposite verdicts.** `en_US-libritts-high` is clean —
+"Trained from scratch on train-clean-360", CC BY 4.0, verified at openslr.org/60.
+`en_US-libritts_r-medium` is **not** — "Fine-tuned from English lessac medium on
+train-clean-360". One underscore and one letter apart, and on opposite sides of
+the licence question.
+
+## LibriVox, verified at source
+
+WebFetch gets a 403 from librivox.org; a plain request with a browser
+user-agent returns the page. Its own words: "all our recordings are public
+domain… anyone can use all our recordings however they wish (even to sell
+them)", and "there is no need to credit LibriVox". Commercial use is granted
+explicitly, which is what CC BY-SA 4.0 requires us to be able to pass on.
+
+One honest caveat, materially smaller than the lessac problem: LibriVox asserts
+public domain **under US law**, and the underlying pre-1923 texts may remain in
+copyright elsewhere. The readers' performances are dedicated outright; the
+residual risk attaches only to source texts. That is a jurisdictional nuance,
+not an active non-commercial restriction.
