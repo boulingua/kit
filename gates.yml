@@ -636,14 +636,30 @@ gates:
     pre-flight against the cmap, post-flight for glyph id 0 and U+FFFD.
 
 - id: D6
-  title: audio manifest
+  title: audio manifest and voice audition
   owner: kit
-  scripts: []
-  needs: audio
+  scripts: [scripts/verify_voices.py]
+  needs: source
   severity: blocking
-  status: planned
-  booked: F6 follow-up
-  battery: false
+  status: partial
+  gap: >-
+    The AUDITION half is implemented — status ready requires an audition file
+    with a pass verdict, a named listener and a date, and a passed audition
+    with a non-ready status is a disagreement rather than a pass. The MANIFEST
+    half is not: manifest-to-disk both ways, transcript non-empty, source in
+    {tts,human}, one channel at 64 kbit/s.
+
+    It fails today, and the failure is real: efl, fle and daf are all marked
+    status: ready and none has an audition file, while between them they ship
+    323 audio manifests. Three live courses published synthetic audio with no
+    recorded verdict that the voice is acceptable to put in front of a child.
+    Nobody can fix that by editing a gate; somebody has to listen.
+  battery: true
+  note: >-
+    Licences are matched AFTER normalising. The registry spells one licence
+    three ways — CC-BY 4.0, CC-BY-4.0 and a bare creativecommons.org URL — and
+    an exact-string allowlist flagged seven codes of which four are fine. A
+    gate that fails a course over a hyphen teaches people to ignore it.
 
 # ── Stage E · deploy ─────────────────────────────────────────────────────────
 
