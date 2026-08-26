@@ -393,6 +393,34 @@ def cmd_new(a) -> int:
     if src.is_dir():
         for f in sorted(src.glob("*.yaml")):
             put(f"data/{f.name}", copy_from=f)
+
+    # The statutory pages. An Impressum under § 5 DDG and a
+    # Datenschutzerklärung under Art. 13 DSGVO are not optional for a site
+    # published from Germany, and they are the one real legal exposure here.
+    #
+    # They carry the author's actual details — the same author for every course
+    # in this organisation — so they are INHERITED rather than scaffolded as
+    # blanks. A blank that must be filled before publishing is a blank that
+    # gets published: the kit's own example still carries its ⟨…⟩ and needs a
+    # declared exception to stop A5 failing on it.
+    lic = "CC BY-SA 4.0"
+    cfgf = dest / "boulingua.yml"
+    if cfgf.exists():
+        import yaml as _y
+        lic = (_y.safe_load(cfgf.read_text(encoding="utf-8")) or {}).get(
+            "content_licence", lic)
+    legal = KIT / "templates" / "course-content"
+    if legal.is_dir():
+        for f in sorted(legal.glob("*.md")):
+            if f.name == "README.md":
+                continue
+            put(f"content/{f.name}",
+                f.read_text(encoding="utf-8").replace("{{CONTENT_LICENCE}}", lic))
+
+    # A landing page, so the course has a home before it has units.
+    put("content/_index.md",
+        f"---\npage_type: section\ntitle: \"{a.code}\"\n---\n\n"
+        f"This course has no published units yet.\n")
     if kept:
         print(f"  {len(kept)} file(s) already present and left untouched: "
               + ", ".join(kept[:6]) + (" …" if len(kept) > 6 else ""))
