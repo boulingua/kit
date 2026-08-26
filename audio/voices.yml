@@ -643,10 +643,10 @@ languages:
   iso: false
   status: candidate
   quality: medium
-  num_speakers: 1
+  num_speakers: 10
   licence: CC0
   dataset: https://www.nb.no/sprakbanken/en/resource-catalogue/oai-nb-no-sbr-15/
-  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/no/no_NO/talesyntese/medium/no_NO-talesyntese-medium.onnx
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/no/no_NO/nvcc/medium/no_NO-nvcc-medium.onnx
   note: Bokmål. CC0, no obligation. no_NO-nvcc-medium (CC0, 10 speakers) covers dialogues needing more
     than one voice.
   alternatives:
@@ -655,9 +655,9 @@ languages:
     num_speakers: 10
     licence: CC0
     licence_ok: true
-  piper_key: no_NO-talesyntese-medium
-  base_model: en_US-lessac-medium
-  provenance: blocked
+  piper_key: no_NO-nvcc-medium
+  base_model: null   # trained from scratch
+  provenance: clean
   provenance_note: >-
     Its MODEL_CARD Training line reads "Finetuned from U.S. English
     lessac voice". That base is trained on the Blizzard 2013 Lessac
