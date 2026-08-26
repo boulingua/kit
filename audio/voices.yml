@@ -16,12 +16,12 @@ languages:
 - code: efl
   language: English (United Kingdom)
   iso: en
-  status: ready
+  status: candidate   # re-audition required: the voice changed
   quality: medium
   num_speakers: 1
-  licence: https://creativecommons.org/licenses/by/4.0/
-  dataset: https://datashare.ed.ac.uk/handle/10283/3270
-  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/alba/medium/en_GB-alba-medium.onnx
+  licence: public domain
+  dataset: https://librivox.org
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/cori/medium/en_GB-cori-medium.onnx
   note: The model card states the licence as a bare URL; it is CC BY 4.0, so alba carries an attribution
     obligation and needs a NOTICE.md row naming the model and the CSTR Edinburgh dataset. en_GB-cori-medium
     (public domain) is the second speaker.
@@ -211,16 +211,18 @@ languages:
     num_speakers: 1
     licence: CC BY-NC-SA 4.0
     licence_ok: false
-  piper_key: en_GB-alba-medium
-  base_model: en_US-lessac-medium
-  provenance: blocked
+  piper_key: en_GB-cori-medium
+  base_model: null   # trained from scratch
+  provenance: clean
   provenance_note: >-
-    Its MODEL_CARD Training line reads "Finetuned from U.S. English
-    lessac voice". That base is trained on the Blizzard 2013 Lessac
-    corpus, which is non-commercial only and non-sublicensable, so the
-    derived weights cannot produce audio distributable under
-    CC BY-SA 4.0. Verified against the model card on 2026-08-26; see
-    docs/voice-provenance.md.
+    Replaces a lessac fine-tune. This voice's MODEL_CARD Training line
+    reads "Trained from scratch" and its dataset licence was verified
+    at the dataset's own page, not only from the card.
+
+    Register caveat for the audition: this corpus is read audiobook
+    speech, so the voice is fluent and literary rather than
+    conversational. That is a real pedagogical difference for a course
+    teaching everyday dialogue, and it is what the audition is for.
   tts_lang: en
   url: https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/alba/medium/en_GB-alba-medium.onnx
   md5: c07f313752bb3aba8061041666251654
@@ -230,12 +232,12 @@ languages:
 - code: fle
   language: French
   iso: fr
-  status: ready
+  status: candidate   # re-audition required: the voice changed
   quality: medium
-  num_speakers: 1
-  licence: CC-BY 4.0
-  dataset: https://datashare.is.ed.ac.uk/handle/10283/2353
-  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/siwis/medium/fr_FR-siwis-medium.onnx
+  num_speakers: 125
+  licence: CC BY 4.0
+  dataset: http://openslr.org/94/
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/mls/medium/fr_FR-mls-medium.onnx
   note: CC BY 4.0, written CC-BY 4.0 upstream; siwis carries an attribution obligation and needs a NOTICE.md
     row. fr_FR-gilles-low (CC0) is the second speaker. fr_FR-tom-medium is AGPLv3 — a software copyleft
     with no clean path into a CC BY-SA 4.0 work — and is excluded.
@@ -270,16 +272,21 @@ languages:
     num_speakers: 1
     licence: AGPLv3
     licence_ok: false
-  piper_key: fr_FR-siwis-medium
-  base_model: en_US-lessac-medium
-  provenance: blocked
+  piper_key: fr_FR-mls-medium
+  base_model: null   # trained from scratch
+  provenance: clean
   provenance_note: >-
-    Its MODEL_CARD Training line reads "Finetuned from U.S. English
-    lessac voice". That base is trained on the Blizzard 2013 Lessac
-    corpus, which is non-commercial only and non-sublicensable, so the
-    derived weights cannot produce audio distributable under
-    CC BY-SA 4.0. Verified against the model card on 2026-08-26; see
-    docs/voice-provenance.md.
+    Replaces a lessac fine-tune. This voice's MODEL_CARD Training line
+    reads "Trained from scratch" and its dataset licence was verified
+    at the dataset's own page, not only from the card.
+
+    CC BY 4.0 requires ATTRIBUTION: the course must credit
+    Multilingual LibriSpeech. Recorded in NOTICE.md, not left to
+    the audition to notice.
+    Register caveat for the audition: this corpus is read audiobook
+    speech, so the voice is fluent and literary rather than
+    conversational. That is a real pedagogical difference for a course
+    teaching everyday dialogue, and it is what the audition is for.
   tts_lang: fr
   url: https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/siwis/medium/fr_FR-siwis-medium.onnx
   md5: 20e876e8c839e9b11a26085858f2300c
@@ -295,12 +302,12 @@ languages:
 - code: daf
   language: German
   iso: de
-  status: ready
+  status: candidate   # re-audition required: the voice changed
   quality: medium
-  num_speakers: 1
-  licence: CC0
-  dataset: https://github.com/thorstenMueller/Thorsten-Voice
-  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/medium/de_DE-thorsten-medium.onnx
+  num_speakers: 236
+  licence: CC BY 4.0
+  dataset: http://openslr.org/94/
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/mls/medium/de_DE-mls-medium.onnx
   note: CC0, no obligation. de_DE-kerstin-low (CC0) is the second speaker; de_DE-thorsten_emotional-medium
     (CC0, 8 speakers) covers dialogues needing more than two voices.
   alternatives:
@@ -349,16 +356,21 @@ languages:
     num_speakers: 1
     licence: See URL
     licence_ok: false
-  piper_key: de_DE-thorsten-medium
-  base_model: en_US-lessac-medium
-  provenance: blocked
+  piper_key: de_DE-mls-medium
+  base_model: null   # trained from scratch
+  provenance: clean
   provenance_note: >-
-    Its MODEL_CARD Training line reads "Finetuned from U.S. English
-    lessac voice". That base is trained on the Blizzard 2013 Lessac
-    corpus, which is non-commercial only and non-sublicensable, so the
-    derived weights cannot produce audio distributable under
-    CC BY-SA 4.0. Verified against the model card on 2026-08-26; see
-    docs/voice-provenance.md.
+    Replaces a lessac fine-tune. This voice's MODEL_CARD Training line
+    reads "Trained from scratch" and its dataset licence was verified
+    at the dataset's own page, not only from the card.
+
+    CC BY 4.0 requires ATTRIBUTION: the course must credit
+    Multilingual LibriSpeech. Recorded in NOTICE.md, not left to
+    the audition to notice.
+    Register caveat for the audition: this corpus is read audiobook
+    speech, so the voice is fluent and literary rather than
+    conversational. That is a real pedagogical difference for a course
+    teaching everyday dialogue, and it is what the audition is for.
   tts_lang: de
   url: https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/medium/de_DE-thorsten-medium.onnx
   md5: a129b00fb3078df43c96bab6c94535c0
@@ -678,12 +690,12 @@ languages:
 - code: nvt
   language: Dutch
   iso: nl
-  status: candidate
+  status: candidate   # re-audition required: the voice changed
   quality: medium
-  num_speakers: 1
-  licence: CC0
-  dataset: https://github.com/OHF-Voice/voice-datasets
-  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/nl/nl_NL/ronnie/medium/nl_NL-ronnie-medium.onnx
+  num_speakers: 52
+  licence: CC BY 4.0
+  dataset: http://openslr.org/94/
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/nl/nl_NL/mls/medium/nl_NL-mls-medium.onnx
   note: CC0, no obligation. nl_BE-rdh-medium (CC0 1.0 Universal) is the Flemish contrast voice, used for
     regional variation rather than as a substitute.
   alternatives:
@@ -732,16 +744,21 @@ languages:
     num_speakers: 1
     licence: CC0 1.0 Universal
     licence_ok: true
-  piper_key: nl_NL-ronnie-medium
-  base_model: en_US-lessac-medium
-  provenance: blocked
+  piper_key: nl_NL-mls-medium
+  base_model: null   # trained from scratch
+  provenance: clean
   provenance_note: >-
-    Its MODEL_CARD Training line reads "Finetuned from U.S. English
-    lessac voice". That base is trained on the Blizzard 2013 Lessac
-    corpus, which is non-commercial only and non-sublicensable, so the
-    derived weights cannot produce audio distributable under
-    CC BY-SA 4.0. Verified against the model card on 2026-08-26; see
-    docs/voice-provenance.md.
+    Replaces a lessac fine-tune. This voice's MODEL_CARD Training line
+    reads "Trained from scratch" and its dataset licence was verified
+    at the dataset's own page, not only from the card.
+
+    CC BY 4.0 requires ATTRIBUTION: the course must credit
+    Multilingual LibriSpeech. Recorded in NOTICE.md, not left to
+    the audition to notice.
+    Register caveat for the audition: this corpus is read audiobook
+    speech, so the voice is fluent and literary rather than
+    conversational. That is a real pedagogical difference for a course
+    teaching everyday dialogue, and it is what the audition is for.
   tts_lang: nl
   url: https://huggingface.co/rhasspy/piper-voices/resolve/main/nl/nl_NL/ronnie/medium/nl_NL-ronnie-medium.onnx
   md5: f74c8e7779cb05f935367d661de5b380

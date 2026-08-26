@@ -67,6 +67,37 @@ def main() -> int:
     m = yaml.safe_load(MANIFEST.read_text(encoding="utf-8"))
     bad = 0
 
+    # A4's REPO half, which was a declared gap until an actual obligation
+    # landed on it. Three courses now use a CC BY 4.0 voice corpus, and CC BY
+    # requires attribution — an OER project that does not attribute its own
+    # dependencies is making the omission it asks reusers not to make.
+    required = {
+        "LICENSE": "the code licence",
+        "NOTICE.md": "third-party attribution — fonts, voice corpus, framework",
+    }
+    for name, why in required.items():
+        if not (REPO / name).exists():
+            print(f"::error::{name} is missing ({why})")
+            bad += 1
+    notice = REPO / "NOTICE.md"
+    if notice.exists():
+        notice_text = notice.read_text(encoding="utf-8")
+        cfg = REPO / "boulingua.yml"
+        if cfg.exists():
+            import yaml as _y
+            code = (_y.safe_load(cfg.read_text(encoding="utf-8")) or {}).get("code")
+            vf = KIT / "audio" / "voices.yml"
+            if code and vf.exists():
+                reg = {r["code"]: r for r in
+                       _y.safe_load(vf.read_text(encoding="utf-8"))["languages"]}
+                r = reg.get(code) or {}
+                if str(r.get("licence")) == "CC BY 4.0" and r.get("piper_key") \
+                        and r["piper_key"] not in notice_text:
+                    print(f"::error::NOTICE.md does not name {r['piper_key']}, whose "
+                          f"corpus is CC BY 4.0 and therefore REQUIRES attribution. "
+                          f"This is an obligation, not a courtesy.")
+                    bad += 1
+
     files = shipped()
     missing = [p for p in files if p.name not in text]
     for p in missing:

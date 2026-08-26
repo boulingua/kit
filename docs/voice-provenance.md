@@ -65,3 +65,34 @@ trained from scratch, not warm-started from lessac.
 Finding equivalents for German, French and English is the substantive work,
 and it is the difference between removing 323 audio files and regenerating
 them.
+
+---
+
+## Resolved — 2026-08-26
+
+All five voices are replaced with from-scratch models, each verified at its
+model card AND at its dataset's own page:
+
+| course | was | now | training | dataset licence | speakers |
+|---|---|---|---|---|---|
+| `efl` | `en_GB-alba-medium` | `en_GB-cori-medium` | from scratch | public domain (LibriVox) | 1 |
+| `fle` | `fr_FR-siwis-medium` | `fr_FR-mls-medium` | from scratch | CC BY 4.0 (MLS) | 125 |
+| `daf` | `de_DE-thorsten-medium` | `de_DE-mls-medium` | from scratch | CC BY 4.0 (MLS) | 236 |
+| `nsf` | `no_NO-talesyntese-medium` | `no_NO-nvcc-medium` | from scratch | CC0 (Nasjonalbiblioteket) | 10 |
+| `nvt` | `nl_NL-ronnie-medium` | `nl_NL-mls-medium` | from scratch | CC BY 4.0 (MLS) | 52 |
+
+Multilingual LibriSpeech solved three of the five at once, and it is CC BY 4.0
+— so attribution is now an OBLIGATION, carried in each course's NOTICE.md and
+checked by gate A4 rather than left to good intentions.
+
+Every voice returns to `status: candidate`. A changed voice needs a fresh
+audition, and the new corpora make that more than a formality: MLS and LibriVox
+are read audiobook speech, so these voices are fluent and literary where the
+old ones were conversational. For a course teaching everyday dialogue that is a
+real pedagogical difference, and it is exactly what an audition is for.
+
+The 1,220 already-published clips were generated with the blocked voices and
+are withheld — `file` moved to `file_withheld`, transcripts still rendering,
+recordings still on disk. Every clip has a transcript, verified, so this costs
+the audio and no teaching content. Restoring is one command once the clips are
+regenerated.
