@@ -62,7 +62,13 @@ def body_chars(md: str) -> int:
 
 
 def main() -> int:
-    repo = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path.cwd()
+    args = [a for a in sys.argv[1:] if not a.startswith("-")]
+    # --all prints every finding instead of the first 20. Disposing of these is
+    # per-page author work against a list, and a list that stops at 20 with
+    # "… and 76 more" cannot be worked through — you fix twenty, re-run, and
+    # meet twenty different ones.
+    show_all = "--all" in sys.argv[1:]
+    repo = Path(args[0]).resolve() if args else Path.cwd()
     lock = repo / "vgwort" / "url-lock-provisional.csv"
     if not lock.exists():
         print("A18/C6 n/a — this repo registers no marks")
@@ -130,10 +136,12 @@ def main() -> int:
         print(f"::warning::{u}")
     if len(unsourced) > 6:
         print(f"::warning::… and {len(unsourced) - 6} more without a sources section")
-    for b in bad[:20]:
+    import os
+    for b in (bad if show_all else bad[:20]):
         print(f"::error::{b}")
     if len(bad) > 20:
-        print(f"::error::… and {len(bad) - 20} more")
+        print(f"::error::… and {len(bad) - 20} more — re-run with --all for "
+              f"the full list")
     print(f"  {units} marked unit/exam page(s) (EQS-1's territory), "
           f"{checked} marked non-unit page(s) checked here")
     if bad:
