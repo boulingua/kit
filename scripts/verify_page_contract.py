@@ -48,7 +48,8 @@ PLACEHOLDER = re.compile(r"à venir|to be filled|sera rempli|wird sp.ter|"
 SOURCES = ("sources", "quellen", "sources et références", "sources et references",
            "further reading", "weiterführendes", "références", "literatur",
            "quellen und weiterführendes", "bibliographie")
-ALLOWED = {"unit", "exam", "reference", "appendix"}
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from blg_paths import MARK_ELIGIBLE_PAGE_TYPES as ALLOWED  # noqa: E402
 
 
 def body_chars(md: str) -> int:

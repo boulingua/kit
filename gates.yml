@@ -440,7 +440,11 @@ gates:
   title: Mindestumfang coverage
   owner: kit
   scripts: [scripts/verify_vgwort_coverage.py]
-  needs: source
+  # built, not source. C4 counts RENDERED prose — shortcodes expand, partials
+  # contribute — and a needs:source C4 that walked an absent public/ would
+  # report zero uncovered pages and pass. It was needs:source for its whole
+  # life, which is half of why it never examined a site.
+  needs: built
   severity: warn
   ramp: >-
     Stays warn on existing pages permanently and is blocking on any NEW marked

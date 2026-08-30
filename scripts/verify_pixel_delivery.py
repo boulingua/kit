@@ -42,9 +42,8 @@ ALIAS = re.compile(r"""http-equiv\s*=\s*["']?refresh""", re.I)
 LAZY = re.compile(r"loading\s*=\s*[\"']?lazy", re.I)
 DISPLAY_NONE = re.compile(r"display\s*:\s*none", re.I)
 
-FORBIDDEN = ("impressum", "datenschutz", "haftungsausschluss", "disclaimer",
-             "privacy", "imprint", "mentions-legales", "tags", "categories",
-             "materials", "materiel", "materialien")
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from blg_paths import MARK_FORBIDDEN_SLUGS as FORBIDDEN  # noqa: E402
 
 
 def main() -> int:

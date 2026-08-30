@@ -51,6 +51,40 @@ MATERIAL_URL_RE = re.compile(r'/materials?/(?:presentations|worksheets|fiches)/(
 
 EXAM_RE = re.compile(r"[-_]exam$")
 
+# ── The surfaces that must never carry a mark ───────────────────────────────
+# One definition, imported by C3 (which fails a mark found on one), by C1 and
+# by C4 (which must not ask for a mark to be registered on one). Those gates
+# have to agree: a coverage gate that reports /datenschutz/ as unregistered is
+# instructing the author to do the thing C3 blocks, and whichever of the two
+# they believe, the other one is lying to them.
+#
+# Slugs and not URLs, at any depth, in the four chrome languages the org
+# ships — ressources alone puts its notices at /de/impressum/,
+# /en/disclaimer/ and /fr/mentions-legales/.
+MARK_FORBIDDEN_SLUGS = (
+    "impressum", "imprint", "mentions-legales",
+    "datenschutz", "privacy", "confidentialite",
+    "haftungsausschluss", "disclaimer", "avertissement",
+    "tags", "categories",
+    "materials", "materiel", "materialien",
+)
+
+
+# ── The page types that may carry a mark ────────────────────────────────────
+# A18/C6 fails a mark held by anything else; C4 must not ask for one there.
+# Shared for the same reason as the list above: the two gates are a pair, and a
+# pair that disagrees leaves the author holding two instructions and no way to
+# satisfy both.
+MARK_ELIGIBLE_PAGE_TYPES = frozenset({"unit", "exam", "reference", "appendix"})
+
+
+def is_mark_forbidden(url: str) -> bool:
+    """True if `url` names a navigation or statutory surface. Takes a URL and
+    splits it, so a slug matches at any depth and never as a substring —
+    `/anhaenge/glossar-privacy-hinweise/` is a Sprachwerk, not a privacy page."""
+    return any(s in MARK_FORBIDDEN_SLUGS
+               for s in (x for x in url.strip("/").split("/") if x))
+
 
 # ── C7: one exam predicate, applied to a slug and never to a path ───────────
 def is_exam(slug: str) -> bool:

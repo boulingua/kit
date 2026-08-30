@@ -81,6 +81,20 @@ def battery(repo: Path, cfg: dict, roots: dict[str, Path]) -> tuple[list, list]:
     which is how the audio gate ran for months against a file extension nothing
     produced and reported success every time.
 
+    Skips carry a KIND, and the distinction decides whether CI fails:
+
+      blocked   the gate could not run — the site is not built, the script is
+                missing. Nobody chose this and nobody can see it from the repo.
+      declined  the course set `gates: {<opt_in>: false}` in boulingua.yml. That
+                is a decision, written down, in a file A1 watches for drift.
+
+    Failing CI on a declined gate makes an empty scaffold unshippable: nsf and
+    nvt build clean, pass all 24 applicable gates and then fail because they
+    ship no search index and no network graph, which is true and is the point
+    of the flag. Failing CI on a blocked gate stays, because a blocked gate is
+    the vacuous pass this battery exists to remove. The two used to be one
+    list.
+
     Several ids share one script — A12, A14 and C12 are three contracts checked
     by one pass over the built HTML. They are GROUPED onto one entry rather than
     deduplicated, because the first version of this function deduplicated and
@@ -101,13 +115,16 @@ def battery(repo: Path, cfg: dict, roots: dict[str, Path]) -> tuple[list, list]:
             continue
         opt = g.get("opt_in")
         if opt and not cfg.get("gates", {}).get(opt):
-            skip.append((g["id"], g["title"], f"opt-in `{opt}` not enabled"))
+            skip.append((g["id"], g["title"],
+                         f"declined in boulingua.yml — gates.{opt}: false",
+                         "declined"))
             continue
         if not have.get(g["needs"], False):
-            skip.append((g["id"], g["title"], f"needs {g['needs']}"))
+            skip.append((g["id"], g["title"], f"needs {g['needs']}", "blocked"))
             continue
         if not g["scripts"]:
-            skip.append((g["id"], g["title"], "no script — see gates.yml"))
+            skip.append((g["id"], g["title"], "no script — see gates.yml",
+                         "blocked"))
             continue
         for spec in g["scripts"]:
             if spec.startswith("kit:"):
@@ -119,7 +136,7 @@ def battery(repo: Path, cfg: dict, roots: dict[str, Path]) -> tuple[list, list]:
                     # battery over an unlocated owner. Kept explicit so a future
                     # caller cannot reintroduce the guess by accident.
                     skip.append((g["id"], g["title"],
-                                 f"owner {g['owner']} has no checkout"))
+                                 f"owner {g['owner']} has no checkout", "blocked"))
                     break
                 path = root / spec
             arg = str(built) if g["needs"] == "built" else str(repo)
@@ -179,8 +196,8 @@ def cmd_check(a) -> int:
         for gid, title, sev, st, cmds in gates:
             print(f"  {gid:4s} {title:34s} {sev:8s} {st:8s} "
                   + " ".join(Path(c[1]).name for c in cmds))
-        for gid, title, why in skipped:
-            print(f"  {gid:4s} {title:34s} SKIP     {why}")
+        for gid, title, why, kind in skipped:
+            print(f"  {gid:4s} {title:34s} {kind.upper():8s} {why}")
         return 0
     print(f"kit check — {repo.name}"
           + (f" ({cfg.get('code')}, tier {cfg.get('script_tier')})" if cfg else ""))
@@ -197,12 +214,16 @@ def cmd_check(a) -> int:
         if rc:
             (warned if sev == "warn" else failed).append((gid, title, out))
 
-    # Skips are printed, always, and counted in the summary line. In --ci they
-    # are a failure: a CI run that quietly examined nine gates instead of
-    # thirteen is the exact shape of every vacuous pass this kit was built to
-    # remove.
-    for gid, title, why in skipped:
-        print(f"  SKIP {gid:4s} {title:34s} {why}")
+    # Skips are printed, always, and counted in the summary line. A blocked one
+    # fails --ci: a CI run that quietly examined nine gates instead of thirteen
+    # is the exact shape of every vacuous pass this kit was built to remove. A
+    # declined one is printed just as loudly and does not fail, because the
+    # course said so in a tracked file rather than by going quiet.
+    blocked = [s for s in skipped if s[3] == "blocked"]
+    declined = [s for s in skipped if s[3] == "declined"]
+    for gid, title, why, kind in skipped:
+        print(f"  {'SKIP' if kind == 'blocked' else 'n/a '} {gid:4s} "
+              f"{title:34s} {why}")
 
     for gid, title, out in warned:
         print(f"::warning::{gid} {title} — warn gate, see gates.yml for its ramp")
@@ -211,15 +232,15 @@ def cmd_check(a) -> int:
         for gid, title, out in failed:
             print(f"── {gid} {title} ──\n{out}\n", file=sys.stderr)
         return 1
-    if a.ci and skipped:
-        print(f"\n{len(skipped)} gate(s) could not run in CI — a skipped gate is "
+    if a.ci and blocked:
+        print(f"\n{len(blocked)} gate(s) could not run in CI — a blocked gate is "
               f"not a passing gate:", file=sys.stderr)
-        for gid, title, why in skipped:
+        for gid, title, why, _ in blocked:
             print(f"  {gid} {title}: {why}", file=sys.stderr)
         return 1
     n = len(gates)
     print(f"\nkit check OK — {n} gate(s) run, {len(warned)} warning(s), "
-          f"{len(skipped)} skipped"
+          f"{len(blocked)} blocked, {len(declined)} declined"
           + (f", {sum(1 for g in gates if g[3] == 'partial')} partial "
              f"(see gap: in gates.yml)" if any(g[3] == 'partial' for g in gates) else ""))
     return 0

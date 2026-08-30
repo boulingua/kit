@@ -23,6 +23,12 @@ import re
 import sys
 from pathlib import Path
 
+# parents[1] is THE KIT, and here that is correct — ROOT is used only to reach
+# the kit's own placeholder-exceptions.yml, never to find the repo under test.
+# The identical line in verify_vgwort_coverage.py was not correct: it derived
+# the site and the registry from it, so C4 audited the kit while standing in a
+# course and never examined a page. The two files still look the same at the
+# top. The difference is the next line.
 ROOT = Path(__file__).resolve().parents[1]
 # The argument is the BUILT SITE, not the repo. Appending "public" to it —
 # which these did — makes the gate unrunnable in any repo that builds
