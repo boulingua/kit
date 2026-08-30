@@ -364,9 +364,15 @@ def cmd_urldiff(a) -> int:
     cfg = load_cfg(repo)
     built = Path(a.built) if a.built else repo / "public"
     base = f"/{cfg.get('code', repo.name)}/"
-    return run([PY, str(SCRIPTS / "vgwort_urldiff.py"), str(repo), str(built),
-                "--base", base], "urldiff", cwd=repo)[1] or _echo(
-        [PY, str(SCRIPTS / "vgwort_urldiff.py"), str(repo), str(built), "--base", base], repo)
+    # One run, printed whatever it says. This read
+    #     run(...)[1] or _echo(...)
+    # where [1] is the RETURN CODE, so a non-zero result short-circuited and
+    # _echo was never reached: A3 — a blocking gate defending 789 registered
+    # marks — failed SILENTLY, exit 1 and not one line of output. On success it
+    # fell through and ran the whole scan a second time to print it. Both
+    # halves of that were backwards.
+    return _echo([PY, str(SCRIPTS / "vgwort_urldiff.py"), str(repo), str(built),
+                  "--base", base], repo)
 
 
 def _echo(cmd: list[str], cwd: Path) -> int:
