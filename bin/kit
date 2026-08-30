@@ -2,6 +2,7 @@
 """kit — the boulingua platform CLI.
 
     kit check [REPO] [--ci]     run the whole gate battery
+                                --owner-root NAME=PATH where CI puts them
     kit design [--check]        regenerate tokens and icons, or verify them
     kit sync REPO               write _materials/ and kit.lock into a course
     kit urldiff REPO            has anything moved a URL that carries a mark?
@@ -38,6 +39,11 @@ KIT = Path(__file__).resolve().parent.parent
 SCRIPTS = KIT / "scripts"
 PY = sys.executable
 
+sys.path.insert(0, str(SCRIPTS))
+from blg_checkouts import (  # noqa: E402
+    CheckoutError, describe, owners_needing_a_root, parse_owner_root,
+    resolve_owners)
+
 
 def load_cfg(repo: Path) -> dict:
     import yaml
@@ -67,7 +73,7 @@ def register() -> list[dict]:
     return yaml.safe_load(REGISTER.read_text(encoding="utf-8"))["gates"]
 
 
-def battery(repo: Path, cfg: dict) -> tuple[list, list]:
+def battery(repo: Path, cfg: dict, roots: dict[str, Path]) -> tuple[list, list]:
     """Return (runnable, skipped). Skipped is returned, never swallowed.
 
     A gate that cannot run is not a gate that passed. Every earlier version of
@@ -87,7 +93,6 @@ def battery(repo: Path, cfg: dict) -> tuple[list, list]:
             "materials": repo != KIT,
             "audio": (repo / "static" / "audio").exists(),
             "none": True}
-    org = KIT.parent
     order: list[tuple] = []
     by_cmd: dict[tuple, list] = {}
     skip = []
@@ -107,10 +112,16 @@ def battery(repo: Path, cfg: dict) -> tuple[list, list]:
         for spec in g["scripts"]:
             if spec.startswith("kit:"):
                 path = KIT / spec[4:]
-            elif g["owner"] == "kit":
-                path = KIT / spec
             else:
-                path = org / g["owner"] / spec
+                root = roots.get(g["owner"])
+                if root is None:
+                    # Unreachable via cmd_check, which refuses to build a
+                    # battery over an unlocated owner. Kept explicit so a future
+                    # caller cannot reintroduce the guess by accident.
+                    skip.append((g["id"], g["title"],
+                                 f"owner {g['owner']} has no checkout"))
+                    break
+                path = root / spec
             arg = str(built) if g["needs"] == "built" else str(repo)
             cmd = (PY, str(path), arg, *(g.get("args") or []))
             if cmd not in by_cmd:
@@ -132,18 +143,38 @@ def battery(repo: Path, cfg: dict) -> tuple[list, list]:
 def cmd_check(a) -> int:
     repo = Path(a.repo).resolve() if a.repo else Path.cwd()
     cfg = load_cfg(repo)
+
+    # Locate the gate owners first, and by the same rules the register uses —
+    # one resolver, imported by both, because two copies of "where is
+    # `.github`?" is precisely the shape of the defect this replaces.
+    try:
+        overrides = dict(parse_owner_root(x) for x in (a.owner_root or []))
+    except CheckoutError as e:
+        print(f"{e}", file=sys.stderr)
+        return 2
+    roots, missing = resolve_owners(owners_needing_a_root(register()), overrides)
+    if missing:
+        print("gate owners could not be located — battery not run\n",
+              file=sys.stderr)
+        for m in missing:
+            print(f"  {m}", file=sys.stderr)
+        return 1
+
     # The register is checked before anything it defines. A battery built from
     # a register that disagrees with the disk is not a weaker battery, it is a
     # meaningless one — it would report on gates that are not there.
-    out, rc = run([PY, str(SCRIPTS / "verify_gate_register.py"), str(KIT.parent)],
-                  "gate register")
+    reg_cmd = [PY, str(SCRIPTS / "verify_gate_register.py")]
+    for owner, path in sorted(roots.items()):
+        if owner != "kit":
+            reg_cmd += ["--owner-root", f"{owner}={path}"]
+    out, rc = run(reg_cmd, "gate register")
     if rc:
         print("gates.yml is inconsistent with the tree — battery not run\n",
               file=sys.stderr)
         print(out, file=sys.stderr)
         return 1
 
-    gates, skipped = battery(repo, cfg)
+    gates, skipped = battery(repo, cfg, roots)
     if a.list:
         for gid, title, sev, st, cmds in gates:
             print(f"  {gid:4s} {title:34s} {sev:8s} {st:8s} "
@@ -456,6 +487,10 @@ def main() -> int:
 
     c = sub.add_parser("check"); c.add_argument("repo", nargs="?")
     c.add_argument("--ci", action="store_true"); c.add_argument("--list", action="store_true")
+    c.add_argument("--owner-root", action="append", metavar="NAME=PATH",
+                   help="where a non-kit gate owner is checked out. Required in "
+                        "CI, where `.github` and `curriculum` are not siblings "
+                        "of the kit. Repeatable.")
     d = sub.add_parser("design"); d.add_argument("--check", action="store_true")
     s = sub.add_parser("sync"); s.add_argument("repo")
     u = sub.add_parser("urldiff"); u.add_argument("repo"); u.add_argument("--built")
