@@ -17,6 +17,23 @@ Output matches what the site already serves — Ogg Vorbis, one channel, so the
 existing `file` paths stay valid and D6's ≤64 kbit/s single-channel contract
 holds. A regeneration that changed the container would have moved 1,220 URLs
 for no reason.
+
+**The encode is chunked, and that is not a performance choice.** A single
+`sf.write()` of a long clip SEGFAULTS libsndfile 1.2.2's Vorbis encoder —
+reproducibly, above roughly 2.1 million frames of real speech, in a clean
+process with nothing else loaded. The process dies on signal 11 with no
+traceback, no stderr and exit 139, so a run over 1,220 clips stops dead at the
+first long one and says nothing about why.
+
+That is the actual origin of the stranded `dialogue3.ogg.part` in daf, which
+was recorded as a truncated download. It was not a download. It is this crash,
+and it reproduces on demand: daf unit01 Dialog 3, 639 characters of German, 117
+seconds of audio, every time. Writing the same samples through an open
+SoundFile in 262,144-frame blocks completes and reads back at full length.
+
+A `.part` therefore cannot be cleaned up by the process that made it — it is
+not running any more. Stale ones are swept at start instead, which is also what
+makes an interrupted run resumable rather than merely non-destructive.
 """
 from __future__ import annotations
 
@@ -30,6 +47,9 @@ from pathlib import Path
 import yaml
 
 KIT = Path(__file__).resolve().parent.parent
+# Frames per write. Anything comfortably under the ~2.1M-frame point where
+# libsndfile 1.2.2 falls over; 2**18 also keeps peak memory flat.
+OGG_CHUNK = 1 << 18
 
 
 def main() -> int:
@@ -64,6 +84,20 @@ def main() -> int:
     import soundfile as sf
     from piper import PiperVoice
     voice = PiperVoice.load(str(onnx))
+
+    # Sweep .part files left by a previous run that was killed or crashed. A
+    # dead process cannot tidy up after itself, and a stale .part next to a
+    # good .ogg reads as a half-finished write that never happened.
+    swept = 0
+    audio_root = repo / "static"
+    if audio_root.is_dir():
+        for stale in audio_root.rglob("*.ogg.part"):
+            if a.apply:
+                stale.unlink()
+            swept += 1
+    if swept:
+        print(f"  swept {swept} stale .part file(s) from an interrupted run"
+              + ("" if a.apply else " (dry run — not removed)"))
 
     made = skipped = empty = 0
     for mf in sorted((repo / "data" / "audio").glob("*.json")):
@@ -103,7 +137,12 @@ def main() -> int:
                 # that no gate distinguishes from working audio. Found exactly
                 # that way: killing this script mid-write produced one.
                 tmp = out.with_suffix(".ogg.part")
-                sf.write(str(tmp), data, rate, format="OGG", subtype="VORBIS")
+                # Chunked, because one big sf.write() segfaults the Vorbis
+                # encoder on long clips. See the module docstring.
+                with sf.SoundFile(str(tmp), "w", samplerate=int(rate), channels=1,
+                                  format="OGG", subtype="VORBIS") as fh:
+                    for i in range(0, len(data), OGG_CHUNK):
+                        fh.write(data[i:i + OGG_CHUNK])
                 if sf.info(str(tmp)).duration <= 0:
                     tmp.unlink(missing_ok=True)
                     print(f"::error::{out.name}: wrote a zero-duration file — discarded")
