@@ -51,9 +51,19 @@ gates:
   status: partial
   gap: >-
     Covers kit-owned code in a course, step-level continue-on-error, `|| true`
-    on a gate command, and the _materials/ digest lock. Does NOT yet check the
-    hugo.toml key allowlist, an override's kit_base minor distance, or
-    deploy.yml equality with the template.
+    on a gate command, the _materials/ digest lock, deploy.yml byte-equality
+    with the template, and the absence of any second workflow beside the
+    caller. Does NOT yet check the hugo.toml key allowlist or an override's
+    kit_base minor distance.
+  note: >-
+    Until kit v1.21.0 this gate examined nothing in the battery. It reads its
+    argument as an ORG checkout and iterates the directories under it; `kit
+    check` hands every gate the REPO, so the "courses" were content/, static/
+    and data/, none of them imported the kit, and it printed "0 course(s)
+    checked — A1 OK". Green on all five, having compared nothing. It was
+    invisible for as long as the gate register was aborting before the battery
+    ran at all, which is the general shape of this org's gate failures: the
+    outer fault hides the inner one.
   battery: true
 
 - id: A2

@@ -53,10 +53,29 @@ def load_cfg(repo: Path) -> dict:
     return yaml.safe_load(f.read_text(encoding="utf-8")) or {}
 
 
-def run(cmd: list[str], label: str, cwd: Path | None = None) -> tuple[str, int]:
-    r = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
+def run(cmd: list[str], label: str, cwd: Path | None = None,
+        env: dict[str, str] | None = None) -> tuple[str, int]:
+    r = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True,
+                       env={**os.environ, **(env or {})} if env else None)
     out = (r.stdout or "") + (r.stderr or "")
     return out.strip(), r.returncode
+
+
+def root_env(roots: dict[str, Path]) -> dict[str, str]:
+    """The resolved owner roots, for gate scripts that need to reach another
+    repository. A1 compares a course's files against the kit's, and in CI the
+    kit is at `.kit` inside the course rather than beside it — so it has to be
+    told, by the same resolver everything else uses.
+
+    An environment variable rather than an argv flag because gates.yml's `args`
+    are static strings: a path known only at run time cannot be written there,
+    and adding a placeholder syntax to the register would be a second way to
+    say where things are."""
+    env = {"BLG_KIT": str(KIT)}
+    for owner, path in roots.items():
+        if owner != "kit":
+            env["BLG_" + owner.strip(".").upper().replace("-", "_")] = str(path)
+    return env
 
 
 # ── the battery ─────────────────────────────────────────────────────────────
@@ -205,7 +224,7 @@ def cmd_check(a) -> int:
     for gid, title, sev, st, cmds in gates:
         out, rc = "", 0
         for c in cmds:
-            o, r = run(c, title, cwd=repo)
+            o, r = run(c, title, cwd=repo, env=root_env(roots))
             out += (o + "\n"); rc = rc or r
         last = out.strip().splitlines()[-1] if out.strip() else ""
         mark = "ok  " if not rc else ("warn" if sev == "warn" else "FAIL")
