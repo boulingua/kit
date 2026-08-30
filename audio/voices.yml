@@ -224,8 +224,8 @@ languages:
     conversational. That is a real pedagogical difference for a course
     teaching everyday dialogue, and it is what the audition is for.
   tts_lang: en
-  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/alba/medium/en_GB-alba-medium.onnx
-  md5: c07f313752bb3aba8061041666251654
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/cori/medium/en_GB-cori-medium.onnx
+  md5: f143307611eccea9d976235d0895f57c
   sample_rate: 22050
   second_voice: en_GB-cori-medium
   licence_verified_at: '2026-08-21'
@@ -288,8 +288,8 @@ languages:
     conversational. That is a real pedagogical difference for a course
     teaching everyday dialogue, and it is what the audition is for.
   tts_lang: fr
-  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/siwis/medium/fr_FR-siwis-medium.onnx
-  md5: 20e876e8c839e9b11a26085858f2300c
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/mls/medium/fr_FR-mls-medium.onnx
+  md5: 87831389d3ae92347d91e38b0c57add9
   sample_rate: 22050
   second_voice: fr_FR-gilles-low
   must_render:
@@ -372,8 +372,8 @@ languages:
     conversational. That is a real pedagogical difference for a course
     teaching everyday dialogue, and it is what the audition is for.
   tts_lang: de
-  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/medium/de_DE-thorsten-medium.onnx
-  md5: a129b00fb3078df43c96bab6c94535c0
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/mls/medium/de_DE-mls-medium.onnx
+  md5: bb543a8e82b95993cdd2199a0049623b
   sample_rate: 22050
   second_voice: de_DE-kerstin-low
   must_render:
@@ -678,8 +678,8 @@ languages:
     CC BY-SA 4.0. Verified against the model card on 2026-08-26; see
     docs/voice-provenance.md.
   tts_lang: 'no'
-  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/no/no_NO/talesyntese/medium/no_NO-talesyntese-medium.onnx
-  md5: 9fc876e7edc6593086b4f2f34889f44b
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/no/no_NO/nvcc/medium/no_NO-nvcc-medium.onnx
+  md5: 67e04e52b2f195e6db3ae103b58d1710
   sample_rate: 22050
   second_voice: no_NO-nvcc-medium
   must_render:
@@ -760,8 +760,8 @@ languages:
     conversational. That is a real pedagogical difference for a course
     teaching everyday dialogue, and it is what the audition is for.
   tts_lang: nl
-  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/nl/nl_NL/ronnie/medium/nl_NL-ronnie-medium.onnx
-  md5: f74c8e7779cb05f935367d661de5b380
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/nl/nl_NL/mls/medium/nl_NL-mls-medium.onnx
+  md5: f1d4b1452ccfdac24be72085b2b6b55c
   sample_rate: 22050
   second_voice: nl_BE-rdh-medium
   must_render:

@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import re
 import sys
+import urllib.parse
 from pathlib import Path
 
 import yaml
@@ -134,6 +135,35 @@ def main() -> int:
                            f"provenance clean with no note. A fine-tune is clean "
                            f"only if the BASE's dataset licence permits it, and "
                            f"that reasoning has to be written down.")
+
+        # ── The audition must fetch the model the build synthesises ───────
+        # regen_audio.py generates from `piper_key`; audition.py downloads
+        # `url` and refuses to construct one from the key. After the five
+        # encumbered voices were replaced, `piper_key` moved and `url`/`md5`
+        # did not, so the two fields named different models on efl, fle, daf,
+        # nsf and nvt. Nothing shipped from `url`, so no site was affected —
+        # what it would have broken is the audition itself, the one gate whose
+        # entire content is that a human listened. The author would have
+        # approved the model that was removed, and a verdict recorded that way
+        # is a false verdict.
+        #
+        # Compare after percent-decoding: ple's pt_PT-tugão-medium is encoded
+        # in the URL and the ASCII form 404s, so a byte comparison reports a
+        # mismatch that is not one.
+        pk, url = r.get("piper_key"), r.get("url")
+        if pk and url:
+            base = urllib.parse.unquote(str(url).rsplit("/", 1)[-1])
+            base = re.sub(r"\.onnx(\.json)?$", "", base)
+            if base != str(pk):
+                bad.append(f"{code}: piper_key {pk!r} but url names {base!r}. "
+                           f"Generation uses the key and the audition downloads "
+                           f"the url, so the author would listen to a model this "
+                           f"course does not ship. Registration and audition must "
+                           f"name one model.")
+        elif pk and not url:
+            bad.append(f"{code}: piper_key {pk!r} with no url. audition.py will "
+                       f"not construct one from the key, by design — the voice "
+                       f"cannot be auditioned.")
 
         aud = root / "audio" / "auditions" / f"{code}.md"
         if status == "ready":
