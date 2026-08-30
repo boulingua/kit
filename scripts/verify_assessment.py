@@ -130,6 +130,19 @@ def main() -> int:
         print(f"\nA13 FAIL — {len(bad)} problem(s) across {checked} exam(s)",
               file=sys.stderr)
         return 1
+    # Having no exams and having 156 that carry no marking scheme are not the
+    # same state, and this gate reported the second as "A13 OK — 0 exam(s)".
+    # That is fle: every one of its exam pages states a task list and no total,
+    # no task points and no grading scale, so the arithmetic gate had nothing to
+    # add up and said so in a warning while returning OK. A blocking gate that
+    # passes on zero is the failure mode this whole battery was built to remove;
+    # it does not get an exception for being the one counting marks.
+    if not checked and no_data:
+        print(f"\nA13 FAIL — {len(no_data)} exam page(s) and not one carries "
+              f"assessment data, so nothing was verified. This is not the same as "
+              f"having no exams: it is a marking scheme that exists only in the "
+              f"author's head, on every paper in the course.", file=sys.stderr)
+        return 1
     if rehearsals:
         print(f"  {rehearsals} rehearsal paper(s) skipped — they drill a section "
               f"of a larger Klausur and state no total of their own")
