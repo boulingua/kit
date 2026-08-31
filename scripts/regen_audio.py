@@ -8,10 +8,33 @@ en_US-lessac-medium, whose corpus is non-commercial only. The voices are
 replaced; the recordings have to follow, because a manifest pointing at a file
 made by the old model is the old model still being published.
 
-THE TRANSCRIPT IS THE SOURCE. That is what makes this recoverable at all: every
-clip carries its text, verified across all 1,220 before any of them were
-withheld, so the recordings can be rebuilt without anyone re-authoring a word.
-It is also why withholding was an acceptable interim rather than a loss.
+THE TRANSCRIPT IS THE SOURCE — and for 560 of the 1,220 clips it was the WRONG
+source, which this script got wrong on its first real run and which is worth
+stating plainly because the fix is a manifest change, not a code change.
+
+build_audio.py emits TWO strings per vocabulary segment and stores only one:
+
+    segs.append(('vocab', ' · '.join(terms), '.\n'.join(terms) + '.'))
+                          ^ display, shown       ^ TTS, spoken
+
+The middle-dot form is what the learner reads. The full-stop form is what Piper
+reads, and the full stops are the entire point: they are what puts a pause
+between one vocabulary item and the next. The manifest kept only the display
+form, so re-synthesis fed Piper `Hello / Hi · Good morning · Goodbye` and got
+one breathless run-on where the course specifies a drill. Measured on efl
+unit01 Vocabulary 1: 7.52 s and 0 internal pauses against 10.03 s and 2. All
+560 vocab clips across the three courses were rebuilt that way.
+
+So the manifest now carries `tts` beside `transcript` whenever the two differ,
+and this script prefers it. Where `tts` is absent — every manifest written
+before this change — the TTS form is reconstructed for vocabulary segments by
+splitting the display string on its separator, which is exactly invertible
+because build_audio.py joined it. Anything else falls back to the transcript.
+
+The same omission bypassed normalise(): the U+0301 stripping for ru/uk, the
+bidi-control stripping for ar/fa, the ano-teleia for el and the NFC pass for tr
+are all applied to the TTS string only, and none of them ran. Five queued
+courses would have inherited that.
 
 Output matches what the site already serves — Ogg Vorbis, one channel, so the
 existing `file` paths stay valid and D6's ≤64 kbit/s single-channel contract
@@ -38,8 +61,10 @@ makes an interrupted run resumable rather than merely non-destructive.
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import io
 import json
+import re
 import sys
 import wave
 from pathlib import Path
@@ -51,6 +76,39 @@ KIT = Path(__file__).resolve().parent.parent
 # libsndfile 1.2.2 falls over; 2**18 also keeps peak memory flat.
 OGG_CHUNK = 1 << 18
 
+#: The separator build_audio.py uses to join vocabulary terms for DISPLAY.
+VOCAB_SEP = " · "
+#: Labels that mark a vocabulary drill, in the four chrome languages in use.
+VOCAB_LABELS = ("vocab", "wortschatz", "vocabulaire", "woordenschat", "ordforr")
+
+
+def _build_audio():
+    """build_audio.py by path — it lives in kit/audio/, not on sys.path, and it
+    owns normalise(). Duplicating that function here is how the two would drift."""
+    f = KIT / "audio" / "build_audio.py"
+    spec = importlib.util.spec_from_file_location("blg_build_audio", f)
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
+
+
+def tts_text(seg: dict) -> str:
+    """What Piper should read, as opposed to what the learner sees.
+
+    Prefer a stored `tts`. Failing that, invert build_audio.py's own join for a
+    vocabulary segment: it produced the display string with ' · ' and the spoken
+    string with '.\n', from the same list, so the split is exact rather than a
+    guess. Everything else speaks its transcript."""
+    if str(seg.get("tts") or "").strip():
+        return str(seg["tts"]).strip()
+    display = str(seg.get("transcript") or "").strip()
+    label = str(seg.get("label") or "").lower()
+    if VOCAB_SEP in display and any(k in label for k in VOCAB_LABELS):
+        terms = [t.strip() for t in display.split(VOCAB_SEP) if t.strip()]
+        if len(terms) >= 2:
+            return ".\n".join(terms) + "."
+    return display
+
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -58,6 +116,14 @@ def main() -> int:
     ap.add_argument("--models", type=Path, required=True)
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--only-label", default=None, metavar="SUBSTR[,SUBSTR]",
+                    help="only clips whose label contains one of these "
+                         "(case-insensitive). Used to re-synthesise a single "
+                         "class of clip without rebuilding a correct corpus.")
+    ap.add_argument("--only-tts-mismatch", action="store_true",
+                    help="only clips where the spoken string differs from the "
+                         "transcript — i.e. exactly those a regeneration that "
+                         "ignored the TTS form got wrong.")
     a = ap.parse_args()
     repo = a.repo.resolve()
 
@@ -84,6 +150,12 @@ def main() -> int:
     import soundfile as sf
     from piper import PiperVoice
     voice = PiperVoice.load(str(onnx))
+    normalise = _build_audio().normalise
+    only_labels = [x.strip().lower() for x in (a.only_label or "").split(",")
+                   if x.strip()]
+    # The row's own tts_lang, not the course code: nsf synthesises Norwegian
+    # under code `nsf`, and normalise() keys on the language.
+    tts_lang = str(row.get("tts_lang") or row.get("iso") or "")
 
     # Sweep .part files left by a previous run that was killed or crashed. A
     # dead process cannot tidy up after itself, and a stale .part next to a
@@ -107,8 +179,16 @@ def main() -> int:
         touched = False
         for s in segs:
             rel = s.get("file") or s.get("file_withheld")
-            text = str(s.get("transcript") or "").strip()
+            raw = tts_text(s)
+            text = normalise(raw, tts_lang)
             if not rel or not text:
+                skipped += 1
+                continue
+            if only_labels and not any(
+                    k in str(s.get("label") or "").lower() for k in only_labels):
+                skipped += 1
+                continue
+            if a.only_tts_mismatch and text == str(s.get("transcript") or "").strip():
                 skipped += 1
                 continue
             # The path in the manifest is a URL carrying the site prefix; the
@@ -149,6 +229,11 @@ def main() -> int:
                     empty += 1
                     continue
                 tmp.replace(out)
+                # Record what was actually spoken, so the next regeneration is
+                # lossless instead of reconstructing it again.
+                if text != str(s.get("transcript") or "").strip():
+                    s["tts"] = text
+                    touched = True
                 if "file_withheld" in s:
                     s["file"] = s.pop("file_withheld")
                     touched = True

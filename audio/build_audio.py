@@ -141,16 +141,38 @@ def block_transcript(qs):
     return '\n'.join(strip_md(q) for q in qs if q.strip())
 
 def synth(text, wav, voice):
-    subprocess.run([sys.executable, "-m", "piper", "--model", voice, "--output_file", str(wav)],
-                   input=text, text=True, capture_output=True)
+    """Synthesise to `wav`. Raises if piper fails.
+
+    The return code used to be discarded, and one temp path was reused for a
+    whole unit, so a failed call left the PREVIOUS segment's wav in place and
+    `if wav.exists()` was still true. The result was the last clip republished
+    under the next clip's filename, with the next clip's transcript beside it
+    in the manifest, and a .hash sidecar written so it was never retried. A
+    language course whose audio and transcript disagree is the worst available
+    outcome and this produced it silently, exit 0, "N clips synthesized".
+    """
+    wav.unlink(missing_ok=True)
+    r = subprocess.run([sys.executable, "-m", "piper", "--model", voice,
+                        "--output_file", str(wav)],
+                       input=text, text=True, capture_output=True)
+    if r.returncode != 0:
+        raise RuntimeError(f"piper failed ({r.returncode}) on {wav.name}: "
+                           f"{(r.stderr or '')[-400:]}")
+    if not wav.exists() or wav.stat().st_size == 0:
+        raise RuntimeError(f"piper exited 0 but wrote no audio to {wav.name}")
 
 def to_ogg(wav, ogg):
-    subprocess.run(["ffmpeg", "-y", "-i", str(wav), "-c:a", "libopus", "-b:a", "48k", "-ac", "1", str(ogg)],
-                   capture_output=True)
+    r = subprocess.run(["ffmpeg", "-y", "-i", str(wav), "-c:a", "libopus",
+                        "-b:a", "48k", "-ac", "1", str(ogg)], capture_output=True)
+    if r.returncode != 0:
+        raise RuntimeError(f"ffmpeg failed ({r.returncode}) on {ogg.name}: "
+                           f"{(r.stderr or b'')[-400:]!r}")
+    if not ogg.exists() or ogg.stat().st_size == 0:
+        raise RuntimeError(f"ffmpeg exited 0 but wrote no audio to {ogg.name}")
 
 def main():
     units = sorted(glob.glob(str(repo / UNITS_GLOB)))
-    made = 0; manifests = 0
+    made = 0; manifests = 0; failed = 0
     DATA.mkdir(parents=True, exist_ok=True)
     for uf in units:
         uf = Path(uf)
@@ -198,10 +220,22 @@ def main():
                 if ogg.exists() and hashf.exists() and hashf.read_text() == h:
                     pass  # unchanged
                 else:
-                    wav = Path(td) / "s.wav"
-                    synth(normalise(tts, TTS_LANG), wav, voice)
-                    if wav.exists():
-                        to_ogg(wav, ogg); hashf.write_text(h); made += 1
+                    # Per-segment temp name, so a failure cannot leave a
+                    # previous segment's wav behind to be picked up as this
+                    # one's. The unlink in synth() is the belt; this is braces.
+                    wav = Path(td) / f"{kind}{n}.wav"
+                    try:
+                        synth(normalise(tts, TTS_LANG), wav, voice)
+                        to_ogg(wav, ogg)
+                    except RuntimeError as e:
+                        # Loud, and NOT recorded: no .hash, so the next run
+                        # retries it, and no manifest entry, so no page renders
+                        # an <audio> element pointing at a file that is absent
+                        # or holds the wrong clip.
+                        print(f"::error::{slug}/{name}: {e}", file=sys.stderr)
+                        failed += 1
+                        continue
+                    hashf.write_text(h); made += 1
                 label = label_for(kind, LANG) + f' {n}'
                 # Never overwrite a curated human recording. lle has no voice
                 # at all and pfa may take hand-recorded clips for its classical
@@ -210,12 +244,23 @@ def main():
                 if prior.get("source") == "human":
                     manifest.append(prior)
                     continue
-                manifest.append({"file": f"/{SITE}/materials/audio/{slug}/{name}",
-                                 "label": label, "transcript": transcript,
-                                 "source": "tts"})
+                entry = {"file": f"/{SITE}/materials/audio/{slug}/{name}",
+                         "label": label, "transcript": transcript,
+                         "source": "tts"}
+                # The spoken string, whenever it differs from the displayed one.
+                # Without this a regeneration has to reconstruct it, and the one
+                # that did not reconstruct it rebuilt 560 vocabulary drills as
+                # run-on sentences.
+                if tts != transcript:
+                    entry["tts"] = tts
+                manifest.append(entry)
         (DATA / f"{slug}.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=1), encoding='utf-8')
         manifests += 1
-    print(f"audio: {made} clips synthesized, {manifests} unit manifests written")
+    print(f"audio: {made} clips synthesized, {manifests} unit manifests written"
+          + (f", {failed} FAILED and were not published" if failed else ""))
+    # A build that could not synthesise part of the corpus has not succeeded.
+    # Returning 0 here is what let a whole class of failure read as "done".
+    return 1 if failed else 0
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
