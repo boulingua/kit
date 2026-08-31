@@ -83,23 +83,55 @@ def scan(paths: list[Path], pattern: re.Pattern, what: str, generated: str) -> i
                 continue
             if allowed(lines, i):
                 continue
-            rel = path.relative_to(KIT)
+            # Same crash A8 had: relative_to(KIT) raises the moment the file
+        # belongs to a course, so the first real finding killed the gate.
+        try:
+            rel = f"{KIT.name}/{path.resolve().relative_to(KIT)}"
+        except ValueError:
+            rel = path.resolve().name if not path.is_absolute() else \
+                "/".join(path.resolve().parts[-4:])
             print(f"::error file={rel},line={i + 1}::{what} outside {generated}: "
                   f"{lines[i].strip()[:90]}")
             bad += 1
     return bad
 
 
-def main() -> int:
-    print("A7 — checking generated artefacts match design/tokens.yaml")
-    r = subprocess.run([sys.executable, str(KIT / "design" / "build_tokens.py"), "--check"])
-    bad = 1 if r.returncode else 0
+def stylesheets(root: Path) -> list[Path]:
+    out: list[Path] = []
+    for sub in (("assets", "css"), ("static", "css")):
+        d = root.joinpath(*sub)
+        if d.is_dir():
+            out += sorted(d.glob("*.css")) + sorted(d.rglob("*.scss"))
+    return out
 
-    print("A7 — checking no colour is written outside the generated files")
-    bad += scan(sorted((KIT / "assets" / "css").glob("*.css")),
+
+def main() -> int:
+    # THE ARGUMENT. This scanned only the kit and never read sys.argv, so it
+    # printed "A7 OK — one source for every colour" for every course and for a
+    # path that does not exist, while 114 colour literals sat in the four course
+    # stylesheets it never opened. fle/assets/css/course.css:14 defines
+    # --boulingua-accent: #4B8D19 and website/assets/css/custom.css:7 defines the
+    # same variable as #1a73e8 — literally the two-sources defect the docstring
+    # says this gate exists to prevent, under a green blocking verdict.
+    repo = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else KIT
+    if not repo.is_dir():
+        print(f"::error::{repo} is not a directory. A7 cannot report on a repo "
+              f"it cannot open.", file=sys.stderr)
+        return 2
+
+    bad = 0
+    if repo == KIT:
+        # The generated-artefact half is the kit's own and only makes sense there.
+        print("A7 — checking generated artefacts match design/tokens.yaml")
+        r = subprocess.run([sys.executable, str(KIT / "design" / "build_tokens.py"), "--check"])
+        bad = 1 if r.returncode else 0
+
+    print(f"A7 — checking no colour is written outside the generated files ({repo.name})")
+    bad += scan(stylesheets(repo) if repo != KIT else sorted((KIT / "assets" / "css").glob("*.css")),
                 COLOUR, "colour literal", "tokens.css")
-    bad += scan(sorted((KIT / "latex").glob("*.sty")),
-                re.compile(r"\\definecolor"), "\\definecolor", "boulingua-tokens.sty")
+    if repo == KIT:
+        bad += scan(sorted((KIT / "latex").glob("*.sty")),
+                    re.compile(r"\\definecolor"), "\\definecolor", "boulingua-tokens.sty")
 
     if bad:
         print("\nA7 FAIL — the design system has more than one source again. Put the "
