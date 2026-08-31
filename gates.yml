@@ -138,8 +138,24 @@ gates:
   owner: kit
   scripts: [scripts/verify_tokens.py]
   needs: source
-  severity: blocking
-  status: live
+  severity: warn
+  ramp: >-
+    Blocking again at the harmonisation release that lands the token binding
+    (roadmap H, "Ramp and Binding"). Warn is not a weakening: until 2026-08-31
+    this gate rooted itself at __file__, never read sys.argv, and printed
+    "A7 OK — one source for every colour" for every course AND for a path that
+    does not exist. It was blocking over nothing. Pointed at the repo it is
+    handed it finds real literals in all five live sites — including
+    static/css/fonts.css, which five of seven repos shadow with a hand-copied
+    pre-tier file, and fle defining --boulingua-accent as #4B8D19 while website
+    defines the same variable as #1a73e8. Those are scheduled design work, and a
+    blocking gate for scheduled work is a suppression waiting to be written.
+  status: partial
+  gap: >-
+    Checks the generated artefacts against design/tokens.yaml (kit only) and
+    scans for colour literals in the repo it is given. Does not yet resolve a
+    literal to the token it should have used, so it names the line and not the
+    replacement.
   battery: true
 
 - id: A8
@@ -289,8 +305,18 @@ gates:
     checkout and never from a constant, because F8 re-derives two scales and
     every coverage number in the programme moves when it lands.
   status: live
-  battery: false
-  runs: course-build.yml, against the pinned curriculum checkout
+  battery: true
+  note: >-
+    Sat battery:false with a `runs:` field claiming "course-build.yml, against
+    the pinned curriculum checkout" while conformance_audit.py appeared in that
+    workflow zero times — status live, no invocation site anywhere in the org,
+    and invisible in every `kit check` run because the battery dropped
+    battery:false gates before the skip branches without printing a row. It is
+    in the battery now: conformance_audit.py accepts a bare repo path, which is
+    the shape `kit check` hands every gate.
+  gap_note: >-
+    Resolves ids and reports in-progress vs claimed. The coverage half stays
+    with A2's milestone.
 
 - id: A17
   title: review record

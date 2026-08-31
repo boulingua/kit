@@ -132,6 +132,18 @@ def battery(repo: Path, cfg: dict, roots: dict[str, Path]) -> tuple[list, list]:
     skip = []
     for g in register():
         if not g.get("battery"):
+            # NOT silently. This `continue` sat above every skip branch, so a
+            # battery:false gate vanished from `kit check` and from `--list`
+            # entirely — no row, no SKIP, nothing. A3 is blocking and defends
+            # 789 registered marks; A16 is live; both were invisible in every
+            # run this org has ever done, and A16 turned out to have no
+            # invocation site at all. A gate that runs somewhere else is still
+            # a gate this report has to name.
+            if g["status"] in ("live", "partial"):
+                skip.append((g["id"], g["title"],
+                             f"not in the battery — runs: "
+                             f"{str(g.get('runs') or 'nowhere stated')[:72]}",
+                             "elsewhere"))
             continue
         opt = g.get("opt_in")
         if opt and not cfg.get("gates", {}).get(opt):
@@ -241,9 +253,10 @@ def cmd_check(a) -> int:
     # course said so in a tracked file rather than by going quiet.
     blocked = [s for s in skipped if s[3] == "blocked"]
     declined = [s for s in skipped if s[3] == "declined"]
+    elsewhere = [s for s in skipped if s[3] == "elsewhere"]
+    mark = {"blocked": "SKIP", "declined": "n/a ", "elsewhere": "else"}
     for gid, title, why, kind in skipped:
-        print(f"  {'SKIP' if kind == 'blocked' else 'n/a '} {gid:4s} "
-              f"{title:34s} {why}")
+        print(f"  {mark[kind]} {gid:4s} {title:34s} {why}")
 
     for gid, title, out in warned:
         print(f"::warning::{gid} {title} — warn gate, see gates.yml for its ramp")
@@ -260,7 +273,8 @@ def cmd_check(a) -> int:
         return 1
     n = len(gates)
     print(f"\nkit check OK — {n} gate(s) run, {len(warned)} warning(s), "
-          f"{len(blocked)} blocked, {len(declined)} declined"
+          f"{len(blocked)} blocked, {len(declined)} declined, "
+          f"{len(elsewhere)} run elsewhere"
           + (f", {sum(1 for g in gates if g[3] == 'partial')} partial "
              f"(see gap: in gates.yml)" if any(g[3] == 'partial' for g in gates) else ""))
     return 0

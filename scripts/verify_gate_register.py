@@ -163,6 +163,36 @@ def main() -> int:
             bad.append(f"{where}: runs neither in the battery nor anywhere named. "
                        f"Set battery: true or say where it runs in `runs`")
 
+        # A `runs:` claim naming a workflow must be TRUE of that workflow.
+        # This field was only ever checked for being a non-empty sentence, and
+        # A16 used it to claim "course-build.yml, against the pinned curriculum
+        # checkout" while conformance_audit.py appears in that file zero times.
+        # The gate is status: live and has no invocation site anywhere in the
+        # organisation. A prose promise that nothing verifies is how a gate
+        # stops running without anyone noticing — which is the exact failure
+        # the four bookkeeping rules above were written to prevent.
+        runs = str(g.get("runs") or "")
+        if st in {"live", "partial"} and not g.get("battery"):
+            for wf in re.findall(r"([\w.-]+\.ya?ml)", runs):
+                cands = [r / ".github" / "workflows" / wf
+                         for r in roots.values()] + \
+                        [r / ".github" / ".github" / "workflows" / wf
+                         for r in roots.values()]
+                found = next((c for c in cands if c.exists()), None)
+                if found is None:
+                    bad.append(f"{where}: runs names {wf}, which does not exist "
+                               f"in any owner checkout.")
+                    continue
+                text = found.read_text(encoding="utf-8")
+                names = [Path(x.split(":", 1)[-1]).name
+                         for x in (g.get("scripts") or [])]
+                if names and not any(n in text for n in names):
+                    bad.append(
+                        f"{where}: runs claims {wf}, but none of "
+                        f"{', '.join(names)} appears in it. The gate is "
+                        f"{st} and has no invocation site — a `runs:` field is "
+                        f"a claim about a file, not a note to the reader.")
+
     for p in sorted((KIT / "scripts").glob("verify_*.py")):
         if p.name in NOT_A_GATE or p.name in claimed:
             continue
