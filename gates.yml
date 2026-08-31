@@ -727,6 +727,38 @@ gates:
     template. Reproduced end to end on 2026-08-31; the new gate exits 1 listing
     exactly the five removals.
 
+- id: A21
+  title: template paths are not URLs
+  owner: kit
+  scripts: [scripts/verify_template_paths.py]
+  needs: source
+  severity: warn
+  ramp: >-
+    Blocking at kit v1.23.0, when the harmonisation adoption PRs have moved the
+    six coupled templates into the kit and the `templates:` declaration becomes
+    required. Warn until then because it currently reports real, known,
+    scheduled work on daf, efl and fle, and a blocking gate for scheduled work
+    is a suppression waiting to be written.
+  status: partial
+  gap: >-
+    Enforces that no course template's first path segment is a top-level content
+    section, refuses `url_shape` and its synonyms, and checks a `templates:`
+    block against the disk in both directions where one is declared. Does NOT
+    yet require the declaration — no course has one — and does not detect a fork
+    at a section-NEUTRAL path, which is the other five of the twenty
+    course-local layouts.
+  battery: true
+  note: >-
+    Hugo picks a template by section name; a section name is the first segment
+    of a URL; ADR-0003 freezes URLs permanently because 789 marks are keyed to
+    them. daf/layouts/materials/materials-list.html and
+    fle/layouts/materiel/materials-list.html are the same 92 lines twice, kept
+    apart by nothing but the fact that "materials" and "materiel" are different
+    words. Baseline on 2026-08-31: 6 of 20 course-local templates so coupled —
+    daf 2 of 2, efl 2 of 4, fle 2 of 4, website 0 of 6, ressources 0 of 4, and
+    nsf and nvt hold none at all, which is the proof the target state is
+    reachable.
+
 - id: E1
   title: deploy shape
   owner: .github
