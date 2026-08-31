@@ -6,6 +6,7 @@
     kit design [--check]        regenerate tokens and icons, or verify them
     kit sync REPO               write _materials/ and kit.lock into a course
     kit urldiff REPO            has anything moved a URL that carries a mark?
+    kit urlset REPO|BUILT       the published file set — what A3 cannot see
     kit materials REPO ...      build decks, worksheets, thumbnails
     kit audio REPO ...          fetch, audition, synthesise
     kit vgwort REPO ...         the mark ledger
@@ -381,6 +382,20 @@ def _echo(cmd: list[str], cwd: Path) -> int:
     return rc
 
 
+def cmd_urlset(a) -> int:
+    """The published file set, scanned or diffed. A3 defends the 789 pages that
+    carry a mark; this defends all 2,076 that are published."""
+    script = str(SCRIPTS / "verify_url_set.py")
+    if a.diff:
+        return _echo([PY, script, "--diff", a.diff[0], a.diff[1]]
+                     + [x for p in (a.allow_removed or []) for x in ("--allow-removed", p)],
+                     Path.cwd())
+    target = Path(a.repo).resolve()
+    built = target if (target / "index.html").exists() else target / "public"
+    cmd = [PY, script, str(built)] + (["--out", a.out] if a.out else [])
+    return _echo(cmd, Path.cwd())
+
+
 def cmd_materials(a) -> int:
     repo = Path(a.repo).resolve()
     if a.thumbs:
@@ -540,6 +555,9 @@ def main() -> int:
     d = sub.add_parser("design"); d.add_argument("--check", action="store_true")
     s = sub.add_parser("sync"); s.add_argument("repo")
     u = sub.add_parser("urldiff"); u.add_argument("repo"); u.add_argument("--built")
+    us = sub.add_parser("urlset"); us.add_argument("repo", nargs="?")
+    us.add_argument("--out"); us.add_argument("--diff", nargs=2, metavar=("BASE", "NOW"))
+    us.add_argument("--allow-removed", action="append")
     m = sub.add_parser("materials"); m.add_argument("repo"); m.add_argument("--thumbs", action="store_true")
     au = sub.add_parser("audio"); au.add_argument("action", choices=["build", "audition"])
     au.add_argument("repo", nargs="?"); au.add_argument("--code")
@@ -554,7 +572,8 @@ def main() -> int:
 
     a = ap.parse_args()
     return {"check": cmd_check, "design": cmd_design, "sync": cmd_sync,
-            "urldiff": cmd_urldiff, "materials": cmd_materials, "audio": cmd_audio,
+            "urldiff": cmd_urldiff, "urlset": cmd_urlset,
+            "materials": cmd_materials, "audio": cmd_audio,
             "vgwort": cmd_vgwort, "new": cmd_new, "menu": cmd_menu,
             "bundles": cmd_bundles}[a.cmd](a)
 

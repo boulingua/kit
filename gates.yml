@@ -694,6 +694,39 @@ gates:
 
 # ── Stage E · deploy ─────────────────────────────────────────────────────────
 
+- id: A20
+  title: published file set
+  owner: kit
+  scripts: [scripts/verify_url_set.py]
+  needs: built
+  severity: warn
+  ramp: >-
+    Blocking from kit v1.23.0, after the harmonisation adoption PRs have merged
+    and every repo has a committed baseline. Warn until then because a gate that
+    needs a baseline cannot block on the release that introduces the baseline.
+  status: partial
+  gap: >-
+    Compares a built tree against a stored manifest and fails on a removed or
+    moved published file. Does NOT yet run automatically in CI against the merge
+    base — that arrives with the H1 workflow step, and until it does the
+    comparison is something a person performs rather than something CI enforces.
+  battery: false
+  runs: >-
+    By hand and in every harmonisation PR, bracketing each step:
+    `kit urlset <repo> --out now && kit urlset --diff base now`.
+  note: >-
+    The gate exists because of a measurement, not a worry. Deleting
+    daf/layouts/materials/list.html removes five fingerprinted JS bundles from
+    the published tree and the organisation reports: hugo exit 0 with 145 of 145
+    pages and no WARN under --panicOnWarning; `kit urldiff` "A3 OK — 68 locked
+    marks"; `kit check` "26 gate(s) run, 0 warning(s), 0 blocked"; C9/C10
+    qa_basics rc=0. Each is true about the question it asks. A3 defends the 789
+    files that carry a mark and asks whether one moved; the battery asks whether
+    the pages are correct. Nothing asked whether the site still contains what it
+    contained yesterday, and eleven of the fourteen harmonisation steps delete a
+    template. Reproduced end to end on 2026-08-31; the new gate exits 1 listing
+    exactly the five removals.
+
 - id: E1
   title: deploy shape
   owner: .github
