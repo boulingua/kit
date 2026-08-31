@@ -83,6 +83,20 @@ def ci_shape(tmp: Path) -> tuple[Path, Path, Path]:
         f = course / owner / script
         f.parent.mkdir(parents=True, exist_ok=True)
         f.write_text("# stand-in\n", encoding="utf-8")
+
+    # The org repo's workflows, because the register now verifies that a gate's
+    # `runs:` claim naming a workflow is true of that workflow — B2 and E1 both
+    # name course-build.yml. In real CI this file is checked out with the rest
+    # of `.github`; a fixture that omits it is not the CI shape, and the first
+    # version of this one said the battery could not start when in fact only
+    # the stand-in was thin.
+    wf = course / ".github-org" / ".github" / "workflows" / "course-build.yml"
+    wf.parent.mkdir(parents=True, exist_ok=True)
+    wf.write_text((KIT.parent / ".github" / ".github" / "workflows" /
+                   "course-build.yml").read_text(encoding="utf-8")
+                  if (KIT.parent / ".github" / ".github" / "workflows" /
+                      "course-build.yml").exists()
+                  else "# stand-in caller\n", encoding="utf-8")
     return course, course / ".github-org", course / ".curriculum"
 
 
