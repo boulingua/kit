@@ -194,19 +194,15 @@ def vocab_terms(secs):
     return []
 
 def move_lines(secs):
-    """Individual short teaching-point lines from Input (e.g. 'Voice — ...'),
-    excluding headings, the long source paragraph and the vocab list."""
+    """Whole teaching-point paragraphs, preserving authored soft wrapping."""
     voc = set(vocab_terms(secs))
     out = []
-    for ln in find_sec(secs, *SEC["input"]).split('\n'):
-        s = ln.strip()
-        if not s or s.startswith(('#','>','|','{{<')): continue
-        if re.match(r'^\s*(?:[-*]|\d+\.)\s', ln): continue
+    for s in paragraphs(find_sec(secs, *SEC["input"])):
         plain = re.sub(r'[*`]','',s)
-        if not (20 <= len(plain) <= 200): continue          # not the long source
+        if len(plain) < 20: continue
         if ('—' in s or ' - ' in s or ':' in s) and not plain.rstrip('.') in voc:
             out.append(s)
-    return out[:4]
+    return out
 
 MATCHED_TITLES: list[str] = []
 
@@ -357,7 +353,7 @@ def build_deck(fm, secs, title, subtitle):
             f"\\column{{0.5\\linewidth}}\n{col2}\n\\end{{columns}}"))
     moves = move_lines(secs)
     if moves:
-        F.append(frame(L["key"], itemize(moves, small=True)))
+        F.append(flow_frame(L["key"], itemize(moves)))
     practice = find_sec(secs, *SEC["practise"])
     if practice.strip(): F.append(flow_frame(L["prac"], text_blocks(practice)))
     production = find_sec(secs, *SEC["produce"])

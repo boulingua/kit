@@ -34,3 +34,9 @@ class MaterialContent(unittest.TestCase):
         source='{{< callout type="note" >}}\n**Support**\n- Use the model.\n{{< /callout >}}\n{{< details title="Solutions" >}}\nSecret answer\n{{< /details >}}'
         result=materials.strip_callouts(source)
         self.assertIn('Use the model.',result);self.assertNotIn('Secret answer',result)
+
+    def test_teaching_point_soft_wrap_does_not_truncate_its_last_sentence(self):
+        paragraph='**Grammar: formal address.** This is a teaching point\ncontinued on another line. **Important:**\nThe last sentence is essential.'
+        points=materials.move_lines([('Input',paragraph)])
+        self.assertEqual(len(points),1)
+        self.assertTrue(points[0].endswith('The last sentence is essential.'))
