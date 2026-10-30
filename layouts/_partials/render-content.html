@@ -1,0 +1,6 @@
+{{- /* Goldmark emits disabled checkboxes without accessible names. Associate
+       simple task-list items with their complete inline text during rendering,
+       including when JavaScript is disabled. Preserve their static checked state. */ -}}
+{{- $content := .Content -}}
+{{- $content = replaceRE `(?m)<li>(<input[^>]*type="checkbox"[^>]*>)([^\n]+)</li>` `<li><label>${1} ${2}</label></li>` $content -}}
+{{- return ($content | safeHTML) -}}

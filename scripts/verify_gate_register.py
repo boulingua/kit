@@ -46,7 +46,7 @@ from blg_checkouts import (  # noqa: E402
     resolve_owners)
 
 KIT = Path(__file__).resolve().parent.parent
-ID_RE = re.compile(r"^(A[1-9]\d?|B[1-4]|C1[0-5]|C[1-9]|D[1-6]|E1)$")
+ID_RE = re.compile(r"^(A[1-9]\d?|B[1-4]|C1[0-6]|C[1-9]|D[1-6]|E1)$")
 STATUS = {"live", "partial", "planned", "withdrawn"}
 SEVERITY = {"blocking", "warn"}
 NEEDS = {"source", "built", "materials", "audio", "none"}
@@ -129,6 +129,9 @@ def main() -> int:
                                ("needs", NEEDS), ("owner", OWNERS)):
             if g.get(field) not in allowed:
                 bad.append(f"{where}: {field}={g.get(field)!r} outside {sorted(allowed)}")
+
+        if "argument" in g and g["argument"] not in {"repo", "built"}:
+            bad.append(f"{where}: argument must be repo or built")
 
         st, sev = g.get("status"), g.get("severity")
 

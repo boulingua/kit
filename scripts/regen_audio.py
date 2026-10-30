@@ -67,6 +67,7 @@ import json
 import re
 import sys
 import wave
+import hashlib
 from pathlib import Path
 
 import yaml
@@ -125,6 +126,7 @@ def main() -> int:
                          "transcript — i.e. exactly those a regeneration that "
                          "ignored the TTS form got wrong.")
     a = ap.parse_args()
+    if a.limit < 0: ap.error("--limit must be nonnegative")
     repo = a.repo.resolve()
 
     cfg = yaml.safe_load((repo / "boulingua.yml").read_text(encoding="utf-8"))
@@ -149,7 +151,8 @@ def main() -> int:
 
     import soundfile as sf
     from piper import PiperVoice
-    voice = PiperVoice.load(str(onnx))
+    voice = PiperVoice.load(str(onnx)) if a.apply else None
+    model_sha256 = hashlib.sha256(onnx.read_bytes()).hexdigest()
     normalise = _build_audio().normalise
     only_labels = [x.strip().lower() for x in (a.only_label or "").split(",")
                    if x.strip()]
@@ -178,6 +181,9 @@ def main() -> int:
             continue
         touched = False
         for s in segs:
+            if s.get("source") == "human":
+                skipped += 1
+                continue
             rel = s.get("file") or s.get("file_withheld")
             raw = tts_text(s)
             text = normalise(raw, tts_lang)
@@ -193,6 +199,9 @@ def main() -> int:
                 continue
             # The path in the manifest is a URL carrying the site prefix; the
             # file lives under static/ without it.
+            if not str(rel).startswith('/' + code + '/materials/audio/') or '..' in Path(str(rel)).parts:
+                print(f'::error::invalid local audio path: {rel}', file=sys.stderr)
+                return 1
             parts = [p for p in str(rel).lstrip("/").split("/")]
             if parts and parts[0] == code:
                 parts = parts[1:]
@@ -229,6 +238,8 @@ def main() -> int:
                     empty += 1
                     continue
                 tmp.replace(out)
+                s.update(source='tts', voice=key, model_sha256=model_sha256)
+                touched = True
                 # Record what was actually spoken, so the next regeneration is
                 # lossless instead of reconstructing it again.
                 if text != str(s.get("transcript") or "").strip():
@@ -250,7 +261,7 @@ def main() -> int:
           + ("regenerated and restored" if a.apply else "would be regenerated")
           + (f", {skipped} skipped (no transcript or no path)" if skipped else "")
           + (f", {empty} produced NO AUDIO and were discarded" if empty else ""))
-    return 0
+    return int(bool(empty))
 
 
 if __name__ == "__main__":

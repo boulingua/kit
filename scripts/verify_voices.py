@@ -68,10 +68,12 @@ def norm(lic: str | None) -> str | None:
 
 def main() -> int:
     root = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else KIT
+    if not (root / "audio/voices.yml").exists():
+        root = KIT
     f = root / "audio" / "voices.yml"
     if not f.exists():
         print(f"Gate 3 n/a — {root.name} holds no audio/voices.yml")
-        return 0
+        return 1
     d = yaml.safe_load(f.read_text(encoding="utf-8"))
     allow = {norm(x) for x in d.get("licence_allowlist", [])}
     rows = d.get("languages") or []

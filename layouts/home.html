@@ -11,7 +11,7 @@
       <h1 class="post-title">{{ .Title }}</h1>
     </header>
     <div class="post-content">
-      {{ .Content }}
+      {{ partial "render-content.html" . }}
     </div>
   </article>
 </section>

@@ -35,3 +35,8 @@ worksheet:
   other: Worksheet
 worksheets:
   other: Worksheets
+
+search: Search
+search_intro: Search the full text of the course.
+search_no_js: Enable JavaScript to search, or browse the course using the menu.
+skip_content: Skip to content

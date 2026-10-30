@@ -51,7 +51,7 @@ a:focus {
 }
 
 .navigation-parent {
-  cursor: default;
+  cursor: pointer;
 }
 
 .navigation-parent::after {
@@ -98,8 +98,7 @@ a:focus {
   color: var(--boulingua-accent);
 }
 
-.navigation-list .has-children:hover .navigation-submenu,
-.navigation-list .has-children:focus-within .navigation-submenu {
+.navigation-dropdown[open] > .navigation-submenu {
   display: block;
 }
 
@@ -116,7 +115,7 @@ a:focus {
    (efl pattern), so it rides the same flex flow as the menu items
    and ends up at the top-right with the rest of the nav. */
 .navigation-item--social .navigation-link {
-  font-size: 1.05rem;
+  font-size: 1.68rem;
   padding-inline: 0.5rem;
 }
 .navigation-item--social .navigation-link i {
@@ -139,13 +138,13 @@ main.content h2:hover,
 
 /* ── Footer ─────────────────────────────────────── */
 .footer {
-  font-size: 0.9rem;
+  font-size: 1.44rem;
 }
 
 .footer .footer-links {
   margin: 0.6rem 0;
-  font-size: 0.85rem;
-  opacity: 0.85;
+  font-size: 1.36rem;
+  opacity: 1;
 }
 
 .footer .footer-links a {
@@ -158,15 +157,15 @@ main.content h2:hover,
 }
 
 .hero-kicker {
-  font-size: 0.85rem;
+  font-size: 1.36rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  opacity: 0.7;
+  opacity: 1;
   margin-bottom: 0.6rem;
 }
 
 .lead {
-  font-size: 1.2rem;
+  font-size: 1.92rem;
   line-height: 1.6;
   max-width: 50rem;
 }
@@ -201,7 +200,7 @@ main.content h2:hover,
 
 .card h3 {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.76rem;
   order: 2;
 }
 
@@ -219,7 +218,7 @@ main.content h2:hover,
   width: 5rem;
   height: 5rem;
   border-radius: 50%;
-  font-size: 1.6rem;
+  font-size: 2.56rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   background: var(--cefr-color);
@@ -340,18 +339,18 @@ details.callout summary {
 
 .material-card h3 {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.6rem;
 }
 
 .material-card .tags {
-  font-size: 0.8rem;
+  font-size: 1.28rem;
   opacity: 0.8;
 }
 
 .material-card .download {
   display: inline-block;
   margin-top: 0.5rem;
-  font-size: 0.85rem;
+  font-size: 1.36rem;
 }
 
 /* ── Per-article material links partial (paired) ─ */
@@ -382,7 +381,7 @@ details.callout summary {
   border-radius: 4px;
   background: transparent;
   color: inherit;
-  font-size: 0.95rem;
+  font-size: 1.52rem;
 }
 
 .materials-hub .materials-search:focus { outline: none; border-color: var(--network-highlight); }
@@ -394,7 +393,7 @@ details.callout summary {
 }
 
 .materials-hub .tag-chip {
-  font-size: 0.78rem;
+  font-size: 1.25rem;
   padding: 0.18rem 0.55rem;
   border: 1px solid var(--network-border);
   border-radius: 999px;
@@ -459,13 +458,13 @@ details.callout summary {
 
 .material-tile-title {
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 1.52rem;
   line-height: 1.3;
 }
 
 .material-tile-meta {
   font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-  font-size: 0.72rem;
+  font-size: 1.2rem;
   color: var(--network-fg-mute);
 }
 
@@ -477,7 +476,7 @@ details.callout summary {
 }
 
 .material-tile-tags .tile-tag {
-  font-size: 0.68rem;
+  font-size: 1.2rem;
   padding: 0.05rem 0.4rem;
   border-radius: 999px;
   background: var(--network-rail-bg);
@@ -489,7 +488,7 @@ details.callout summary {
   margin: 0 0.85rem 0.85rem;
   padding: 0.4rem 0.7rem;
   text-align: center;
-  font-size: 0.85rem;
+  font-size: 1.36rem;
   font-weight: 600;
   border: 1px solid var(--boulingua-accent);
   border-radius: 4px;
@@ -532,7 +531,7 @@ details.callout summary {
 .material-links .material-card-title {
   padding: 0.6rem 0.85rem 0.2rem;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 1.52rem;
 }
 
 .material-links .download-btn { margin-top: auto; }
@@ -556,7 +555,7 @@ details.callout summary {
 }
 
 .materials-filter .filter-label {
-  font-size: 0.85rem;
+  font-size: 1.36rem;
   font-weight: 600;
   margin-inline-end: 0.4rem;
   min-width: 5rem;
@@ -570,7 +569,7 @@ details.callout summary {
   border-radius: 4px;
   background: transparent;
   color: inherit;
-  font-size: 0.95rem;
+  font-size: 1.52rem;
 }
 
 .materials-filter input[type="search"]:focus {
@@ -585,7 +584,7 @@ details.callout summary {
   border-radius: 999px;
   background: transparent;
   color: inherit;
-  font-size: 0.85rem;
+  font-size: 1.36rem;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
@@ -606,7 +605,7 @@ details.callout summary {
 }
 
 .materials-count {
-  font-size: 0.85rem;
+  font-size: 1.36rem;
   opacity: 0.7;
   margin-inline-start: auto;
 }
@@ -671,7 +670,7 @@ body.colorscheme-dark {
   background: transparent;
   color: inherit;
   font: inherit;
-  font-size: 1rem;
+  font-size: 1.6rem;
 }
 
 .network-search input:focus { outline: none; }
@@ -682,7 +681,7 @@ body.colorscheme-dark {
   border-radius: 4px;
   background: transparent;
   color: inherit;
-  font-size: 0.85rem;
+  font-size: 1.36rem;
   cursor: pointer;
 }
 
@@ -700,7 +699,7 @@ body.colorscheme-dark {
 
 .network-rail h4 {
   margin: 0 0 0.4rem;
-  font-size: 0.78rem;
+  font-size: 1.25rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--network-fg-mute);
@@ -727,7 +726,7 @@ body.colorscheme-dark {
   border-radius: 999px;
   background: transparent;
   color: inherit;
-  font-size: 0.8rem;
+  font-size: 1.28rem;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
@@ -744,7 +743,7 @@ body.colorscheme-dark {
 
 .facet-chip .count {
   font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-  font-size: 0.7rem;
+  font-size: 1.2rem;
   opacity: 0.7;
 }
 
@@ -765,7 +764,7 @@ body.colorscheme-dark {
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  font-size: 0.88rem;
+  font-size: 1.41rem;
   cursor: pointer;
 }
 
@@ -775,7 +774,7 @@ body.colorscheme-dark {
   justify-content: center;
   width: 1.4rem;
   height: 1.4rem;
-  font-size: 0.95rem;
+  font-size: 1.52rem;
   line-height: 1;
   color: var(--network-fg-mute);
 }
@@ -818,7 +817,7 @@ body.colorscheme-dark {
   animation: graph-skeleton-spin 0.8s linear infinite;
 }
 .graph-skeleton-label {
-  font-size: 0.85rem;
+  font-size: 1.36rem;
 }
 @keyframes graph-skeleton-spin {
   to { transform: rotate(360deg); }
@@ -831,7 +830,7 @@ body.colorscheme-dark {
   position: absolute;
   bottom: 0.6rem;
   inset-inline-start: 0.7rem;
-  font-size: 0.75rem;
+  font-size: 1.2rem;
   color: var(--network-fg-mute);
   background: var(--network-surface);
   padding: 0.25rem 0.5rem;
@@ -845,7 +844,7 @@ body.colorscheme-dark {
   justify-content: space-between;
   align-items: center;
   padding: 0 0.4rem;
-  font-size: 0.85rem;
+  font-size: 1.36rem;
   color: var(--network-fg-mute);
 }
 
@@ -877,13 +876,13 @@ body.colorscheme-dark {
 
 .network-card .title {
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 1.6rem;
   line-height: 1.3;
 }
 
 .network-card .meta {
   font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-  font-size: 0.72rem;
+  font-size: 1.2rem;
   color: var(--network-fg-mute);
 }
 
@@ -895,7 +894,7 @@ body.colorscheme-dark {
 }
 
 .network-card .tag {
-  font-size: 0.7rem;
+  font-size: 1.2rem;
   padding: 0.1rem 0.45rem;
   border-radius: 999px;
   background: var(--network-rail-bg);
@@ -906,7 +905,7 @@ body.colorscheme-dark {
 .network-card .type-row {
   display: flex;
   gap: 0.4rem;
-  font-size: 0.78rem;
+  font-size: 1.25rem;
   margin-top: 0.2rem;
 }
 
@@ -914,7 +913,7 @@ body.colorscheme-dark {
 
 .network-card .placeholder-badge {
   align-self: flex-start;
-  font-size: 0.65rem;
+  font-size: 1.2rem;
   padding: 0.1rem 0.4rem;
   margin-top: 0.2rem;
   background: var(--network-highlight);
@@ -988,7 +987,7 @@ body.colorscheme-dark {
 }
 
 .network-search [data-action="search-clear"] {
-  font-size: 1rem;
+  font-size: 1.6rem;
   line-height: 1;
   padding: 0.2rem 0.55rem;
 }
@@ -1007,7 +1006,7 @@ body.colorscheme-dark {
 
 /* ── Speaker / presenter notes (Quarto .notes) ───*/
 .notes {
-  font-size: 0.9rem;
+  font-size: 1.44rem;
   opacity: 0.85;
   border-inline-start: 3px solid var(--boulingua-rule);
   padding: 0.4rem 1rem;
@@ -1050,7 +1049,7 @@ body.colorscheme-dark .colorscheme-toggle .cs-icon--sun { display: inline-block;
 /* ── Audio ("Hören") section ─────────────────────── */
 .audio-section { margin: 2.5rem 0 1.5rem; }
 .audio-section > h2 { border-bottom: 1px solid var(--boulingua-rule); padding-bottom: 0.3rem; }
-.audio-intro { opacity: 0.8; font-size: 0.95rem; margin: 0.4rem 0 1rem; }
+.audio-intro { opacity: 0.8; font-size: 1.52rem; margin: 0.4rem 0 1rem; }
 .audio-item {
   border: 1px solid var(--boulingua-panel-border);
   border-radius: 8px; padding: 0.7rem 1rem; margin: 0.7rem 0;
@@ -1059,7 +1058,7 @@ body.colorscheme-dark .colorscheme-toggle .cs-icon--sun { display: inline-block;
 .audio-item-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.8rem; }
 .audio-label { font-weight: 600; min-width: 7rem; }
 .audio-item audio { flex: 1 1 16rem; height: 2.3rem; }
-.audio-transcript { margin-top: 0.5rem; font-size: 0.9rem; }
+.audio-transcript { margin-top: 0.5rem; font-size: 1.44rem; }
 .audio-transcript summary { cursor: pointer; color: var(--boulingua-accent); }
 .audio-transcript p { margin: 0.5rem 0 0; line-height: 1.5; }
 

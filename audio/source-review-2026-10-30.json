@@ -1,0 +1,6 @@
+{
+  "source": "https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/voices.json",
+  "sha256": "97ecf06e9f4d7ae7aa06b7b34ef5e1377a36869dd9bf9c1682a5cd695fbea331",
+  "voices": 178,
+  "note": "Selected model, config and model-card checksums refreshed from the pinned catalogue. Italian model checksum changed from the August snapshot. The stale 115-voice language subtotal has been removed; alternative counts remain dated observations."
+}

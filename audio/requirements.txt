@@ -1,2 +1,3 @@
-piper-tts>=1.5.0
-# ffmpeg (system package) is required for OGG/Opus encoding.
+-r ../requirements.txt
+piper-tts==1.8.0
+soundfile==0.14.0

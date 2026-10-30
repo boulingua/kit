@@ -1,57 +1,95 @@
 #!/usr/bin/env python3
-"""Gate C13 — the render-path JavaScript budget.
+"""Measure scripts actually referenced by each built discovery page.
 
-    python scripts/verify_js_budget.py public/
-
-Promoted from daf, which is the only site that had it. Two caps, and the split
-is the substance: the glue we ship eagerly is held tight, while the graph
-library is dynamically imported only when the network scrolls into view and is
-therefore measured against a looser total.
-
-  render-path glue   <= 88 KB gzipped   main / filters / search / list
-  total (incl. lazy) <= 280 KB gzipped  the above plus vendor.*.js
-
-A language course is read on school hardware and on phones. A budget that is
-not enforced is a budget that is exceeded, and the failure is invisible to the
-person who caused it — nobody notices 40 KB, they notice the fortieth 40 KB.
+The initial page scripts must fit 88 KiB gzip; the page plus explicitly
+referenced lazy graph modules must fit 280 KiB. Missing pages/assets and
+external graph dependencies fail. This is a graph-page budget, not a claim
+about later Pagefind query shards, separately configured telemetry or all network traffic.
 """
 from __future__ import annotations
-
 import gzip
-import sys
+import json
 from pathlib import Path
+import sys
+import tomllib
+from urllib.parse import unquote, urljoin, urlsplit
+from html_tree import parse
 
-GLUE_MAX = 90_112     # 88 KB
-TOTAL_MAX = 286_720   # 280 KB
+GLUE_MAX = 90_112
+TOTAL_MAX = 286_720
+MARKERS = {'network-graph', 'network-mount', 'overview-root'}
 
+def gz_size(p):
+    return len(gzip.compress(p.read_bytes(), 9, mtime=0))
 
-def gz_size(p: Path) -> int:
-    return len(gzip.compress(p.read_bytes(), 9))
+def audit(root: Path, base: str, telemetry=()):
+    root = root.resolve(); errors = []; rows = []
+    parsed = urlsplit(base); prefix = parsed.path.rstrip('/') + '/'
+    if not root.is_dir(): return ['built site is missing'], rows
+    def resolve(url, page):
+        target = urlsplit(urljoin(base + page.relative_to(root).as_posix(), url))
+        if target.netloc != parsed.netloc or target.scheme != parsed.scheme:
+            raise ValueError(f'external script: {url}')
+        path = unquote(target.path)
+        if not path.startswith(prefix): raise ValueError(f'site prefix missing: {url}')
+        file = (root/path[len(prefix):]).resolve()
+        if not file.is_relative_to(root) or not file.is_file(): raise ValueError(f'missing script: {url}')
+        return file
+    for page in sorted(root.rglob('*.html')):
+        html = page.read_text(encoding='utf-8')
+        if not any(marker in html for marker in MARKERS): continue
+        elements = list(parse(html).walk())
+        if not any(e.attrs.get('id') in MARKERS for e in elements): continue
+        eager, lazy = set(), set()
+        excluded_telemetry = set()
+        inline = 0
+        for element in elements:
+            if element.tag == 'script':
+                if element.attrs.get('src') in telemetry and element.attrs.get('data-domain'):
+                    excluded_telemetry.add(element.attrs['src'])
+                elif element.attrs.get('src'): eager.add(element.attrs['src'])
+                elif element.attrs.get('type', '') not in {'application/ld+json', 'application/json'}:
+                    inline += len(gzip.compress(element.text.encode(), 9, mtime=0))
+            for key, value in element.attrs.items():
+                if key == 'data-vendors':
+                    try:
+                        urls = json.loads(value)
+                        if not isinstance(urls, list) or any(not isinstance(u, str) for u in urls): raise ValueError('expected URL list')
+                        lazy.update(urls)
+                    except (ValueError, TypeError) as exc: errors.append(f'{page.relative_to(root)}: invalid data-vendors ({exc})')
+                elif key.startswith('data-') and value and urlsplit(value).path.endswith('.js'):
+                    lazy.add(value)
+        try:
+            initial = {resolve(u, page) for u in eager}
+            deferred = {resolve(u, page) for u in lazy}
+        except ValueError as exc:
+            errors.append(f'{page.relative_to(root)}: {exc}'); continue
+        if not initial:
+            errors.append(f'{page.relative_to(root)}: discovery page has no script entry point'); continue
+        glue = inline + sum(gz_size(p) for p in initial)
+        total = inline + sum(gz_size(p) for p in initial | deferred)
+        rows.append({'page':str(page.relative_to(root)), 'initial_gzip':glue, 'total_gzip':total,
+                     'eager_assets':len(initial), 'lazy_assets':len(deferred-initial), 'telemetry_outside_graph_budget':sorted(excluded_telemetry)})
+        if glue > GLUE_MAX: errors.append(f'{page.relative_to(root)}: initial scripts {glue} > {GLUE_MAX} bytes gzip')
+        if total > TOTAL_MAX: errors.append(f'{page.relative_to(root)}: all graph scripts {total} > {TOTAL_MAX} bytes gzip')
+    if not rows and not errors: errors.append('no built discovery page found for the enabled network gate')
+    return errors, rows
 
+def main():
+    repo=Path(sys.argv[1] if len(sys.argv)>1 else '.').resolve()
+    config=repo/'hugo.toml'
+    if not config.is_file():
+        print('::error::Give the course repository with hugo.toml and public/');return 1
+    cfg=tomllib.loads(config.read_text())
+    base=cfg.get('baseURL')
+    if not base:
+        print('::error::hugo.toml has no baseURL');return 1
+    plausible=cfg.get('params',{}).get('plausible',{})
+    telemetry={plausible.get('src')} if plausible.get('domain') else set()
+    errors, rows=audit(repo/'public',base,telemetry)
+    for row in rows: print(json.dumps(row))
+    for error in errors: print('::error::'+error)
+    print(f'JavaScript budget: {len(rows)} pages; {len(errors)} findings')
+    return int(bool(errors))
 
-def main() -> int:
-    root = Path(sys.argv[1] if len(sys.argv) > 1 else "public")
-    net = root / "js" / "network"
-    if not net.exists():
-        print(f"  no {net} — this course ships no network graph, nothing to budget")
-        return 0
-    js = sorted(net.glob("*.js"))
-    glue = sum(gz_size(p) for p in js if not p.name.startswith("vendor."))
-    total = sum(gz_size(p) for p in js)
-    print(f"  render-path glue: {glue:,} B gz (cap {GLUE_MAX:,})")
-    print(f"  total incl. lazy: {total:,} B gz (cap {TOTAL_MAX:,})")
-    bad = 0
-    if glue > GLUE_MAX:
-        print(f"::error::render-path glue exceeds the 88 KB gzipped budget ({glue} B)")
-        bad += 1
-    if total > TOTAL_MAX:
-        print(f"::error::total network JS exceeds the 280 KB gzipped budget ({total} B)")
-        bad += 1
-    if bad:
-        return 1
-    print("C13 OK")
-    return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
+if __name__=='__main__':raise SystemExit(main())

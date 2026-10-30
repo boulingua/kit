@@ -34,13 +34,13 @@ FIXTURES = [
          url="/track-e/kl09/units/unit06-interview-and-portrait/",
          material="track-e_kl09_unit06-interview-and-portrait",
          unit="interview-and-portrait", exam=False),
-    dict(repo="fle", model="flat file + slug override",
-         rel="content/track_gm_kl10/units/unit01_transition-formation-emploi.md",
+    dict(repo="fle", model="leaf bundle + slug override",
+         rel="content/track_gm_kl10/units/unit01_transition-formation-emploi/index.md",
          url="/track_gm_kl10/units/transition-formation-emploi/",
          material="unit01_transition-formation-emploi",
          unit="transition-formation-emploi", exam=False),
-    dict(repo="daf", model="flat file",
-         rel="content/kurs_b2/units/unit09_bildungsdebatten.md",
+    dict(repo="daf", model="leaf bundle, underscore",
+         rel="content/kurs_b2/units/unit09_bildungsdebatten/index.md",
          url="/kurs_b2/units/unit09_bildungsdebatten/",
          material="unit09_bildungsdebatten",
          unit="bildungsdebatten", exam=False),
@@ -53,7 +53,8 @@ def check_fixtures(org: Path) -> int:
     for f in FIXTURES:
         md = org / f["repo"] / f["rel"]
         if not md.exists():
-            print(f"  SKIP {f['repo']}: {f['rel']} not found")
+            print(f"  FAIL {f['repo']}: required fixture {f['rel']} not found")
+            bad += 1
             continue
         root = org / f["repo"] / "content"
         fm, body = bp.front_matter(md)
@@ -128,7 +129,7 @@ def check_materials(org: Path, repos: list[str]) -> int:
               f"{failed} unit(s) with no recoverable slug")
         for s in sorted(missing)[:4]:
             print(f"      missing {s}")
-        bad += 1 if missing else 0
+        bad += 1 if missing or failed else 0
     return bad
 
 

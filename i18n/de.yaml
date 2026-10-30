@@ -46,3 +46,8 @@ worksheet:
   other: Arbeitsblatt
 worksheets:
   other: Arbeitsblätter
+
+search: Suche
+search_intro: Den gesamten Kurs durchsuchen.
+search_no_js: Für die Suche JavaScript aktivieren oder den Kurs über das Menü öffnen.
+skip_content: Zum Inhalt springen

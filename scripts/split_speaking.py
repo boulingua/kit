@@ -30,18 +30,24 @@ COLLAPSED = {"speaking", "sprechen"}
 
 
 def replace_block(body: str, key: str, values: list) -> str:
-    lines, out, i, done = body.splitlines(), [], 0, False
-    while i < len(lines):
-        if not done and re.match(rf"^{re.escape(key)}\s*:", lines[i]):
-            i += 1
-            while i < len(lines) and lines[i].startswith("- "):
-                i += 1
-            out.append(f"{key}:")
-            out += [f"- {v}" for v in values]
-            done = True
-            continue
-        out.append(lines[i]); i += 1
-    return "\n".join(out)
+    original = yaml.safe_load(body)
+    node = yaml.compose(body)
+    if not isinstance(original, dict) or not isinstance(node, yaml.MappingNode):
+        raise ValueError('front matter must be a mapping')
+    matches = [(k, v) for k, v in node.value if k.value == key]
+    if len(matches) != 1:
+        raise ValueError(f'{key}: expected exactly one field')
+    k, value = matches[0]
+    lines = body.splitlines(keepends=True)
+    end = value.end_mark.line + bool(value.end_mark.column)
+    while end > k.start_mark.line + 1 and (not lines[end - 1].strip() or lines[end - 1].lstrip().startswith('#')):
+        end -= 1
+    replacement = yaml.safe_dump({key: values}, allow_unicode=True, sort_keys=False)
+    result = ''.join(lines[:k.start_mark.line]) + replacement + ''.join(lines[end:])
+    expected = {**original, key: values}
+    if yaml.safe_load(result) != expected:
+        raise ValueError(f'{key}: replacement changed unrelated front matter')
+    return result.rstrip('\n')
 
 
 def main() -> int:

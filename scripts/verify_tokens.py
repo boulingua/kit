@@ -83,13 +83,10 @@ def scan(paths: list[Path], pattern: re.Pattern, what: str, generated: str) -> i
                 continue
             if allowed(lines, i):
                 continue
-            # Same crash A8 had: relative_to(KIT) raises the moment the file
-        # belongs to a course, so the first real finding killed the gate.
-        try:
-            rel = f"{KIT.name}/{path.resolve().relative_to(KIT)}"
-        except ValueError:
-            rel = path.resolve().name if not path.is_absolute() else \
-                "/".join(path.resolve().parts[-4:])
+            try:
+                rel = f"{KIT.name}/{path.resolve().relative_to(KIT)}"
+            except ValueError:
+                rel = str(path.resolve())
             print(f"::error file={rel},line={i + 1}::{what} outside {generated}: "
                   f"{lines[i].strip()[:90]}")
             bad += 1

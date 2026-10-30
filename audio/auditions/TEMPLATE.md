@@ -12,6 +12,9 @@ would use to a stranger. None of that shows up in a licence or a checksum.
 ---
 
 voice: <piper_key>
+speaker_id: <integer>
+model_sha256: <SHA-256 from preview receipt>
+config_sha256: <SHA-256 from preview receipt>
 model_url: <the resolve/ URL the model was fetched from>
 listener: <name — the person who actually listened>
 date: <YYYY-MM-DD>

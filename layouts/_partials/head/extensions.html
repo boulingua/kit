@@ -4,7 +4,7 @@
 {{- $code := site.Params.code -}}
 {{- range hugo.Data.accents -}}{{- if eq .code $code -}}
 <style>:root{--boulingua-accent:{{ .accent }};--boulingua-accent-hover:{{ .hover }}}
-@media (prefers-color-scheme:dark){:root{--boulingua-accent:{{ .dark }};--boulingua-accent-hover:{{ .dark_hover }}}}
+@media (prefers-color-scheme:dark){body.colorscheme-auto{--boulingua-accent:{{ .dark }};--boulingua-accent-hover:{{ .dark_hover }}}}
 body.colorscheme-dark{--boulingua-accent:{{ .dark }};--boulingua-accent-hover:{{ .dark_hover }}}</style>
 {{- end -}}{{- end -}}
 {{- $p := .Site.Params.plausible -}}
@@ -63,3 +63,8 @@ body.colorscheme-dark{--boulingua-accent:{{ .dark }};--boulingua-accent-hover:{{
     {{- warnf "params.font_preload lists %d fonts; only the first 2 are preloaded (gate C11)" (len .) }}
   {{- end }}
 {{- end -}}
+
+{{ $access := resources.Get "css/accessibility.css" | minify | fingerprint }}
+<link rel="stylesheet" href="{{ $access.RelPermalink }}">
+{{ $navigation := resources.Get "js/navigation.js" | minify | fingerprint }}
+<script defer src="{{ $navigation.RelPermalink }}"></script>

@@ -8,45 +8,43 @@ design language (the site's signature accent + pentagon mark + foot watermark),
 renders a thumbnail, writes the PDFs under static/materials/, and rewrites the
 unit's presentation:/worksheet: front matter to the open-format PDFs.
 
-The site (== repo directory name, e.g. efl/fle/daf) selects the LaTeX accent
+The declared site code selects the LaTeX accent
 via \\blgsetlang and the /<site> URL prefix. Section names, answer-key formats
 and the flat slug are detected across English, French and German units.
 
 Usage:
-  build_materials_latex.py [--only SLUG_SUBSTR] [--limit N] [--keep-tex]
-Local, LLM-free, deterministic. Requires xelatex + the vendored templates in
+  build_materials_latex.py [REPO] [--only SLUG_SUBSTR] [--limit N] [--keep-tex]
+Requires xelatex and the vendored templates in
 _materials/.
 """
-import sys, os, re, subprocess, glob, argparse, shutil
+import sys, os, re, subprocess, argparse, shutil, tempfile
+import yaml
+from blg_paths import material_slug, site_code, SiteError
 from pathlib import Path
-import sys
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-# The repo is an ARGUMENT. Derived from __file__ this resolved to the kit, so
-# the emitter built the kit's example and called it "kit" — the sixth script in
-# this kit found taking its target from its own location. And SITE is read from
-# boulingua.yml rather than from the directory name: the code drives the accent,
-# the brand mark and the /SITE URL prefix, and a repo checked out under a
-# different directory name would silently get another course's colour.
-def _repo() -> Path:
-    for i, a in enumerate(sys.argv[1:], 1):
-        if not a.startswith("-"):
-            sys.argv.pop(i)
-            return Path(a).resolve()
-    return Path.cwd()
+REPO = Path.cwd()
+SITE = ''
+MAT = REPO / '_materials'
+PRES = REPO / 'static/materials/presentations'
+WORK = REPO / 'static/materials/worksheets'
+URL = ''
 
 
-REPO = _repo()
-_cfg = REPO / "boulingua.yml"
-if _cfg.exists():
-    import yaml as _y
-    SITE = (_y.safe_load(_cfg.read_text(encoding="utf-8")) or {}).get("code") or REPO.name
-else:
-    SITE = REPO.name
-MAT = REPO / "_materials"
-PRES = REPO / "static/materials/presentations"
-WORK = REPO / "static/materials/worksheets"
-URL = "/" + SITE
+def configure(repo):
+    global REPO, SITE, MAT, PRES, WORK, URL, L
+    REPO = Path(repo).resolve()
+    SITE = site_code(REPO)
+    config = yaml.safe_load((REPO / 'boulingua.yml').read_text()) or {}
+    if config.get('code') != SITE:
+        raise ValueError('boulingua.yml and Hugo must declare the same site code')
+    MAT = REPO / '_materials'
+    PRES = REPO / 'static/materials/presentations'
+    WORK = REPO / 'static/materials/worksheets'
+    URL = '/' + SITE
+    if SITE not in {'efl', 'fle', 'daf'}:
+        raise ValueError(f'materials labels are not reviewed for {SITE}')
+    L = LABELS[{'efl': 'en', 'fle': 'fr', 'daf': 'de'}[SITE]]
+
 
 # ---------- markdown → LaTeX ----------
 SPECIAL = {'\\': r'\textbackslash{}', '&': r'\&', '%': r'\%', '$': r'\$',
@@ -73,6 +71,9 @@ def inline(s):
     s = (s.replace(B,r'\textbf{').replace(Bc,'}')
            .replace(I,r'\textit{').replace(Ic,'}')
            .replace(C,r'\texttt{').replace(Cc,'}'))
+    # Authored differentiation mark, outside Source Sans 3's character map.
+    # Draw the five-point star and retain U+2B51 as PDF ActualText.
+    s = s.replace('⭑', r'\blgdifficultystar{}')
     # No symbol substitution. Thirteen arrows and operators used to be rewritten
     # into math mode here because the bundled 781-codepoint subset lacked them.
     # All thirteen are in the shipped payload now, and the hack was doing active
@@ -88,10 +89,9 @@ def inline(s):
 def parse(md):
     m = re.match(r'^---\n(.*?)\n---\n(.*)$', md, re.S)
     fm_raw, body = (m.group(1), m.group(2)) if m else ("", md)
-    fm = {}
-    for line in fm_raw.split('\n'):
-        mm = re.match(r'^(\w[\w_]*):\s*"?(.*?)"?\s*$', line)
-        if mm and mm.group(2): fm[mm.group(1)] = mm.group(2)
+    fm = yaml.safe_load(fm_raw) or {}
+    if not isinstance(fm, dict):
+        raise ValueError('unit front matter must be a mapping')
     # split into level-2 sections (keep level-3 inside)
     parts = re.split(r'(?m)^##\s+(.+?)\s*$', body)
     secs = []  # (title, text)
@@ -103,12 +103,16 @@ def norm(t):
     return re.sub(r'^\d+\.?\s*', '', t).strip().lower()
 
 def strip_callouts(t):
-    """Remove {{< callout >}}…{{< /callout >}} and {{< details >}}…{{< /details >}}
-    blocks (answer keys, grading scales, hints) so section extraction doesn't
-    pull answers into exercises."""
-    t = re.sub(r'\{\{<\s*callout.*?\{\{<\s*/callout\s*>\}\}', '', t, flags=re.S)
-    t = re.sub(r'\{\{<\s*details.*?\{\{<\s*/details\s*>\}\}', '', t, flags=re.S)
-    return t
+    """Hide answer keys but retain instructional hints and differentiation."""
+    def content(match):
+        attrs, body = match.group(2), match.group(3)
+        title = re.search(r'title=["\']([^"\']+)', attrs)
+        title = title.group(1) if title else ''
+        if re.search(r'l\wsung|answer\s*key|solution|corrig|barème|notenschlüssel', title, re.I):
+            return ''
+        return '\n\n' + (f'**{title}**\n\n' if title else '') + body.strip() + '\n\n'
+    return re.sub(r'\{\{<\s*(callout|details)([^>]*)>\}\}(.*?)\{\{<\s*/\1\s*>\}\}',
+                  content, t, flags=re.S)
 
 # section-name synonyms across English / French / German units
 SEC = {
@@ -171,17 +175,22 @@ def vocab_terms(secs):
         if mm and mm.group(1).count(',') >= 3:
             terms = [t.strip(' .') for t in mm.group(1).split(',') if t.strip(' .')]
             if len(terms) >= 4 and max(len(t) for t in terms) <= 28:
-                return terms[:12]
-    rows = [l for l in text.split('\n') if l.strip().startswith('|')]
-    if len(rows) >= 4:
-        terms=[]
-        for r in rows[2:]:
-            cells=[c.strip() for c in r.strip().strip('|').split('|')]
-            if cells and cells[0] and not set(cells[0])<=set('-: '):
-                terms.append(re.sub(r'[*`]','',cells[0]))
-        terms=[t for t in terms if t]
-        if len(terms) >= 4 and max(len(t) for t in terms) <= 28:
-            return terms[:12]
+                return terms
+    tables, rows = [], []
+    for line in text.splitlines() + ['']:
+        if line.strip().startswith('|'):
+            rows.append(line)
+        elif rows:
+            tables.append(rows); rows = []
+    for rows in tables:
+        if len(rows) < 4: continue
+        terms = []
+        for row in rows[2:]:
+            cells = [c.strip() for c in row.strip().strip('|').split('|')]
+            if cells and cells[0] and not set(cells[0]) <= set('-: '):
+                terms.append(re.sub(r'[*`]', '', cells[0]))
+        if len(terms) >= 4 and max(map(len, terms)) <= 28:
+            return terms
     return []
 
 def move_lines(secs):
@@ -223,7 +232,9 @@ def answer_keys(md, secs):
     pat = (r'\{\{<\s*(?:callout|details)[^>]*title="([^"]*)"[^>]*>\}\}'
            r'(.*?)\{\{<\s*/(?:callout|details)\s*>\}\}')
     KEYWORD = re.compile(r'(l\wsung|answer\s*key|solution|corrig)', re.I)
-    for m in re.finditer(pat, md, re.S):
+    teaching = "\n\n".join(body for title, body in secs
+                           if not re.search(r'exam|prüfung|prufung|épreuve|epreuve', norm(title)))
+    for m in re.finditer(pat, teaching, re.S):
         if not KEYWORD.search(m.group(1)):
             continue
         MATCHED_TITLES.append(m.group(1))
@@ -236,24 +247,24 @@ def answer_keys(md, secs):
     return out
 
 # ---------- localisation (labels follow the site's language) ----------
-LANG = {"efl": "en", "fle": "fr", "daf": "de"}.get(SITE, "en")
-L = {
+LABELS = {
   "en": {"obj":"Learning objectives","lead":"Lead-in","vocab":"Vocabulary",
          "key":"Key points","prac":"Practise","turn":"Your turn","refl":"Reflect",
          "read":"Reading","write":"Write","term":"Term","note":"Your note",
          "v_i":"Match each item to its meaning or use it in a sentence.",
-         "r_i":"Read the text, then answer in full sentences."},
+         "r_i":"Read the text and use it for the activities below."},
   "fr": {"obj":"Objectifs","lead":"Mise en situation","vocab":"Vocabulaire",
          "key":"Points clés","prac":"S'entraîner","turn":"À toi de jouer","refl":"Réfléchir",
          "read":"Lecture","write":"Produire","term":"Terme","note":"Votre note",
          "v_i":"Associez chaque terme à son sens ou employez-le dans une phrase.",
-         "r_i":"Lisez le texte, puis répondez par des phrases complètes."},
+         "r_i":"Lisez le texte et utilisez-le pour les activités suivantes."},
   "de": {"obj":"Lernziele","lead":"Einstieg","vocab":"Wortschatz",
          "key":"Kernpunkte","prac":"Üben","turn":"Anwenden","refl":"Reflexion",
          "read":"Lesen","write":"Schreiben","term":"Wort","note":"Ihre Notiz",
          "v_i":"Ordnen Sie jedem Wort seine Bedeutung zu oder verwenden Sie es im Satz.",
-         "r_i":"Lesen Sie den Text und antworten Sie in ganzen Sätzen."},
-}[LANG]
+         "r_i":"Lesen Sie den Text und nutzen Sie ihn für die folgenden Aufgaben."},
+}
+L = LABELS["en"]
 
 # ---------- LaTeX emit ----------
 def frame(title, body):
@@ -264,6 +275,71 @@ def itemize(items, small=False):
     sz = "\\small\n" if small else ""
     return sz+"\\begin{itemize}\n" + "\n".join(f"  \\item {inline(x)}" for x in items) + "\n\\end{itemize}"
 
+def task_table(lines):
+    """Keep header/cell associations; short repeated-header tables can paginate."""
+    rows = [[cell.strip() for cell in re.split(r'(?<!\\)\|', line.strip().strip('|'))]
+            for line in lines]
+    width = len(rows[0])
+    if len(rows) < 2 or any(len(row) != width for row in rows):
+        raise ValueError('task table has inconsistent columns')
+    if not all(re.fullmatch(r':?-+:?', cell.replace(' ', '')) for cell in rows[1]):
+        raise ValueError('task table is missing its header separator')
+    out = []
+    for start in range(2, len(rows), 4):
+        cells = [' & '.join(r'\textbf{' + inline(cell) + '}' for cell in rows[0]) + r' \\ \midrule']
+        cells += [' & '.join(inline(cell.replace(r'\|', '|')) for cell in row) + r' \\'
+                  for row in rows[start:start + 4]]
+        out.append(r'\par\medskip\noindent\begin{tabularx}{\linewidth}{@{}' +
+                   ('>{\\raggedright\\arraybackslash}X' * width) + '@{}}\n' +
+                   '\n'.join(cells) + '\n' + r'\bottomrule\end{tabularx}\par\medskip')
+    return '\n'.join(out)
+
+
+def text_blocks(text):
+    """Render task paragraphs, headings, quotes, tables and labelled lists."""
+    lines = text.strip().splitlines()
+    out, index = [], 0
+    item = re.compile(r'^\s*([-*]|\d+\.)\s+(?:\[[ xX]?\]\s*)?(.*)$')
+    def boundary(line):
+        return (not line.strip() or re.match(r'^\s*(?:#{1,6}\s|\||>)', line)
+                or item.match(line))
+    while index < len(lines):
+        line = lines[index].strip(); index += 1
+        if not line: continue
+        if line.startswith('|'):
+            table = [line]
+            while index < len(lines) and lines[index].lstrip().startswith('|'):
+                table.append(lines[index]); index += 1
+            out.append(task_table(table))
+        elif re.match(r'^#{1,6}\s', line):
+            out.append(r'\par\medskip\textbf{' + inline(re.sub(r'^#+\s*', '', line)) + r'}\par')
+        elif line.startswith('>'):
+            out.append(inline(re.sub(r'^>\s?', '', line)) + r'\par')
+        elif item.match(line):
+            items = []
+            while True:
+                match = item.match(line)
+                label, value = match.groups()
+                while index < len(lines) and not boundary(lines[index]):
+                    value += ' ' + lines[index].strip(); index += 1
+                # Explicit labels preserve authored numbering, including restarts.
+                prefix = r'\item[' + label + '] ' if label[0].isdigit() else r'\item '
+                items.append(prefix + inline(value))
+                if index >= len(lines) or not item.match(lines[index]): break
+                line = lines[index]; index += 1
+            out.append('\\begin{itemize}\n' + '\n'.join(items) + '\n\\end{itemize}')
+        else:
+            paragraph = [line]
+            while index < len(lines) and not boundary(lines[index]):
+                paragraph.append(lines[index].strip()); index += 1
+            out.append(inline(' '.join(paragraph)) + r'\par')
+    return '\n'.join(out)
+
+
+def flow_frame(title,body):
+    return f"\\begin{{frame}}[allowframebreaks]{{{esc(title)}}}\n\\small\n{body}\n\\end{{frame}}\n"
+
+
 def build_deck(fm, secs, title, subtitle):
     F = []
     F.append("\\begin{frame}[plain]\\titlepage\\end{frame}")
@@ -273,20 +349,19 @@ def build_deck(fm, secs, title, subtitle):
     if lead:
         F.append(frame(L["lead"], f"\\large {inline(lead[0])}"))
     terms = vocab_terms(secs)
-    if terms:
-        half = (len(terms)+1)//2
-        col1 = itemize(terms[:half]); col2 = itemize(terms[half:])
+    for start in range(0, len(terms), 12):
+        group=terms[start:start+12]; half=(len(group)+1)//2
+        col1=itemize(group[:half]); col2=itemize(group[half:])
         F.append(frame(L["vocab"],
             f"\\begin{{columns}}[T]\n\\column{{0.5\\linewidth}}\n{col1}\n"
             f"\\column{{0.5\\linewidth}}\n{col2}\n\\end{{columns}}"))
     moves = move_lines(secs)
     if moves:
         F.append(frame(L["key"], itemize(moves, small=True)))
-    prac = bullets(find_sec(secs, *SEC["practise"]))[:5]
-    if prac: F.append(frame(L["prac"], itemize(prac, small=True)))
-    prod = paragraphs(find_sec(secs, *SEC["produce"]))
-    if prod:
-        F.append(frame(L["turn"], f"\\large {inline(prod[0])}"))
+    practice = find_sec(secs, *SEC["practise"])
+    if practice.strip(): F.append(flow_frame(L["prac"], text_blocks(practice)))
+    production = find_sec(secs, *SEC["produce"])
+    if production.strip(): F.append(flow_frame(L["turn"], text_blocks(production)))
     refl = bullets(find_sec(secs, *SEC["reflect"]))
     if refl: F.append(frame(L["refl"], itemize(refl, small=True)))
     return (TEX_DECK.replace("@@TITLE@@", inline(title)).replace("@@SUBTITLE@@", inline(subtitle))
@@ -298,34 +373,50 @@ def build_worksheet(fm, secs, md, title, subtitle, badge):
     if terms:
         rows = " \\\\[0.5em]\n".join(f"{inline(t)} & " for t in terms)
         S.append(f"\\section{{{esc(L['vocab'])}}}\n{esc(L['v_i'])}\n\n"
-            "\\begin{tabularx}{\\linewidth}{@{}p{5cm}X@{}}\n\\toprule\n"
+            "\\noindent\\begin{tabularx}{\\linewidth}{@{}p{5cm}X@{}}\n\\toprule\n"
             f"\\textbf{{{esc(L['term'])}}} & \\textbf{{{esc(L['note'])}}} \\\\\n\\midrule\n"
             f"{rows} \\\\\n\\bottomrule\n\\end{{tabularx}}")
     src = ""
     inp = find_sec(secs, *SEC["input"])
-    for p in paragraphs(inp):
-        if len(p) > 160: src = p; break
+    # A dialogue/source is a blockquote. Vocabulary and explanatory prose are
+    # not reading stimuli, even when they happen to exceed 160 characters.
+    quoted = re.findall(r'(?m)(?:^>[^\n]*(?:\n|$))+', inp)
+    if quoted:
+        src = '\n'.join(re.sub(r'^>\s?', '', line) for line in quoted[0].strip().splitlines())
     if src:
+        reading = r'\par '.join(inline(line) for line in src.splitlines())
         S.append(f"\\section{{{esc(L['read'])}}}\n{esc(L['r_i'])}\n\n"
-                 f"\\begingroup\\itshape {inline(src)}\\endgroup\n\\blglines[2]")
-    prac = bullets(find_sec(secs, *SEC["practise"]))
-    if prac:
-        items = "\n".join(f"  \\item {inline(x)}" for x in prac)
-        S.append(f"\\section{{{esc(L['prac'])}}}\n\\begin{{enumerate}}\n"+items+"\n\\end{enumerate}\n\\blglines[3]")
-    prod = paragraphs(find_sec(secs, *SEC["produce"]))
-    if prod:
-        S.append(f"\\section{{{esc(L['write'])}}}\n"+inline(prod[0])+"\n\\blglines[6]")
+                 f"\\begingroup\\itshape {reading}\\endgroup\n\\blglines[2]")
+    practice = find_sec(secs, *SEC["practise"])
+    if practice.strip():
+        S.append(f"\\section{{{esc(L['prac'])}}}\n"+text_blocks(practice)+"\n\\blglines[3]")
+    production = find_sec(secs, *SEC["produce"])
+    if production.strip():
+        S.append(f"\\section{{{esc(L['turn'])}}}\n"+text_blocks(production)+"\n\\blglines[6]")
     ans = answer_keys(md, secs)
     ansbox = ""
     if ans:
-        body = " \\\\\n".join(inline(a) for a in ans[:8])
+        body = " \\\\\n".join(inline(a) for a in ans)
         ansbox = "\\begin{blganswers}\n"+body+"\n\\end{blganswers}"
     return (TEX_SHEET.replace("@@TITLE@@", inline(title)).replace("@@SUBTITLE@@", inline(subtitle))
             .replace("@@BADGE@@", esc(badge)).replace("@@LANG@@", SITE)
-            .replace("@@SECTIONS@@", "\n\n".join(S)).replace("@@ANSWERS@@", ansbox))
+            .replace("@@UI@@", {'efl': 'english', 'fle': 'french', 'daf': 'german'}[SITE])
+            .replace("@@SECTIONS@@", "\n\n".join(S).replace(r'\section{', r'\Needspace{6\baselineskip}\section{'))
+            .replace("@@ANSWERS@@", ansbox))
 
+TEX_SYMBOLS = r"""
+\usetikzlibrary{shapes.geometric}
+\newcommand{\blgdifficultystar}{%
+  \special{pdf:literal direct /Span << /ActualText <FEFF2B51> >> BDC}%
+  \makebox[0pt][l]{\special{pdf:literal direct 3 Tr}.\special{pdf:literal direct 0 Tr}}%
+  \tikz[baseline=-0.1ex]\node[star,star points=5,star point ratio=2.25,
+    fill=.,draw=none,inner sep=0pt,minimum size=0.65em]{};%
+  \special{pdf:literal direct EMC}}
+"""
 TEX_DECK = r"""\documentclass[aspectratio=169,11pt]{beamer}
+\usepackage{tabularx,booktabs}
 \usetheme{boulingua}
+""" + TEX_SYMBOLS + r"""
 \blgsetlang{@@LANG@@}
 \title{@@TITLE@@}
 \subtitle{@@SUBTITLE@@}
@@ -335,7 +426,11 @@ TEX_DECK = r"""\documentclass[aspectratio=169,11pt]{beamer}
 """
 TEX_SHEET = r"""\documentclass[11pt]{article}
 \usepackage{boulingua-sheet}
+\usepackage{needspace}
+""" + TEX_SYMBOLS + r"""
 \blgsetlang{@@LANG@@}
+\blgsetui{@@UI@@}
+\emergencystretch=2em
 \begin{document}
 \worksheetheader{@@TITLE@@}{@@SUBTITLE@@}{@@BADGE@@}{blgcefrB}
 \begin{sheetbody}
@@ -347,10 +442,20 @@ TEX_SHEET = r"""\documentclass[11pt]{article}
 """
 
 def xelatex(texfile, passes=2):
+    output = MAT / (texfile.stem + '.pdf')
+    output.unlink(missing_ok=True)  # generated intermediate, never a published PDF
+    result = None
     for _ in range(passes):
-        r = subprocess.run(["xelatex","-interaction=nonstopmode","-halt-on-error",texfile.name],
-                           cwd=MAT, capture_output=True, text=True)
-    return (MAT / (texfile.stem + ".pdf")).is_file(), r
+        result = subprocess.run(['xelatex', '-no-shell-escape', '-interaction=nonstopmode', '-halt-on-error', texfile.name],
+                                cwd=MAT, capture_output=True, text=True)
+        log = texfile.with_suffix('.log')
+        messages = result.stdout + result.stderr + (log.read_text(errors='replace') if log.exists() else '')
+        if result.returncode or 'Missing character:' in messages:
+            diagnostic = '\n'.join(line for line in messages.splitlines()
+                                   if line.startswith(('!', 'Missing character:')))
+            result.stderr += '\n' + diagnostic
+            return False, result
+    return output.is_file() and output.stat().st_size > 0, result
 
 def thumb(pdf, png):
     # Delegates. This used to be a second renderer at a third width — 900 px
@@ -378,14 +483,7 @@ def upsert_fm(md_path, slug):
     md_path.write_text(f"---\n{fm.rstrip()}\n---\n{body}")
 
 def unit_slug(md_path, md):
-    """Reuse the site's established flat slug: take it from the existing
-    presentation:/worksheet: URL if present (keeps every download link stable
-    across the .odp/.pptx -> .pdf migration); otherwise derive it."""
-    m = re.search(r'/materials/(?:presentations|worksheets)/([^/"\s.]+)\.(?:pdf|odp|pptx)', md)
-    if m: return m.group(1)
-    if md_path.name == "index.md":            # EFL leaf bundle
-        return md_path.parent.name
-    return md_path.stem                        # FLE/DaF single-file unit
+    return material_slug(md_path)
 
 def unit_badge(fm, md_path):
     niv = fm.get("niveau") or fm.get("cefr") or fm.get("niveau_cefr")
@@ -396,41 +494,56 @@ def unit_badge(fm, md_path):
 def process(md_path, keep_tex=False):
     md = md_path.read_text()
     fm, secs = parse(md)
-    name = md_path.parent.name if md_path.name == "index.md" else md_path.stem
-    title = fm.get("title", name)
-    subtitle = fm.get("subtitle", "")
-    badge = unit_badge(fm, md_path)
-    slug = unit_slug(md_path, md)
-    ok = {"unit": name, "deck": False, "sheet": False}
-    PRES.mkdir(parents=True, exist_ok=True); WORK.mkdir(parents=True, exist_ok=True)
-    # deck
-    dtex = MAT / f"{slug}-deck.tex"; dtex.write_text(build_deck(fm, secs, title, subtitle))
-    good, r = xelatex(dtex)
-    if good:
-        shutil.move(str(MAT / f"{slug}-deck.pdf"), str(PRES / f"{slug}.pdf"))
-        thumb(PRES / f"{slug}.pdf", PRES / f"{slug}.png"); ok["deck"] = True
-    else:
-        ok["err_deck"] = r.stdout[-400:]
-    # worksheet
-    wtex = MAT / f"{slug}-sheet.tex"; wtex.write_text(build_worksheet(fm, secs, md, title, subtitle, badge))
-    good, r = xelatex(wtex)
-    if good:
-        shutil.move(str(MAT / f"{slug}-sheet.pdf"), str(WORK / f"{slug}.pdf"))
-        thumb(WORK / f"{slug}.pdf", WORK / f"{slug}.png"); ok["sheet"] = True
-    else:
-        ok["err_sheet"] = r.stdout[-400:]
-    if ok["deck"] and ok["sheet"]:
+    name = md_path.parent.name if md_path.name == 'index.md' else md_path.stem
+    title, subtitle = fm.get('title', name), fm.get('subtitle', '')
+    badge, slug = unit_badge(fm, md_path), unit_slug(md_path, md)
+    result = {'unit': name, 'deck': False, 'sheet': False}
+    documents = [('deck', build_deck(fm, secs, title, subtitle), PRES),
+                 ('sheet', build_worksheet(fm, secs, md, title, subtitle, badge), WORK)]
+    for kind, text, target in documents:
+        tex = MAT / f'{slug}-{kind}.tex'
+        tex.write_text(text)
+        good, run = xelatex(tex)
+        result[kind] = good
+        if not good:
+            result['err_' + kind] = (run.stdout + run.stderr)[-1200:]
+    # Publish neither document until both compile and both thumbnails render.
+    if result['deck'] and result['sheet']:
+        with tempfile.TemporaryDirectory(prefix='materials-', dir=MAT) as td:
+            stage = Path(td)
+            prepared = []
+            for kind, text, target in documents:
+                pdf, png = stage / f'{kind}.pdf', stage / f'{kind}.png'
+                shutil.copy2(MAT / f'{slug}-{kind}.pdf', pdf)
+                thumb(pdf, png)
+                target.mkdir(parents=True, exist_ok=True)
+                prepared.extend([(pdf, target / f'{slug}.pdf'), (png, target / f'{slug}.png')])
+            for source, destination in prepared:
+                source.replace(destination)
         upsert_fm(md_path, slug)
-    if not keep_tex:
-        for f in MAT.glob(f"{slug}-*"):
-            if f.suffix in (".aux",".log",".nav",".snm",".toc",".out",".tex"): f.unlink()
-    return ok
+    if not keep_tex and result['deck'] and result['sheet']:
+        for kind, _, _ in documents:
+            for suffix in ['.aux', '.log', '.nav', '.snm', '.toc', '.out', '.tex', '.pdf']:
+                (MAT / f'{slug}-{kind}{suffix}').unlink(missing_ok=True)
+    return result
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument('repo', nargs='?', type=Path, default=Path.cwd())
     ap.add_argument("--only", default=""); ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--keep-tex", action="store_true")
     a = ap.parse_args()
+    try:
+        configure(a.repo)
+    except (OSError, ValueError, SiteError) as exc:
+        print(f'::error::{exc}', file=sys.stderr)
+        return 2
+    if not shutil.which('xelatex'):
+        print('::error::xelatex is required; install the documented TeX toolchain', file=sys.stderr)
+        return 2
+    if not MAT.is_dir():
+        print('::error::_materials is missing; run kit sync REPO first', file=sys.stderr)
+        return 2
     # EFL units are leaf bundles (units/<slug>/index.md); FLE/DaF are single
     # files (units/<slug>.md). Take any markdown under a units/ folder that
     # carries a presentation: block (i.e. a real material-bearing teaching unit).
@@ -438,16 +551,27 @@ def main():
                    if "/units/" in p.as_posix() and p.name != "_index.md")
     units = [u for u in units if a.only in str(u)]
     units = [u for u in units if 'presentation:' in u.read_text()]
+    if a.limit < 0:
+        ap.error('--limit must be nonnegative')
     if a.limit: units = units[:a.limit]
+    if not units:
+        print('::error::no material-bearing units match this request', file=sys.stderr)
+        return 1
     okc = deckc = sheetc = 0
     for u in units:
-        r = process(u, a.keep_tex); okc += 1
+        try:
+            r = process(u, a.keep_tex)
+        except (OSError, ValueError, RuntimeError) as exc:
+            r = {'unit': str(u.relative_to(REPO)), 'deck': False, 'sheet': False,
+                 'err_deck': str(exc), 'err_sheet': str(exc)}
+        okc += 1
         deckc += r["deck"]; sheetc += r["sheet"]
         flag = "OK" if r["deck"] and r["sheet"] else "PARTIAL"
         print(f"[{flag}] {r['unit']}  deck={r['deck']} sheet={r['sheet']}")
         if not r["deck"] and r.get("err_deck"): print("   deck err:", r["err_deck"].replace('\n',' ')[-200:])
         if not r["sheet"] and r.get("err_sheet"): print("   sheet err:", r["err_sheet"].replace('\n',' ')[-200:])
     print(f"\n{okc} units | {deckc} decks | {sheetc} worksheets")
+    return int(deckc != okc or sheetc != okc)
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

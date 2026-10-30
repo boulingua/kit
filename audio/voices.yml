@@ -1,8 +1,8 @@
 snapshot:
-  source: https://huggingface.co/rhasspy/piper-voices/resolve/main/voices.json
-  taken_at: 2026-08-21
-  voices_in_catalogue: 174
-  voices_in_boulingua_languages: 115
+  revision: 5041a7a49ae5b3a0f30e6837769eb03fdbb231bd
+  source: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/voices.json
+  taken_at: 2026-10-30
+  voices_in_catalogue: 178
 licence_allowlist:
 - CC0
 - public domain
@@ -21,10 +21,10 @@ languages:
   num_speakers: 1
   licence: public domain
   dataset: https://librivox.org
-  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/cori/medium/en_GB-cori-medium.onnx
-  note: The model card states the licence as a bare URL; it is CC BY 4.0, so alba carries an attribution
-    obligation and needs a NOTICE.md row naming the model and the CSTR Edinburgh dataset. en_GB-cori-medium
-    (public domain) is the second speaker.
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/en/en_GB/cori/medium/en_GB-cori-medium.onnx
+  note: Cori is the current candidate. The pinned upstream model card identifies
+    a LibriVox public-domain dataset. Historical recordings may use a different
+    voice and must not be assigned this candidate's provenance without evidence.
   alternatives:
   - key: en_GB-cori-high
     quality: high
@@ -224,8 +224,10 @@ languages:
     conversational. That is a real pedagogical difference for a course
     teaching everyday dialogue, and it is what the audition is for.
   tts_lang: en
-  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/cori/medium/en_GB-cori-medium.onnx
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/en/en_GB/cori/medium/en_GB-cori-medium.onnx
   md5: f143307611eccea9d976235d0895f57c
+  config_md5: 12b1dc45d8919f3475cf296d5f16a4c6
+  model_card_md5: 43861aa2d2c143356702fd966b7812c4
   sample_rate: 22050
   second_voice: en_GB-cori-medium
   licence_verified_at: '2026-08-21'
@@ -237,7 +239,7 @@ languages:
   num_speakers: 125
   licence: CC BY 4.0
   dataset: http://openslr.org/94/
-  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/mls/medium/fr_FR-mls-medium.onnx
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/fr/fr_FR/mls/medium/fr_FR-mls-medium.onnx
   note: CC BY 4.0, written CC-BY 4.0 upstream; siwis carries an attribution obligation and needs a NOTICE.md
     row. fr_FR-gilles-low (CC0) is the second speaker. fr_FR-tom-medium is AGPLv3 — a software copyleft
     with no clean path into a CC BY-SA 4.0 work — and is excluded.
@@ -288,8 +290,10 @@ languages:
     conversational. That is a real pedagogical difference for a course
     teaching everyday dialogue, and it is what the audition is for.
   tts_lang: fr
-  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/mls/medium/fr_FR-mls-medium.onnx
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/fr/fr_FR/mls/medium/fr_FR-mls-medium.onnx
   md5: 87831389d3ae92347d91e38b0c57add9
+  config_md5: be41a30aab03788f5e5c4fe51620ccbe
+  model_card_md5: 88d84c1c548aa27c1d119d2964f8fcf0
   sample_rate: 22050
   second_voice: fr_FR-gilles-low
   must_render:
@@ -307,7 +311,7 @@ languages:
   num_speakers: 236
   licence: CC BY 4.0
   dataset: http://openslr.org/94/
-  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/mls/medium/de_DE-mls-medium.onnx
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/de/de_DE/mls/medium/de_DE-mls-medium.onnx
   note: CC0, no obligation. de_DE-kerstin-low (CC0) is the second speaker; de_DE-thorsten_emotional-medium
     (CC0, 8 speakers) covers dialogues needing more than two voices.
   alternatives:
@@ -372,8 +376,10 @@ languages:
     conversational. That is a real pedagogical difference for a course
     teaching everyday dialogue, and it is what the audition is for.
   tts_lang: de
-  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/mls/medium/de_DE-mls-medium.onnx
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/de/de_DE/mls/medium/de_DE-mls-medium.onnx
   md5: bb543a8e82b95993cdd2199a0049623b
+  config_md5: 3fb96c627820ac38cff6e8c3ac0e4aa0
+  model_card_md5: e32e1746dddda1336c1b6725afa6251d
   sample_rate: 22050
   second_voice: de_DE-kerstin-low
   must_render:
@@ -426,7 +432,7 @@ languages:
   num_speakers: 1
   licence: CC0
   dataset: https://github.com/OHF-Voice/voice-datasets
-  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/zh/zh_CN/chaowen/medium/zh_CN-chaowen-medium.onnx
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/zh/zh_CN/chaowen/medium/zh_CN-chaowen-medium.onnx
   note: 'zh_CN-huayan-medium, named at cfl/ROADMAP.md:30,78, states License: Unknown, and zh_CN-xiao_ya-medium
     is explicitly non-commercial. chaowen is the only licence-clear Mandarin voice in the catalogue and
     there is only one of him, so dialogues ship single-voice with speaker labels.'
@@ -448,8 +454,10 @@ languages:
     licence_ok: false
   piper_key: zh_CN-chaowen-medium
   tts_lang: zh
-  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/zh/zh_CN/chaowen/medium/zh_CN-chaowen-medium.onnx
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/zh/zh_CN/chaowen/medium/zh_CN-chaowen-medium.onnx
   md5: 4965c46e983653811bef0253026ff45a
+  config_md5: f2598f030cbb8b27549a2e9aaa4daeb5
+  model_card_md5: 5f3c9e126b75994e47198d935a7f45a8
   sample_rate: 22050
   must_render_phrases:
   - mā má mǎ mà ma
@@ -462,7 +470,7 @@ languages:
   num_speakers: 1
   licence: CC0
   dataset: https://github.com/OHF-Voice/voice-datasets
-  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_ES/davefx/medium/es_ES-davefx-medium.onnx
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/es/es_ES/davefx/medium/es_ES-davefx-medium.onnx
   note: CC0, no obligation. es_ES-sharvard-medium (CC BY 3.0, 2 speakers) is the two-speaker option where
     a dialogue needs alternating voices, at the cost of an attribution row.
   alternatives:
@@ -508,8 +516,10 @@ languages:
     licence_ok: false
   piper_key: es_ES-davefx-medium
   tts_lang: es
-  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_ES/davefx/medium/es_ES-davefx-medium.onnx
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/es/es_ES/davefx/medium/es_ES-davefx-medium.onnx
   md5: dc515cd4ecc5f6f72fe14a941188fc9c
+  config_md5: dd157b5eaf6930bf949cf416d9a9307a
+  model_card_md5: 980f3ebe5987b10488da3a7f4a462970
   sample_rate: 22050
   second_voice: es_ES-sharvard-medium
   must_render:
@@ -528,7 +538,7 @@ languages:
   num_speakers: 1
   licence: CC0
   dataset: https://www.kaggle.com/datasets/bryanpark/greek-single-speaker-speech-dataset
-  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/el/el_GR/rapunzelina/medium/el_GR-rapunzelina-medium.onnx
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/el/el_GR/rapunzelina/medium/el_GR-rapunzelina-medium.onnx
   note: 'gfl/ROADMAP.md:38,239 states that el_GR-rapunzelina-low is the only openly-licensed Greek option
     and accepts a low tier. Upstream ships three Greek voices: -medium is the same speaker at 22.05 kHz
     against -low''s 16 kHz and is equally CC0, so the tier is a free upgrade. el_GR-joy-medium is CC BY-NC
@@ -546,8 +556,10 @@ languages:
     licence_ok: false
   piper_key: el_GR-rapunzelina-medium
   tts_lang: el
-  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/el/el_GR/rapunzelina/medium/el_GR-rapunzelina-medium.onnx
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/el/el_GR/rapunzelina/medium/el_GR-rapunzelina-medium.onnx
   md5: 265f2f9be00aa5ce81abc1f022145e42
+  config_md5: ba83ba13667e14e2f97fbc9d950f9583
+  model_card_md5: 8a9392d82c8a5631bad7d12fc4aa66a7
   sample_rate: 22050
   must_render:
   - ά
@@ -568,7 +580,7 @@ languages:
   num_speakers: 1
   licence: CC-BY-4.0
   dataset: https://huggingface.co/datasets/committa/serena-synthetic-it-27h
-  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/it/it_IT/serena/medium/it_IT-serena-medium.onnx
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/it/it_IT/serena/medium/it_IT-serena-medium.onnx
   note: 'it_IT-paola-medium and it_IT-riccardo-x_low, named at ils/ROADMAP.md:75-82, both state License:
     See URL with no resolvable statement. serena is the only licence-clear Italian speaker; -high is the
     same voice at a higher tier, not a second speaker. ils therefore ships single-voice dialogues with
@@ -592,8 +604,10 @@ languages:
     licence_ok: false
   piper_key: it_IT-serena-medium
   tts_lang: it
-  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/it/it_IT/serena/medium/it_IT-serena-medium.onnx
-  md5: 808596cb580247648bdaef5ee6b4e7da
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/it/it_IT/serena/medium/it_IT-serena-medium.onnx
+  md5: f8c82f1139dfa382686bd7564a633400
+  config_md5: a0b3d407bc039d501219857e5aa0e34e
+  model_card_md5: 108f8227a5cefedb6223159e94fbbdff
   sample_rate: 22050
   must_render_phrases:
   - nonno / nono
@@ -658,7 +672,7 @@ languages:
   num_speakers: 10
   licence: CC0
   dataset: https://www.nb.no/sprakbanken/en/resource-catalogue/oai-nb-no-sbr-15/
-  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/no/no_NO/nvcc/medium/no_NO-nvcc-medium.onnx
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/no/no_NO/nvcc/medium/no_NO-nvcc-medium.onnx
   note: Bokmål. CC0, no obligation. no_NO-nvcc-medium (CC0, 10 speakers) covers dialogues needing more
     than one voice.
   alternatives:
@@ -678,8 +692,10 @@ languages:
     CC BY-SA 4.0. Verified against the model card on 2026-08-26; see
     docs/voice-provenance.md.
   tts_lang: 'no'
-  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/no/no_NO/nvcc/medium/no_NO-nvcc-medium.onnx
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/no/no_NO/nvcc/medium/no_NO-nvcc-medium.onnx
   md5: 67e04e52b2f195e6db3ae103b58d1710
+  config_md5: eb78dda3e46b97cb184dc6e9b91f64ea
+  model_card_md5: f362ee42574a623299481ef4f28d0fa5
   sample_rate: 22050
   second_voice: no_NO-nvcc-medium
   must_render:
@@ -695,7 +711,7 @@ languages:
   num_speakers: 52
   licence: CC BY 4.0
   dataset: http://openslr.org/94/
-  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/nl/nl_NL/mls/medium/nl_NL-mls-medium.onnx
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/nl/nl_NL/mls/medium/nl_NL-mls-medium.onnx
   note: CC0, no obligation. nl_BE-rdh-medium (CC0 1.0 Universal) is the Flemish contrast voice, used for
     regional variation rather than as a substitute.
   alternatives:
@@ -760,8 +776,10 @@ languages:
     conversational. That is a real pedagogical difference for a course
     teaching everyday dialogue, and it is what the audition is for.
   tts_lang: nl
-  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/nl/nl_NL/mls/medium/nl_NL-mls-medium.onnx
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/nl/nl_NL/mls/medium/nl_NL-mls-medium.onnx
   md5: f1d4b1452ccfdac24be72085b2b6b55c
+  config_md5: 1915807d7cb85274ba957846370fff39
+  model_card_md5: 6e5d961780907a4d7746eada893b8eca
   sample_rate: 22050
   second_voice: nl_BE-rdh-medium
   must_render:
@@ -777,7 +795,7 @@ languages:
   num_speakers: 1
   licence: CC0
   dataset: https://datacula.com/tts-databases
-  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/fa/fa_IR/amir/medium/fa_IR-amir-medium.onnx
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/fa/fa_IR/amir/medium/fa_IR-amir-medium.onnx
   note: 'pfa/ROADMAP.md:56-58,108-112 defers the Persian voice to an M1 survey with no confirmed production-quality
     option. The survey is answered: four of the five Persian voices are CC0 (amir, ganji, ganji_adabi,
     reza_ibrahim) and only fa_IR-gyro-medium states See URL. The open decision closes in favour of shipping.
@@ -806,8 +824,10 @@ languages:
     licence_ok: false
   piper_key: fa_IR-amir-medium
   tts_lang: fa
-  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/fa/fa_IR/amir/medium/fa_IR-amir-medium.onnx
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/fa/fa_IR/amir/medium/fa_IR-amir-medium.onnx
   md5: 7c0598c9726427869e1e86447b333539
+  config_md5: 48c5e81f5aa4e1c5eba3dda0be403b58
+  model_card_md5: 0728165259eb968913a680077607cd5c
   sample_rate: 22050
   second_voice: fa_IR-ganji_adabi-medium
   must_render:
@@ -828,7 +848,7 @@ languages:
   num_speakers: 1
   licence: CC0
   dataset: https://github.com/OHF-Voice/voice-datasets
-  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/pl/pl_PL/gosia/medium/pl_PL-gosia-medium.onnx
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/pl/pl_PL/gosia/medium/pl_PL-gosia-medium.onnx
   note: CC0, no obligation. pl_PL-darkman-medium (CC0) is the second speaker, giving a clean alternating
     pair. pl_PL-bass-high carries no License line at all and is excluded.
   alternatives:
@@ -854,8 +874,10 @@ languages:
     licence_ok: false
   piper_key: pl_PL-gosia-medium
   tts_lang: pl
-  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/pl/pl_PL/gosia/medium/pl_PL-gosia-medium.onnx
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/pl/pl_PL/gosia/medium/pl_PL-gosia-medium.onnx
   md5: ecf817530e575025166e454adde1f382
+  config_md5: e57055b9eec14e570617af2b716bd5c3
+  model_card_md5: ff04633302a79cee848d97bfd4f18791
   sample_rate: 22050
   second_voice: pl_PL-darkman-medium
   must_render:
@@ -877,7 +899,7 @@ languages:
   num_speakers: 1
   licence: CC0
   dataset: https://github.com/OHF-Voice/voice-datasets
-  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_PT/tug%C3%A3o/medium/pt_PT-tug%C3%A3o-medium.onnx
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/pt/pt_PT/tug%C3%A3o/medium/pt_PT-tug%C3%A3o-medium.onnx
   note: The ã is in the key, the directory and the filename. Transliterating it to a bare a yields a URL
     that returned 404 on 2026-08-21, where the percent-encoded model_url above returned 302 to the CDN.
     Never transliterate this key. pt_BR-faber-medium (CC0) is the Brazilian contrast voice for pronunciation
@@ -905,8 +927,10 @@ languages:
     licence_ok: true
   piper_key: pt_PT-tugão-medium
   tts_lang: pt
-  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_PT/tug%C3%A3o/medium/pt_PT-tug%C3%A3o-medium.onnx
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/pt/pt_PT/tug%C3%A3o/medium/pt_PT-tug%C3%A3o-medium.onnx
   md5: 0642048511ffe36c3b519520614b53f4
+  config_md5: c4113a1da477aa6db28420454c142ebd
+  model_card_md5: d894d2aedf10b01ff8ee3bd13970a79e
   sample_rate: 22050
   second_voice: pt_BR-faber-medium
   must_render:
@@ -924,7 +948,7 @@ languages:
   num_speakers: 1
   licence: CC0
   dataset: https://github.com/OHF-Voice/voice-datasets
-  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/denis/medium/ru_RU-denis-medium.onnx
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/ru/ru_RU/denis/medium/ru_RU-denis-medium.onnx
   note: 'ru_RU-irina-medium, named as primary at rki/ROADMAP.md:29,79, states License: Unknown and cannot
     ship. ru_RU-ruslan-medium is CC BY-NC-SA 4.0 and cannot ship either. denis and dmitri are both CC0
     and both medium, which gives the alternating speaker pair the ROADMAP asks for. Strip U+0301 before
@@ -947,8 +971,10 @@ languages:
     licence_ok: false
   piper_key: ru_RU-denis-medium
   tts_lang: ru
-  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/denis/medium/ru_RU-denis-medium.onnx
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/ru/ru_RU/denis/medium/ru_RU-denis-medium.onnx
   md5: 76c2f14e521fef3ed574f97ad492728e
+  config_md5: e3df5957c07647cab05cf9910ef3ede0
+  model_card_md5: baa1911124846d4474ef1e4536158cee
   sample_rate: 22050
   second_voice: ru_RU-dmitri-medium
   must_render:
@@ -999,7 +1025,7 @@ languages:
   num_speakers: 3
   licence: CC0
   dataset: https://github.com/OHF-Voice/voice-datasets
-  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/main/uk/uk_UA/ukrainian_tts/medium/uk_UA-ukrainian_tts-medium.onnx
+  model_url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/uk/uk_UA/ukrainian_tts/medium/uk_UA-ukrainian_tts-medium.onnx
   note: CC0, no obligation. Three speakers in one model, selected through speaker_id_map, so alternating
     dialogue works from the primary alone. uk_UA-tetiana-high (Apache 2.0) is the high-tier fallback.
     Strip U+0301 before synthesis; keep ґ, ї, є and the U+02BC/U+2019 apostrophe.
@@ -1026,8 +1052,10 @@ languages:
     licence_ok: true
   piper_key: uk_UA-ukrainian_tts-medium
   tts_lang: uk
-  url: https://huggingface.co/rhasspy/piper-voices/resolve/main/uk/uk_UA/ukrainian_tts/medium/uk_UA-ukrainian_tts-medium.onnx
+  url: https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/uk/uk_UA/ukrainian_tts/medium/uk_UA-ukrainian_tts-medium.onnx
   md5: 3366c3d4f31cb77966fb14d042956b4f
+  config_md5: 3bf9b2b1fcc8e599947cdda4af130498
+  model_card_md5: ec29babff51fdd0e2c640d371800ee3d
   sample_rate: 22050
   second_voice: uk_UA-tetiana-high
   must_render:

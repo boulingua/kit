@@ -5,7 +5,7 @@
   (any leftover calls in content render nothing).
 */}}
 <section class="container page">
-  <article>
+  <article data-pagefind-body>
     <header>
       <h1 class="title">
         <a class="title-link" href="{{ .Permalink | safeURL }}">
@@ -14,7 +14,7 @@
       </h1>
     </header>
 
-    {{ .Content }}
+    {{ partial "render-content.html" . }}
 
     {{ $links := partial "material-links.html" . }}
     {{- with $links }}

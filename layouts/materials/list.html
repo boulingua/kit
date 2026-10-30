@@ -12,20 +12,21 @@
       <h1 class="title">{{ .Title }}</h1>
       {{ with .Description }}<p class="lead">{{ . }}</p>{{ end }}
     </header>
-    {{ .Content }}
+    {{ partial "render-content.html" . }}
     {{ if $kind }}
       {{- $dir := printf "materials/%ss" $kind -}}
       <ul class="materials-list">
-      {{- range (readDir (printf "static/%s" $dir)) -}}
+      {{- $files := partial "material-files.html" $kind -}}
+      {{- range $files -}}
         {{- if strings.HasSuffix .Name ".pdf" -}}
-          <li><a href="{{ (printf "/%s/%s" $dir .Name) | relURL }}">{{ .Name }}</a></li>
+          <li><a href="{{ (printf "%s/%s" $dir .Name) | relURL }}">{{ .Name }}</a></li>
         {{- end -}}
       {{- end -}}
       </ul>
     {{ else }}
       <ul class="materials-list">
-        <li><a href="{{ "/materials/presentations/" | relURL }}">{{ i18n "presentations" | default "Slide decks" }}</a></li>
-        <li><a href="{{ "/materials/worksheets/" | relURL }}">{{ i18n "worksheets" | default "Worksheets" }}</a></li>
+        {{ with .Site.GetPage "/materials/presentations" }}<li><a href="{{ .RelPermalink }}">{{ i18n "presentations" | default "Slide decks" }}</a></li>{{ end }}
+        {{ with .Site.GetPage "/materials/worksheets" }}<li><a href="{{ .RelPermalink }}">{{ i18n "worksheets" | default "Worksheets" }}</a></li>{{ end }}
       </ul>
     {{ end }}
   </article>

@@ -8,7 +8,7 @@ broken: the page renders, the search box appears, and it returns nothing. So
 this checks the index exists AND carries entries, because "the directory is
 there" is the failure this is meant to catch.
 
-Opt-in: a course that ships no search passes trivially and says so.
+Opt-in is handled by the battery. Once invoked, a missing index is a failure.
 """
 from __future__ import annotations
 
@@ -21,8 +21,8 @@ def main() -> int:
     root = Path(sys.argv[1] if len(sys.argv) > 1 else "public")
     pf = root / "pagefind"
     if not pf.exists():
-        print("  no pagefind/ — this course ships no search index")
-        return 0
+        print("::error::search is enabled but pagefind/ is missing; build the index")
+        return 1
     entries = list(pf.glob("pagefind-entry.json")) or list(pf.glob("*.pf_meta"))
     frags = list((pf / "fragment").glob("*")) if (pf / "fragment").exists() else []
     if not entries:
@@ -34,8 +34,12 @@ def main() -> int:
         if e.suffix == ".json":
             try:
                 n = len(json.loads(e.read_text(encoding="utf-8")).get("languages", {}))
-            except Exception:
-                pass
+            except (ValueError, OSError) as exc:
+                print(f"::error::{e}: invalid index metadata: {exc}")
+                return 1
+            if not n:
+                print(f"::error::{e}: index declares no languages")
+                return 1
     print(f"  pagefind index present: {len(entries)} entry file(s), "
           f"{len(frags)} fragment(s)")
     if not frags:

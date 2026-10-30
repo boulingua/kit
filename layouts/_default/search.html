@@ -1,0 +1,14 @@
+{{ define "title" }}{{ .Title }} · {{ .Site.Title }}{{ end }}
+{{ define "content" }}
+<section class="container page" data-pagefind-ignore>
+  <h1>{{ .Title }}</h1>
+  <p>{{ i18n "search_intro" }}</p>
+  <pagefind-config bundle-path="{{ "pagefind/" | relURL }}" base-url="{{ "" | relURL }}"></pagefind-config>
+  <pagefind-input></pagefind-input>
+  <pagefind-summary></pagefind-summary>
+  <pagefind-results></pagefind-results>
+  <noscript><p>{{ i18n "search_no_js" }}</p></noscript>
+</section>
+<link href="{{ "pagefind/pagefind-component-ui.css" | relURL }}" rel="stylesheet">
+<script type="module" src="{{ "pagefind/pagefind-component-ui.js" | relURL }}"></script>
+{{ end }}

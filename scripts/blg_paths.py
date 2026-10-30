@@ -225,7 +225,8 @@ def unit_slug(md_path: Path, fm: dict | None = None) -> str:
         return str(fm["unit_slug"])
     if fm.get("slug"):
         return str(fm["slug"])
-    return p.parent.name if p.name == "index.md" else p.stem
+    name = p.parent.name if p.name == "index.md" else p.stem
+    return re.sub(r"^unit\d+[-_]", "", name)
 
 
 def audio_slug(md_path: Path, fm: dict | None = None, body: str | None = None) -> str:

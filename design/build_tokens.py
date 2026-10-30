@@ -112,7 +112,8 @@ def emit_css(t: dict, sha: str) -> str:
         L.append(f"  --{p}-elev-{code}: {v['light']};")
         D.append(f"    --{p}-elev-{code}: {v['dark']};")
     for step, v in t["type"]["steps"].items():
-        L.append(f"  --{p}-text-{step.replace('-', 'n')}: {v['rem']}rem;")
+        size = max(t['type']['web_min_rem'], v['rem'] * t['type']['web_rem_factor'])
+        L.append(f"  --{p}-text-{step.replace('-', 'n')}: {size:.4g}rem;")
     for k, v in t["type"]["line_height"].items():
         L.append(f"  --{p}-leading-{k}: {v};")
     for k, v in t["type"]["tracking"].items():

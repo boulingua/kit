@@ -22,6 +22,7 @@ not honour §5. Nothing detected that, because nothing was looking.
 from __future__ import annotations
 
 import sys
+import json
 from pathlib import Path
 
 import yaml
@@ -91,7 +92,14 @@ def main() -> int:
                 reg = {r["code"]: r for r in
                        _y.safe_load(vf.read_text(encoding="utf-8"))["languages"]}
                 r = reg.get(code) or {}
-                if str(r.get("licence")) == "CC BY 4.0" and r.get("piper_key") \
+                # Attribution follows recordings actually distributed, not a
+                # future candidate selected in the shared voice registry.
+                distributed = set()
+                for manifest in (REPO / "data" / "audio").glob("*.json"):
+                    entries = json.loads(manifest.read_text(encoding="utf-8"))
+                    if isinstance(entries, list):
+                        distributed.update(e.get("voice") for e in entries if isinstance(e, dict))
+                if str(r.get("licence")) == "CC BY 4.0" and r.get("piper_key") in distributed \
                         and r["piper_key"] not in notice_text:
                     print(f"::error::NOTICE.md does not name {r['piper_key']}, whose "
                           f"corpus is CC BY 4.0 and therefore REQUIRES attribution. "

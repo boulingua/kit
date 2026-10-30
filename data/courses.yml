@@ -1,0 +1,19 @@
+# Course identity and initial development scope; publication status lives in design/tokens.yaml.
+efl: {name: Englisch, language: en, tier: core}
+fle: {name: Französisch, language: fr, tier: core}
+daf: {name: Deutsch, language: de, tier: core}
+afl: {name: Arabisch, language: ar, tier: core, planned_tier: arabic, deferred: true}
+cfl: {name: Chinesisch, language: zh, tier: core, planned_tier: hanzi-sc, deferred: true}
+ele: {name: Spanisch, language: es, tier: core}
+gfl: {name: Griechisch, language: el, tier: greek}
+ils: {name: Italienisch, language: it, tier: core}
+jfl: {name: Japanisch, language: ja, tier: core, planned_tier: kana-kanji, deferred: true}
+lle: {name: Latein, language: la, tier: latin-ext, profile: classical-reception}
+nsf: {name: 'Norwegisch (Bokmål)', language: nb, tier: core}
+nvt: {name: Niederländisch, language: nl, tier: core}
+pfa: {name: Persisch, language: fa, tier: core, planned_tier: arabic, deferred: true}
+pfl: {name: Polnisch, language: pl, tier: latin-ext}
+ple: {name: 'Portugiesisch (Portugal)', language: pt, tier: core}
+rki: {name: Russisch, language: ru, tier: cyrillic}
+tfl: {name: Türkisch, language: tr, tier: latin-ext}
+ufl: {name: Ukrainisch, language: uk, tier: cyrillic}

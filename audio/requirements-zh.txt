@@ -1,0 +1,3 @@
+-r requirements.txt
+# Additional phonemizer/tokenizer dependencies for the Mandarin preview.
+piper-tts[zh]==1.8.0

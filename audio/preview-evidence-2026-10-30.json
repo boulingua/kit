@@ -1,0 +1,684 @@
+{
+  "status": "technical previews; listening reviews pending",
+  "note": "WAV files and listening sheets are local review artifacts, not approved course recordings. Hashes bind this record to those files.",
+  "voices": [
+    {
+      "code": "cfl",
+      "voice": "zh_CN-chaowen-medium",
+      "speaker_id": 0,
+      "generated_at": "2026-10-30T09:45:12.517842+00:00",
+      "url": "https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/zh/zh_CN/chaowen/medium/zh_CN-chaowen-medium.onnx",
+      "model_sha256": "820d64ac16048fbcf38dd0823d37fab5f5e0c2bd71b01ca5a50f553fac19e746",
+      "config_sha256": "a6bb2caafa0645642f13cbf7e2f6fbbb16fded66e51109fc26d622f6472fa16f",
+      "model_card_sha256": "7155212ec9192b1201898500621ae562dc5eeb6d90fa183f3267cd06dc7d5b6b",
+      "licence": "CC0",
+      "piper_version": "1.8.0",
+      "listening_verdict": "pending",
+      "samples": {
+        "dialogue": {
+          "file": "cfl-dialogue.wav",
+          "sha256": "a8c5539ab46b696831884db8de65a0c8b94d409775460e117abfefd1bcbfface",
+          "transcript": "你好，请问，这辆公共汽车去市中心吗？去。在哪里可以买票？你可以在车上买。 到市中心要多长时间？大约二十分钟。谢谢你的帮助。不客气，祝你一路顺风。",
+          "transcript_sha256": "aeb6b2a604a190494ff6074b5e8a27d96ac0f53c63cf366b5e52b7038351bc2d",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 17.264,
+          "rms": 0.170989,
+          "clipped_fraction": 2.1e-05
+        },
+        "vocabulary": {
+          "file": "cfl-vocabulary.wav",
+          "sha256": "e867c1b5014c923d0ea2d80fcdd7f1a00371dcbbb8ff33d9a47b8adf15a16b92",
+          "transcript": "妈，麻，马，骂，吗。mā má mǎ mà ma。你好，中国，学校，朋友，图书馆。 一个人，两本书，三杯水。十三，三十。今天星期几？今天星期三。",
+          "transcript_sha256": "1d973102037798086124759672190c728a1b230f47e49013ac29cba62ac56ad1",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 16.521,
+          "rms": 0.149151,
+          "clipped_fraction": 1.9e-05
+        },
+        "continuous": {
+          "file": "cfl-continuous.wav",
+          "sha256": "3ccad15cfdc8115e8c65ef6322a49035238d4cda25d048cc988a29c9957ceecc",
+          "transcript": "星期六早上，小林和姐姐一起去图书馆。小林想找一本介绍鸟类的书，因为他经常在公园里看见不同的鸟。 图书馆的工作人员告诉他们，这些书放在窗户旁边的书架上。小林选了两本，坐下来认真地看。 姐姐选了一本旅行故事。一个小时以后，他们离开图书馆，走到附近的公园。 小林听见鸟叫，停下来看看树上。他想知道那是什么鸟。回家以后，他打算再查一查刚借来的书。",
+          "transcript_sha256": "813bc0d558a87051a79c83f9bb337f78542c8c1cadeab59885bab5c3caab7b89",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 38.708,
+          "rms": 0.13706,
+          "clipped_fraction": 1.1e-05
+        }
+      }
+    },
+    {
+      "code": "daf",
+      "voice": "de_DE-mls-medium",
+      "speaker_id": 0,
+      "generated_at": "2026-10-30T09:36:45.049790+00:00",
+      "url": "https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/de/de_DE/mls/medium/de_DE-mls-medium.onnx",
+      "model_sha256": "69cd1d2aa5a35839a518966fcc4924b5f93e5f8c948ed0752b1a616ad53f65bf",
+      "config_sha256": "b0af1c89ddfdc72d32e015729b0e89b99eec13c2c8caa1db7488d98e9e570b40",
+      "model_card_sha256": "ca1bf03a3c287fb6968acfa010e1917f85f0aa59db0f371efc3a2857f4035ffd",
+      "licence": "CC BY 4.0",
+      "piper_version": "1.8.0",
+      "listening_verdict": "pending",
+      "samples": {
+        "dialogue": {
+          "file": "daf-dialogue.wav",
+          "sha256": "2f06af7a2f28ea69cb725589fe2fecfa7823078b83949f8af6b21c94a633dd28",
+          "transcript": "Guten Tag. Fährt dieser Zug nach Köln? Ja, aber Sie müssen in Düsseldorf umsteigen. Wie viel Zeit habe ich dort? Zwölf Minuten. Reicht das? Normalerweise schon. Bitte achten Sie auf die Durchsagen. Vielen Dank für Ihre Hilfe.",
+          "transcript_sha256": "8348ad4ca8d47b675a2951aaf30e2a157c4654897b32284eb7c4515bc7ba3996",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 41.842,
+          "rms": 0.09966,
+          "clipped_fraction": 1e-05
+        },
+        "vocabulary": {
+          "file": "daf-vocabulary.wav",
+          "sha256": "5afc68751b3fed1199c7d34703dbbe3dc0b36da7ff4a07827ed8ab7c2b63ba49",
+          "transcript": "Äpfel, schön, grün, Straße. Die Stadt, der Staat. Ofen, offen. Kirche, Kirsche. Ein Buch, viele Bücher. Sechzehn, sechzig, einundzwanzig. Eine E-Mail, zwei Fahrräder.",
+          "transcript_sha256": "4caa023918bd6448ff29a1b470e91f0f0de4cf06e3471f653cb1b4aa44a47b9a",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 33.971,
+          "rms": 0.10145,
+          "clipped_fraction": 9e-06
+        },
+        "continuous": {
+          "file": "daf-continuous.wav",
+          "sha256": "f956f78f942d833f27490b98b25b1920c07989bc7bed4cdcd3611715247718ee",
+          "transcript": "Am Freitag besucht Amir seine Großmutter. Sie wohnt in einem kleinen Dorf am Fluss. Gemeinsam gehen sie zum Markt und kaufen frisches Gemüse für das Abendessen. Auf dem Rückweg beginnt es zu regnen. Zum Glück haben beide einen Schirm dabei. Zu Hause kochen sie eine Suppe und erzählen sich von ihrer Woche. Später zeigt die Großmutter alte Fotos. Amir erkennt den Garten wieder, aber das Haus auf dem Bild sieht ganz anders aus als heute.",
+          "transcript_sha256": "af70ae17f2549407476aa22a22eafaacf874fad15cae7009bcaf9a1245a24864",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 46.405,
+          "rms": 0.111944,
+          "clipped_fraction": 8e-06
+        }
+      }
+    },
+    {
+      "code": "efl",
+      "voice": "en_GB-cori-medium",
+      "speaker_id": 0,
+      "generated_at": "2026-10-30T09:35:43.250698+00:00",
+      "url": "https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/en/en_GB/cori/medium/en_GB-cori-medium.onnx",
+      "model_sha256": "1899f98e5fb8310154f3c2973f4b8a929ba7245e722b3d3a85680b833d95f10d",
+      "config_sha256": "e262c16d7f192f69d4edd6b4ef8a5915379e67495fcc402f1ab15eeb33da3d36",
+      "model_card_sha256": "38d76dfde845837b184668f8bab1c6426ad740b1af0fcebc349037822739e536",
+      "licence": "public domain",
+      "piper_version": "1.8.0",
+      "listening_verdict": "pending",
+      "samples": {
+        "dialogue": {
+          "file": "efl-dialogue.wav",
+          "sha256": "c16da3895bd36539f3bd187e9e2141b887494b5629d373a046143a52d238d2b6",
+          "transcript": "Good morning. Is this the bus to the museum? Yes, it is. How much is a return ticket? Three pounds fifty, please. Thank you. Does the museum open at half past nine? No, it opens at ten on Thursdays. Then I have time for breakfast.",
+          "transcript_sha256": "070d9490a0fe21fb4f000965d7ccb1d56b2f26a0b8e076b20dc4f055fb9f8708",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 16.556,
+          "rms": 0.184202,
+          "clipped_fraction": 2.5e-05
+        },
+        "vocabulary": {
+          "file": "efl-vocabulary.wav",
+          "sha256": "90e52516ac604eb45bec6b336627b55f56e5bf20a7ed85d6b57480b32996cf6d",
+          "transcript": "Ship, sheep, thin, this, thought, though, through. Read yesterday, read tomorrow. A present, to present. A photograph, a photographer. One, thirteen, thirty, one hundred.",
+          "transcript_sha256": "292db6db9aaee3918c73aa0e8deaf8ba6f8528ccf83b855a19501518b0e807d0",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 13.781,
+          "rms": 0.136668,
+          "clipped_fraction": 1.6e-05
+        },
+        "continuous": {
+          "file": "efl-continuous.wav",
+          "sha256": "7de6ca15097f7e42838edefe9fcaa44686e54ae859b841abf817cd767ce2731c",
+          "transcript": "On Saturday, Maya and her brother walk to the library. It has been raining all morning, but now the clouds are moving away. At the entrance, they meet their neighbour, who is returning a book about gardens. Maya chooses a story about a journey across the sea. Her brother asks the librarian for a book about trains. Before going home, they sit by the window and read the first few pages.",
+          "transcript_sha256": "b5d1fd03fa56c6b1bf77abdc714aba6ddca9726976759189951ba242d9778127",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 22.163,
+          "rms": 0.195218,
+          "clipped_fraction": 1.2e-05
+        }
+      }
+    },
+    {
+      "code": "ele",
+      "voice": "es_ES-davefx-medium",
+      "speaker_id": 0,
+      "generated_at": "2026-10-30T09:41:56.494518+00:00",
+      "url": "https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/es/es_ES/davefx/medium/es_ES-davefx-medium.onnx",
+      "model_sha256": "6658b03b1a6c316ee4c265a9896abc1393353c2d9e1bca7d66c2c442e222a917",
+      "config_sha256": "0e0dda87c732f6f38771ff274a6380d9252f327dca77aa2963d5fbdf9ec54842",
+      "model_card_sha256": "420703b5d8ea239b729f13d83f31eea9bae5fcb89447de23ebc94aa8a4768f95",
+      "licence": "CC0",
+      "piper_version": "1.8.0",
+      "listening_verdict": "pending",
+      "samples": {
+        "dialogue": {
+          "file": "ele-dialogue.wav",
+          "sha256": "57a150dab2f3b76ef2c95047d7b9dbf1662bfdfdeefe05c93dd1869556dcc389",
+          "transcript": "Buenos días. ¿Este autobús va al centro? Sí, pero tiene que bajar en la próxima plaza. ¿Cuánto cuesta el billete? Un euro con cincuenta. Muchas gracias. ¡Buen viaje!",
+          "transcript_sha256": "8a8210d12f1315bcbb040e24cfb9eaa9913775a65156be9a4e1884531785835f",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 9.636,
+          "rms": 0.177223,
+          "clipped_fraction": 3.3e-05
+        },
+        "vocabulary": {
+          "file": "ele-vocabulary.wav",
+          "sha256": "2870b342575bb07f3e86737924c5210fbb9a36c16bd063464c30b48acaef15ab",
+          "transcript": "Mañana, niño, España. Café, aquí, música. Pero, perro. Casa, caza. Está, están. Quince, cincuenta. ¿Qué hora es? Son las tres y media.",
+          "transcript_sha256": "a047c5a7e0d91322c953df3aff0887d7b05163f691c5a179ef540ad466f213d6",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 9.172,
+          "rms": 0.143548,
+          "clipped_fraction": 4e-05
+        },
+        "continuous": {
+          "file": "ele-continuous.wav",
+          "sha256": "10ab11eb4d88f46448ed4b4af68944ed4082902c108e6723ad26afbcd4bd5ebc",
+          "transcript": "El sábado, Ana va al mercado con su abuelo. Quieren comprar verduras para preparar la comida. Primero eligen unos tomates y después buscan pan fresco. En una pequeña tienda, Ana encuentra un libro sobre las aves del barrio. Le pregunta a su abuelo si pueden leerlo juntos por la tarde. Él sonríe y dice que sí. De camino a casa, se sientan en un banco y observan a los pájaros que vuelan entre los árboles.",
+          "transcript_sha256": "b031a92dcb295d799bf650e940c92db839183ff3898860433818814df79976f3",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 22.732,
+          "rms": 0.165745,
+          "clipped_fraction": 1.4e-05
+        }
+      }
+    },
+    {
+      "code": "fle",
+      "voice": "fr_FR-mls-medium",
+      "speaker_id": 0,
+      "generated_at": "2026-10-30T09:35:41.263151+00:00",
+      "url": "https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/fr/fr_FR/mls/medium/fr_FR-mls-medium.onnx",
+      "model_sha256": "0ed223f78466917f2bae05ee90096ce69ab1fdeb251f55590d0e7422d234e162",
+      "config_sha256": "252b0b0a6e4cc4949e23eccb956f9c779986c32f934f2f7e2191e5fdc2edca61",
+      "model_card_sha256": "443ca90f1ed8e57d9fb802da6dc19c302d5d9b51ddbfbf27a17f3fb5c37ad154",
+      "licence": "CC BY 4.0",
+      "piper_version": "1.8.0",
+      "listening_verdict": "pending",
+      "samples": {
+        "dialogue": {
+          "file": "fle-dialogue.wav",
+          "sha256": "f4704471d3cefd790bf36a202fc36e327546d0e7a7bf0094a98308a878ac52fd",
+          "transcript": "Bonjour, est-ce que cette place est libre ? Oui, bien sûr. Vous allez à Lyon ? Non, je descends à Dijon. Le train arrive à quelle heure ? À onze heures vingt. Merci beaucoup. Je vous en prie, bon voyage !",
+          "transcript_sha256": "b6eb7570d36f7a5ac30c5432e15c4f8da69f234520acf1ce9be53c3d579a5a7c",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 24.822,
+          "rms": 0.098264,
+          "clipped_fraction": 1.5e-05
+        },
+        "vocabulary": {
+          "file": "fle-vocabulary.wav",
+          "sha256": "bdace146953a9ee1a1af63425b8e95242c645db0cd674fcef3e37c1681036349",
+          "transcript": "Un élève, une école, la fenêtre, une fête, un garçon, ma sœur. Dessus, dessous. Le pain, le vin, le vent. Deux amis, les enfants. Un, onze, vingt et un, quatre-vingts.",
+          "transcript_sha256": "48b6cd231bf36facfbb1006179215c1ef718ef32d776a3eb4652a44fdd430ea1",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 16.939,
+          "rms": 0.114795,
+          "clipped_fraction": 1.3e-05
+        },
+        "continuous": {
+          "file": "fle-continuous.wav",
+          "sha256": "4236b0af2ef9c7e17267d17b3afd536d19316cba655d4a525ee7592d3f3eb6e2",
+          "transcript": "Ce matin, Léa prépare une visite au musée avec sa classe. Elle met un carnet et un crayon dans son sac, puis elle rejoint ses amis devant l'école. Leur professeur explique le programme de la journée. Ils vont d'abord regarder les tableaux, puis travailler en petits groupes. À midi, ils mangeront dans le jardin si le temps le permet. Léa espère découvrir une œuvre qu'elle pourra présenter à sa sœur en rentrant chez elle.",
+          "transcript_sha256": "0e1c03b64a2ebd3e30ce662714e47dfb90b0360820095f29e0d6896eab9917f4",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 26.076,
+          "rms": 0.139757,
+          "clipped_fraction": 1e-05
+        }
+      }
+    },
+    {
+      "code": "gfl",
+      "voice": "el_GR-rapunzelina-medium",
+      "speaker_id": 0,
+      "generated_at": "2026-10-30T09:42:18.191035+00:00",
+      "url": "https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/el/el_GR/rapunzelina/medium/el_GR-rapunzelina-medium.onnx",
+      "model_sha256": "3ca9fb3092215ee92edfc019b43feb0115ff4dfe638eb34474833ab1de840952",
+      "config_sha256": "3a6182ec7c7550e14ef15e5d9badbb18f973a434086ac9658a1b10991fd192f8",
+      "model_card_sha256": "dc69f15382dabed061fa8d31b65c14e5c4b57ba2fe6906012c756478da156b50",
+      "licence": "CC0",
+      "piper_version": "1.8.0",
+      "listening_verdict": "pending",
+      "samples": {
+        "dialogue": {
+          "file": "gfl-dialogue.wav",
+          "sha256": "dd2792215e81976baf68454daec646b43ad30558bb3c749d503aa834fbb1e172",
+          "transcript": "Καλημέρα. Αυτό το λεωφορείο πηγαίνει στο κέντρο; Ναι, πηγαίνει. Πού μπορώ να αγοράσω εισιτήριο; Στο περίπτερο δίπλα στη στάση. Πόση ώρα διαρκεί η διαδρομή; Περίπου είκοσι λεπτά. Σας ευχαριστώ πολύ. Καλό ταξίδι!",
+          "transcript_sha256": "65e70cd385daec194086cbef251adaefb4263f7df72497c0fbe39646c2bd0aa4",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 13.967,
+          "rms": 0.132652,
+          "clipped_fraction": 1.9e-05
+        },
+        "vocabulary": {
+          "file": "gfl-vocabulary.wav",
+          "sha256": "faa886ae80d40eb20ec99f0b0151eded188909d05c1deee07184d5f3c7855947",
+          "transcript": "Καλημέρα, ήλιος, σπίτι, πόλη, φύλλο, νερό. Ένα καΐκι, ένα χάδι που πραΰνει. Μήλο, μήλα. Φίλος, φύλλο. Δεκατρία, τριάντα. Πού είναι το βιβλίο μου;",
+          "transcript_sha256": "153fb0be0789893f90e94b5843b9d9248504cf56f80c815c02fc2d9f5f0cd809",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 10.937,
+          "rms": 0.147387,
+          "clipped_fraction": 2.5e-05
+        },
+        "continuous": {
+          "file": "gfl-continuous.wav",
+          "sha256": "363b87f75a12b1738e8e46c8239eb6d9393cd343d1f57952d89718b910deb0ae",
+          "transcript": "Το Σάββατο η Μαρία πηγαίνει με τον αδελφό της στη βιβλιοθήκη. Θέλει να βρει ένα βιβλίο για τα ζώα της θάλασσας. Η βιβλιοθηκάριος τους δείχνει ένα ράφι κοντά στο παράθυρο. Η Μαρία διαλέγει δύο βιβλία και κάθεται σε ένα μεγάλο τραπέζι. Ο αδελφός της προτιμά μια ιστορία με εικόνες. Διαβάζουν για λίγη ώρα και μετά βγαίνουν στην πλατεία. Πριν γυρίσουν στο σπίτι, αγοράζουν ψωμί και συζητούν τι έμαθαν από τα βιβλία τους.",
+          "transcript_sha256": "9fe8614470ad31d4943a4152c5bd221ff99e37915a65d182ce0e391567ce2f0a",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 23.371,
+          "rms": 0.140839,
+          "clipped_fraction": 1.4e-05
+        }
+      }
+    },
+    {
+      "code": "ils",
+      "voice": "it_IT-serena-medium",
+      "speaker_id": 0,
+      "generated_at": "2026-10-30T09:45:12.804701+00:00",
+      "url": "https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/it/it_IT/serena/medium/it_IT-serena-medium.onnx",
+      "model_sha256": "fe4e26b2c1236e2a44d2e295cad564d94a0d8b0a9fca1ccdfd70dd4af3116eb5",
+      "config_sha256": "14cb4995874138b2792ae07753b5540942124761af9ae6609f9b520f28837881",
+      "model_card_sha256": "1d0dbdc0182d19f6510fd3dcd2893587912a65f8cafe6da57754863f168bbe7e",
+      "licence": "CC-BY-4.0",
+      "piper_version": "1.8.0",
+      "listening_verdict": "pending",
+      "samples": {
+        "dialogue": {
+          "file": "ils-dialogue.wav",
+          "sha256": "08404f806a87db18c8671a482380ff24a7773565178bad5bd468f652993ab550",
+          "transcript": "Buongiorno. Questo treno va a Firenze? Sì, ma deve cambiare a Bologna. Quanto tempo ho per cambiare? Circa venti minuti. Devo comprare un altro biglietto? No, questo è valido per tutto il viaggio. Grazie mille!",
+          "transcript_sha256": "b01de4bb6a3e29f333b7a2b65262091f385d472614ecda1bdcc65a297605e643",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 11.749,
+          "rms": 0.175858,
+          "clipped_fraction": 3.1e-05
+        },
+        "vocabulary": {
+          "file": "ils-vocabulary.wav",
+          "sha256": "5b4d1ee951baf4df958d515a0df4ab9dc1e187bd04a304018cff20aa5281ed92",
+          "transcript": "nonno / nono. pala / palla. Pena, penna. Casa, cassa. Anno, hanno. Città, perché, caffè. Gli amici, uno zaino. Quindici, cinquanta, cinquantacinque.",
+          "transcript_sha256": "bc4cd81f47e5b6fa314dac8c8ef9a46ad6ef75d9e3b0ddabd04bd817ff921d3a",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 10.286,
+          "rms": 0.149956,
+          "clipped_fraction": 3.1e-05
+        },
+        "continuous": {
+          "file": "ils-continuous.wav",
+          "sha256": "2b2105686893e4ecdb346572eaf1839edbfc2577c274f4d1647172a90a696072",
+          "transcript": "La domenica mattina, Luca apre la finestra e guarda il giardino. Durante la notte ha piovuto, ma adesso il cielo è azzurro. Sua sorella propone una passeggiata al parco. Prima di uscire preparano due panini e riempiono una bottiglia d'acqua. Al parco incontrano un'amica che sta leggendo sotto un albero. Si siedono con lei e parlano dei programmi per le vacanze. Poi fanno un giro intorno al laghetto e tornano a casa per pranzo.",
+          "transcript_sha256": "809da7df65f96fddb8ada659cd09aa91a3980e90fa5515dd022dde48b618e63f",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 22.14,
+          "rms": 0.169891,
+          "clipped_fraction": 1.4e-05
+        }
+      }
+    },
+    {
+      "code": "nsf",
+      "voice": "no_NO-nvcc-medium",
+      "speaker_id": 0,
+      "generated_at": "2026-10-30T09:37:02.100560+00:00",
+      "url": "https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/no/no_NO/nvcc/medium/no_NO-nvcc-medium.onnx",
+      "model_sha256": "3f51702946d9544898440a1a66906155661a9d680ee103130ff68f73360b512e",
+      "config_sha256": "98410e911e5a9076ac4677a79b08b20f98c54f550c4388e29978f6bafa32b83d",
+      "model_card_sha256": "309bb60e631d9c826e862bb0f5732eefd9d2fc4a2ca442b8f93fcf69c78cb3bd",
+      "licence": "CC0",
+      "piper_version": "1.8.0",
+      "listening_verdict": "pending",
+      "samples": {
+        "dialogue": {
+          "file": "nsf-dialogue.wav",
+          "sha256": "d6459302f70cfeb7309be82a9ff6ed9bfbc1f9569e41a5f8b5f5d21d93969ce2",
+          "transcript": "Hei! Går denne bussen til sentrum? Ja, det gjør den. Hvor kan jeg kjøpe billett? Du kan bruke appen eller betale her. Hvor lang tid tar turen? Omtrent tjue minutter. Takk for hjelpen. Bare hyggelig!",
+          "transcript_sha256": "b341a83fe388a7e40dc68f3a7ecbfecb826d280412556915359a0bda0f46565e",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 17.45,
+          "rms": 0.151749,
+          "clipped_fraction": 2.3e-05
+        },
+        "vocabulary": {
+          "file": "nsf-vocabulary.wav",
+          "sha256": "983a02e5af4588a2afe226819929fe09529ae4a933b17cd3d68a84f9112d55fc",
+          "transcript": "Lærer, søster, blå. Bøker, brød, grønnsaker. Kjøpe, kjøre, skjorte. En bok, boka, bøker, bøkene. Sju, sytten, sytti. Jeg bor i Norge og lærer norsk.",
+          "transcript_sha256": "f1b62bc70bef8cd6f1530e618381e7d34bbb57fc8e6490139d6dde751ddf0c98",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 13.363,
+          "rms": 0.147865,
+          "clipped_fraction": 2e-05
+        },
+        "continuous": {
+          "file": "nsf-continuous.wav",
+          "sha256": "2620d47f88f6f4a9ebbba2b082c707df23bb46a07b74b8a8e267397229378a8a",
+          "transcript": "På søndag går Nora og familien hennes en tur langs sjøen. Det blåser litt, men sola skinner mellom skyene. De har med seg brød, ost og varm te i en sekk. Etter en stund finner de et sted der de kan sitte. Lillebroren ser en båt og spør hvor den skal. Nora vet ikke svaret. Kanskje den skal til øya der bestefar bor. Etter maten pakker de sammen og går hjem før det blir mørkt.",
+          "transcript_sha256": "22f4f599c93be509031ab8ecd55dccfc92959ac487bbee50d968fb01f2475a0d",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 23.626,
+          "rms": 0.159995,
+          "clipped_fraction": 1.5e-05
+        }
+      }
+    },
+    {
+      "code": "nvt",
+      "voice": "nl_NL-mls-medium",
+      "speaker_id": 0,
+      "generated_at": "2026-10-30T09:38:29.332320+00:00",
+      "url": "https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/nl/nl_NL/mls/medium/nl_NL-mls-medium.onnx",
+      "model_sha256": "88312e0fbf505b87caf2373d94c1384892e86b1bf2ee482cf65dc8ba179cc7d3",
+      "config_sha256": "6ddb215d38f1392ab935ad45441b82ada1eeae0452a2d6849ed71ea4f2e0aa63",
+      "model_card_sha256": "73d70ff5a8501a80335498135bd773cd9ae01133cf0ac33916538f4d51e13e6e",
+      "licence": "CC BY 4.0",
+      "piper_version": "1.8.0",
+      "listening_verdict": "pending",
+      "samples": {
+        "dialogue": {
+          "file": "nvt-dialogue.wav",
+          "sha256": "05b280a550308b8e3d16c4cc5666178869d1961979030c807b832aac000d4e85",
+          "transcript": "Goedemorgen. Waar vertrekt de trein naar Utrecht? Van spoor vijf. Moet ik overstappen? Nee, deze trein rijdt rechtstreeks. Hoe laat komt hij aan? Om kwart over tien. Dank u wel. Graag gedaan, en een goede reis!",
+          "transcript_sha256": "e13915815ddae81277d2671528c144865a22e8a480137bc49c397ebe935650f4",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 22.651,
+          "rms": 0.102964,
+          "clipped_fraction": 1.8e-05
+        },
+        "vocabulary": {
+          "file": "nvt-vocabulary.wav",
+          "sha256": "d7efb875fa0ee6f4fd2b4e402cae044be8ab671221432502cfae6c7f67cd16c2",
+          "transcript": "IJs, mijn, fijn. Eén café, twee ideeën. Huis, muis, tuin. Boek, boeken. Huur, muur, buur. Schip, school, schrijven. Dertien, dertig, drieëndertig.",
+          "transcript_sha256": "48036b6b2f8155395acb3250a327e87bf0c6a9aff139df9b0e2afa0e9ceb74af",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 15.464,
+          "rms": 0.093438,
+          "clipped_fraction": 2.1e-05
+        },
+        "continuous": {
+          "file": "nvt-continuous.wav",
+          "sha256": "da92ec29fb1fc10c7b4c6c4b0ec6e22c8268c2a5a10960173e52b7a049caaba3",
+          "transcript": "Op woensdag gaat Sam na school naar de bibliotheek. Hij zoekt een boek over dieren voor een spreekbeurt. De bibliothecaris laat hem zien waar de boeken staan. Sam kiest er twee en gaat aan een tafel bij het raam zitten. In zijn schrift noteert hij een paar vragen. Hoe leven deze dieren in de winter? Wat eten ze? Als zijn zus hem komt ophalen, heeft hij genoeg ideeën om thuis verder te werken. Samen fietsen ze langs het park naar huis.",
+          "transcript_sha256": "222679a99e0f727c3adaa18cf07653a56226ac6858dfeb31e7e383b93b808ce4",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 37.314,
+          "rms": 0.097508,
+          "clipped_fraction": 1.1e-05
+        }
+      }
+    },
+    {
+      "code": "pfa",
+      "voice": "fa_IR-amir-medium",
+      "speaker_id": 0,
+      "generated_at": "2026-10-30T09:43:03.097349+00:00",
+      "url": "https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/fa/fa_IR/amir/medium/fa_IR-amir-medium.onnx",
+      "model_sha256": "fb815380d969ea372b0b21b0de14421f58fe481047e153e69685d079b6e1a9d1",
+      "config_sha256": "75f918a3bf0f57a9179abe725af529f2a5c79d6c899e2a84aec76c685d5dfb9a",
+      "model_card_sha256": "0d7d315699945ac830162f82d485d79af51a33081a7649e8992726bd4bba2384",
+      "licence": "CC0",
+      "piper_version": "1.8.0",
+      "listening_verdict": "pending",
+      "samples": {
+        "dialogue": {
+          "file": "pfa-dialogue.wav",
+          "sha256": "ae13f3e538d677bc3fcc378f117faab5c7627f97c20b3345c4e90becc909273a",
+          "transcript": "سلام. این اتوبوس به مرکز شهر می‌رود؟ بله. از کجا می‌توانم بلیت بخرم؟ می‌توانید از دستگاه کنار ایستگاه استفاده کنید. سفر چقدر طول می‌کشد؟ حدود بیست دقیقه. خیلی ممنون. خواهش می‌کنم.",
+          "transcript_sha256": "4f5565b9dc05c04cef36d3e6bdbfe5c4949cc0752abc39421456779d4097535c",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 13.154,
+          "rms": 0.15463,
+          "clipped_fraction": 3.1e-05
+        },
+        "vocabulary": {
+          "file": "pfa-vocabulary.wav",
+          "sha256": "4860226cff0f9d0808d4430c9b58719dc6139c52a70c3b48b0bbc1c11d7334ef",
+          "transcript": "کتاب، خانه، گربه، پدر، چای، ژاله. یک، دو، سه، چهار، پنج. شماره‌های ۰ تا ۹. سیزده، سی. امروز هوا خوب است. کتابخانه کجاست؟",
+          "transcript_sha256": "56d678b11cbb6ee90f67a1f088718aaaed67a924d6d0bc1993800ef91a3879ef",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 11.784,
+          "rms": 0.1745,
+          "clipped_fraction": 2.3e-05
+        },
+        "continuous": {
+          "file": "pfa-continuous.wav",
+          "sha256": "0a75fbd20d01f48c5d9cb100635a92e5404ff67f1865f30ca45db487a366d600",
+          "transcript": "صبح شنبه مریم با برادرش به کتابخانه می‌رود. او می‌خواهد کتابی دربارهٔ پرندگان پیدا کند، چون هر روز چند پرنده در باغ می‌بیند. کتابدار قفسه‌ای را کنار پنجره به آن‌ها نشان می‌دهد. مریم دو کتاب انتخاب می‌کند و پشت میز می‌نشیند. برادرش یک داستان دربارهٔ سفر با قطار برمی‌دارد. یک ساعت بعد از کتابخانه بیرون می‌آیند و به پارک می‌روند. آن‌ها صدای پرنده‌ای را می‌شنوند و سعی می‌کنند آن را پیدا کنند. سپس به خانه برمی‌گردند تا با خانواده ناهار بخورند.",
+          "transcript_sha256": "20db5ec3b723e1e1ee7992f731aad3b89201995bced973d68f7f27ae575b429e",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 30.662,
+          "rms": 0.160289,
+          "clipped_fraction": 1.2e-05
+        }
+      }
+    },
+    {
+      "code": "pfl",
+      "voice": "pl_PL-gosia-medium",
+      "speaker_id": 0,
+      "generated_at": "2026-10-30T09:42:30.331446+00:00",
+      "url": "https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/pl/pl_PL/gosia/medium/pl_PL-gosia-medium.onnx",
+      "model_sha256": "38f66464240ed74f186e6b7dc13c6e3b22e023426299f25c2b3cc9dfa9373fbc",
+      "config_sha256": "1aefb31a9d53ffe44a8163ff73ec833acb7a6253848f6bb0403d8a66f9c7510d",
+      "model_card_sha256": "6b4de033dfff0da758bbe4d438fd87fbd917ab843bdd83f591fa0f32b8eb5780",
+      "licence": "CC0",
+      "piper_version": "1.8.0",
+      "listening_verdict": "pending",
+      "samples": {
+        "dialogue": {
+          "file": "pfl-dialogue.wav",
+          "sha256": "e096f60b4fb543d223b72a818869c84d3e420b0ac533dd0a3d434b9810d0dca3",
+          "transcript": "Dzień dobry. Czy ten autobus jedzie do centrum? Tak, proszę wsiadać. Gdzie mogę kupić bilet? W automacie obok drzwi. Ile trwa podróż? Około dwudziestu minut. Dziękuję za pomoc. Proszę bardzo!",
+          "transcript_sha256": "7ac4621c9e3b6ce2517b1de69390b10f4388d8ade459c2e190a9b74be4bd7ed7",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 13.386,
+          "rms": 0.157691,
+          "clipped_fraction": 3e-05
+        },
+        "vocabulary": {
+          "file": "pfl-vocabulary.wav",
+          "sha256": "8694f3e7901be6eb30e034f67fb609a6af904f545ece59f9bbfd1e0313f8cc42",
+          "transcript": "Mąż, pięć, łódź, koń, góra, śnieg, źródło, żaba. Cześć, szczęście. Proszę, książka, dziewięć. Trzynaście, trzydzieści. W Szczecinie pada deszcz.",
+          "transcript_sha256": "b5c47a10d2a07e15b63be06de54f353d48d2f1685435b081a4f9266b359f4718",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 10.298,
+          "rms": 0.153088,
+          "clipped_fraction": 2.2e-05
+        },
+        "continuous": {
+          "file": "pfl-continuous.wav",
+          "sha256": "65af86fdfe15dd7502dee6acac41f3760ad5b54c05e22c303f4160263c67f328",
+          "transcript": "W sobotę rano Anna idzie z bratem do biblioteki. Chce znaleźć książkę o ptakach, które widuje w ogrodzie. Bibliotekarka pokazuje im półkę przy oknie. Anna wybiera dwie książki i siada przy dużym stole. Jej brat woli czytać opowiadanie o podróży pociągiem. Po godzinie wychodzą na spacer. W parku słyszą śpiew ptaków i próbują rozpoznać jeden z nich. Potem wracają do domu, żeby przygotować obiad i opowiedzieć rodzicom o tym, czego się dowiedzieli.",
+          "transcript_sha256": "d864a616fb657accd9a80a6384a0732baede3ae7c70d76190f865e535b85d2fe",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 28.862,
+          "rms": 0.156519,
+          "clipped_fraction": 1.3e-05
+        }
+      }
+    },
+    {
+      "code": "ple",
+      "voice": "pt_PT-tugão-medium",
+      "speaker_id": 0,
+      "generated_at": "2026-10-30T09:42:03.884465+00:00",
+      "url": "https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/pt/pt_PT/tug%C3%A3o/medium/pt_PT-tug%C3%A3o-medium.onnx",
+      "model_sha256": "223a7aaca69a155c61897e8ada7c3b13bc306e16c72dbb9c2fed733e2b0927d4",
+      "config_sha256": "fe0918dfc0f1a89264a6eea4afe8e95d8e9fed3cc6c81b5c2f87fcb2b50c7320",
+      "model_card_sha256": "1d6c23095980c0c58a044f1cb23e26fdc1d27bd95b68db0b5b0c548788b99d50",
+      "licence": "CC0",
+      "piper_version": "1.8.0",
+      "listening_verdict": "pending",
+      "samples": {
+        "dialogue": {
+          "file": "ple-dialogue.wav",
+          "sha256": "80639f9987fd0a31c5bfe4badb2d46b11fe8e5e4ff2c30ae3f6eb30e3f56e490",
+          "transcript": "Bom dia. Este comboio vai para Coimbra? Sim, vai. A que horas chega? Às onze e meia. É preciso reservar lugar? Para este comboio, não. Muito obrigado pela ajuda. De nada. Boa viagem!",
+          "transcript_sha256": "777b5e0743c9edca463b636ed388d5e966a645228e8184b8e82a9a1f89870f09",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 11.041,
+          "rms": 0.227335,
+          "clipped_fraction": 4.1e-05
+        },
+        "vocabulary": {
+          "file": "ple-vocabulary.wav",
+          "sha256": "fc1ec241424652c5f713bcb09f60d023223e7097178c1010a4d2fe9f4b962237",
+          "transcript": "Pão, coração, limões. Criança, açúcar, avô, avó. Câmara, três, português. Caro, carro. Quinze, cinquenta. Uma chávena de chá. Estação de comboios.",
+          "transcript_sha256": "09e9ada4a45bc51463c0350185faaa4964d212d0576c232d7623b31d5f5525f5",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 9.636,
+          "rms": 0.202369,
+          "clipped_fraction": 3.3e-05
+        },
+        "continuous": {
+          "file": "ple-continuous.wav",
+          "sha256": "6c3fe0e9338f4f00d4da731357ca9bff82d273c1e20fd84afeb61b44af993fb1",
+          "transcript": "Na terça-feira, a Inês vai à biblioteca depois das aulas. Precisa de um livro para preparar um trabalho sobre o mar. A bibliotecária mostra-lhe uma estante com livros sobre animais e viagens. A Inês escolhe um livro sobre peixes e senta-se perto da janela. Tira o caderno da mochila e escreve algumas perguntas. Quando o irmão chega, ela já encontrou várias informações interessantes. Saem juntos e passam pela padaria antes de regressarem a casa.",
+          "transcript_sha256": "de1f349b5f90631d2f8b825f6afc5b6bd15c2d38d9355f64e2e192637e7eee1e",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 20.712,
+          "rms": 0.230232,
+          "clipped_fraction": 1.5e-05
+        }
+      }
+    },
+    {
+      "code": "rki",
+      "voice": "ru_RU-denis-medium",
+      "speaker_id": 0,
+      "generated_at": "2026-10-30T09:42:44.872024+00:00",
+      "url": "https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/ru/ru_RU/denis/medium/ru_RU-denis-medium.onnx",
+      "model_sha256": "15fab56e11a097858ee115545d0f697fc2a316c41a291a5362349fb870411b0a",
+      "config_sha256": "831c860dac0b5073eaa81610a0a638ec23d90a6cf8e5f871b4485c2cec3767c8",
+      "model_card_sha256": "8b5d685dd80f8ad3f8dbbe1c56b16bb0809f00c144af3642dbcf3b707eb89c12",
+      "licence": "CC0",
+      "piper_version": "1.8.0",
+      "listening_verdict": "pending",
+      "samples": {
+        "dialogue": {
+          "file": "rki-dialogue.wav",
+          "sha256": "19f86db223b1627bf5100dee018f4b3713b0db9f9934d27326a096f8d8d8ac0b",
+          "transcript": "Добрый день. Этот автобус идёт в центр? Да, идёт. Где можно купить билет? У водителя или в приложении. Сколько времени занимает поездка? Около двадцати минут. Большое спасибо. Счастливого пути!",
+          "transcript_sha256": "c1763b65f45b966af4ebb0045f88bc9015e2dd9ed62d37fb0c6f003169cb8a12",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 13.932,
+          "rms": 0.149599,
+          "clipped_fraction": 2.9e-05
+        },
+        "vocabulary": {
+          "file": "rki-vocabulary.wav",
+          "sha256": "8715c317e54be39a267fbdc229bec924d2182c0b80667dc25834eddc6e951169",
+          "transcript": "Ёлка, ещё, подъезд, сыр. За́мок, замо́к. Молоко, хорошо. Шесть, щётка. Один друг, два друга. Тринадцать, тридцать. Где находится библиотека?",
+          "transcript_sha256": "4b3ded825034c5742cedb280d9abfb30c3f047491dde51f1c2f9cbeb7db02b2b",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 10.751,
+          "rms": 0.143788,
+          "clipped_fraction": 3e-05
+        },
+        "continuous": {
+          "file": "rki-continuous.wav",
+          "sha256": "84125bd0b319516a1cb1998393411598018be916810d2eae78d9e63451bd1e66",
+          "transcript": "В субботу утром Анна идёт с братом в библиотеку. Она хочет найти книгу о птицах, которых видит в парке. Библиотекарь показывает им полку у окна. Анна выбирает две книги и садится за большой стол. Её брат предпочитает рассказ о путешествии на поезде. Через час они выходят на улицу. В парке они слышат пение птиц и пытаются узнать одну из них. Потом они возвращаются домой, чтобы приготовить обед и рассказать родителям о том, что узнали.",
+          "transcript_sha256": "ac5a6338243ef8f67c6153eace11bbff69e33f960cc7a2da8588b50b2469d9cc",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 27.655,
+          "rms": 0.125761,
+          "clipped_fraction": 1.3e-05
+        }
+      }
+    },
+    {
+      "code": "ufl",
+      "voice": "uk_UA-ukrainian_tts-medium",
+      "speaker_id": 0,
+      "generated_at": "2026-10-30T09:47:08.089668+00:00",
+      "url": "https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/uk/uk_UA/ukrainian_tts/medium/uk_UA-ukrainian_tts-medium.onnx",
+      "model_sha256": "7920419ac5f6fd8b6450520f24b52ed5a319cb53dd018fbcd71c9e079cbac84f",
+      "config_sha256": "4e96e72917ca9b94edc77d6ccfee03a73f450ba2fc1ca93c2e562bc014e5aa55",
+      "model_card_sha256": "ce09d0c9d1d90cdc98d1ea8a4ecbdeb5e937d44593876e4194302c5eabbaad9d",
+      "licence": "CC0",
+      "piper_version": "1.8.0",
+      "listening_verdict": "pending",
+      "samples": {
+        "dialogue": {
+          "file": "ufl-dialogue.wav",
+          "sha256": "678529f0c20bbaecb9c9e2b6111b7f8540e340b716dbbd298f4985760477ff9f",
+          "transcript": "Добрий день. Цей автобус їде до центру? Так, їде. Де можна купити квиток? У водія або в застосунку. Скільки триває поїздка? Приблизно двадцять хвилин. Дуже дякую. Щасливої дороги!",
+          "speech_input": "добрий день. цей автобус їде до центру? так, їде. де можна купити квиток? у водія або в застосунку. скільки триває поїздка? приблизно двадцять хвилин. дуже дякую. щасливої дороги!",
+          "warnings": [],
+          "transcript_sha256": "08684812628b10ef84d57b9b60ea6d2e52ad8db22188f7ff9a73e9d27c3447d6",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 11.134,
+          "rms": 0.171086,
+          "clipped_fraction": 4e-06
+        },
+        "vocabulary": {
+          "file": "ufl-vocabulary.wav",
+          "sha256": "eb9e5a94e143fc95aa965a953cd041925801a1fab673547a18c8294c6404be0a",
+          "transcript": "Ґанок, ґудзик, їжак, єнот, Україна. П'ять, пʼять, сім'я, подвірʼя. Книга, книжка. Тринадцять, тридцять. Сьогодні гарна погода. Де є бібліотека?",
+          "speech_input": "ґанок, ґудзик, їжак, єнот, україна. п'ять, п'ять, сім'я, подвір'я. книга, книжка. тринадцять, тридцять. сьогодні гарна погода. де є бібліотека?",
+          "warnings": [],
+          "transcript_sha256": "f414a4b31f1ac52e2c9ca59f1246f510e6c5caae6f3435dbcac2f08b26f07175",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 9.95,
+          "rms": 0.175138,
+          "clipped_fraction": 5e-06
+        },
+        "continuous": {
+          "file": "ufl-continuous.wav",
+          "sha256": "5dc929220ec8f29c89f2daa62dbf74a377f3523110f81ed14484d4903ef41de6",
+          "transcript": "У суботу вранці Олена йде з братом до бібліотеки. Вона хоче знайти книжку про птахів, яких бачить у парку. Бібліотекарка показує їм полицю біля вікна. Олена вибирає дві книжки й сідає за великий стіл. Її брат воліє читати оповідання про подорож потягом. Через годину вони виходять надвір. У парку вони чують спів птахів і намагаються впізнати одного з них. Потім повертаються додому, щоб приготувати обід і розповісти батькам про те, що дізналися.",
+          "speech_input": "у суботу вранці олена йде з братом до бібліотеки. вона хоче знайти книжку про птахів, яких бачить у парку. бібліотекарка показує їм полицю біля вікна. олена вибирає дві книжки й сідає за великий стіл. її брат воліє читати оповідання про подорож потягом. через годину вони виходять надвір. у парку вони чують спів птахів і намагаються впізнати одного з них. потім повертаються додому, щоб приготувати обід і розповісти батькам про те, що дізналися.",
+          "warnings": [],
+          "transcript_sha256": "7559b76750cb0e626fff6d4d0745295cca5f87573b32bfbc6e40afe254867c2b",
+          "sample_rate": 22050,
+          "channels": 1,
+          "seconds": 26.285,
+          "rms": 0.165176,
+          "clipped_fraction": 2e-06
+        }
+      }
+    }
+  ]
+}

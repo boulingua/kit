@@ -1,0 +1,7 @@
+# Shared build and validation dependencies; Python 3.12.
+PyYAML==6.0.3
+pypdf==6.21.4
+PyMuPDF==1.28.2
+fonttools[woff]==4.68.0
+jsonschema==4.26.0
+mutagen==1.48.1

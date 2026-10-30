@@ -14,16 +14,12 @@ Local, LLM-free. Idempotent (skips segments whose text hash is unchanged).
 import sys, re, json, hashlib, subprocess, tempfile, glob, os
 from pathlib import Path
 
-repo = Path(sys.argv[1]); VOICE = sys.argv[2]; LANG = sys.argv[3]; UNITS_GLOB = sys.argv[4]
-SITE = repo.resolve().name
-# --all / --only replace the AUDIO_ALL environment variable the dead .odp gate
-# forced everyone to set. Kept as an env var too, so existing CI does not break.
-ALL = os.environ.get("AUDIO_ALL") == "1" or "--all" in sys.argv
-ONLY = next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--only=")), None)
-TTS_LANG = LANG
-VOICE2 = sys.argv[5] if len(sys.argv) > 5 else VOICE
-AUDIO = repo / "static/materials/audio"
-DATA = repo / "data/audio"
+# Importing normalise/extract_segments must not parse argv or touch a course.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
+from blg_paths import site_code, material_slug, front_matter
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from normalise_model import prepare_model_text
+
 # Segment labels, loaded from labels.yml so adding a language is a data edit.
 #
 # This was a dict literal covering fr/de/en, read as LABELS[kind][LANG]. Adding
@@ -140,7 +136,7 @@ def extract_segments(body):
 def block_transcript(qs):
     return '\n'.join(strip_md(q) for q in qs if q.strip())
 
-def synth(text, wav, voice):
+def synth(text, wav, voice, speaker=0):
     """Synthesise to `wav`. Raises if piper fails.
 
     The return code used to be discarded, and one temp path was reused for a
@@ -153,9 +149,9 @@ def synth(text, wav, voice):
     """
     wav.unlink(missing_ok=True)
     r = subprocess.run([sys.executable, "-m", "piper", "--model", voice,
-                        "--output_file", str(wav)],
+                        "--output_file", str(wav), "--speaker", str(speaker)],
                        input=text, text=True, capture_output=True)
-    if r.returncode != 0:
+    if r.returncode != 0 or 'Missing phoneme' in r.stderr:
         raise RuntimeError(f"piper failed ({r.returncode}) on {wav.name}: "
                            f"{(r.stderr or '')[-400:]}")
     if not wav.exists() or wav.stat().st_size == 0:
@@ -170,97 +166,129 @@ def to_ogg(wav, ogg):
     if not ogg.exists() or ogg.stat().st_size == 0:
         raise RuntimeError(f"ffmpeg exited 0 but wrote no audio to {ogg.name}")
 
-def main():
-    units = sorted(glob.glob(str(repo / UNITS_GLOB)))
-    made = 0; manifests = 0; failed = 0
-    DATA.mkdir(parents=True, exist_ok=True)
-    for uf in units:
-        uf = Path(uf)
-        txt = uf.read_text(encoding='utf-8')
-        m = re.match(r'^---\n(.*?)\n---\n(.*)$', txt, re.S)
-        if not m: continue
-        fm, body = m.group(1), m.group(2)
-        # Gate positively on materials_status, not on a file extension.
-        #
-        # This used to skip any unit whose front matter lacked ".odp". Since the
-        # LaTeX migration no unit in any repo has one — the surviving mentions
-        # are teacher-note body prose pointing at files that no longer exist —
-        # so the condition was always true and AUDIO_ALL=1 was mandatory to get
-        # any output at all. A gate that always skips is not a gate.
-        if not (ALL or ONLY or re.search(r'^materials_status:\s*ready\s*$', fm, re.M)):
+def link_manifest(text, key):
+    match = re.match(r'\A---\n(.*?)\n---\n', text, re.S)
+    if not match:
+        raise ValueError('YAML front matter is required')
+    front = match.group(1)
+    line = 'audio_manifest: ' + key
+    front = re.sub(r'(?m)^audio_manifest:.*$', line, front) if re.search(r'(?m)^audio_manifest:', front) else front + '\n' + line
+    return '---\n' + front + '\n---\n' + text[match.end():]
+
+
+def main(argv=None):
+    import argparse
+    import yaml
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument('repo', type=Path)
+    ap.add_argument('voice', type=Path)
+    ap.add_argument('lang')
+    ap.add_argument('units_glob')
+    ap.add_argument('voice2', type=Path, nargs='?')
+    ap.add_argument('--all', action='store_true')
+    ap.add_argument('--only')
+    ap.add_argument('--speaker', type=int, default=0)
+    a = ap.parse_args(argv)
+    repo = a.repo.resolve()
+    code = site_code(repo)
+    voices = [a.voice.resolve(), (a.voice2 or a.voice).resolve()]
+    for voice in voices:
+        if not voice.is_file(): ap.error(f'voice not found: {voice}')
+    # Cache keys include model bytes. Replacing a model at the same path must
+    # invalidate the old recording, even when the text stays the same.
+    model_hashes = {v: hashlib.sha256(v.read_bytes()).hexdigest() for v in set(voices)}
+    config_hashes = {}
+    model_settings = {}
+    for voice in set(voices):
+        config = Path(str(voice) + '.json')
+        if not config.is_file(): ap.error(f'voice configuration not found: {config}')
+        settings = json.loads(config.read_text())
+        model_settings[voice] = settings
+        if not 0 <= a.speaker < settings.get('num_speakers', 1): ap.error('speaker outside model speaker range')
+        config_hashes[voice] = hashlib.sha256(config.read_bytes()).hexdigest()
+    units = sorted(repo.glob(a.units_glob))
+    selected = []
+    for unit in units:
+        fm, body = front_matter(unit)
+        if fm.get('page_type') == 'exam': continue
+        if not (a.all or a.only or os.environ.get('AUDIO_ALL') == '1' or fm.get('materials_status') == 'ready'): continue
+        if a.only and a.only != (unit.parent.name if unit.name == 'index.md' else unit.stem): continue
+        selected.append((unit, fm, body))
+    if not selected:
+        print('::error::no eligible units matched; use --only or --all for an explicit selection', file=sys.stderr)
+        return 1
+    data = repo / 'data/audio'
+    data.mkdir(parents=True, exist_ok=True)
+    made = manifests = failed = 0
+    keys = set()
+    for unit, fm, body in selected:
+        slug = fm.get('audio_manifest') or material_slug(unit)
+        if not isinstance(slug, str) or not re.fullmatch(r'[A-Za-z0-9_-]+', slug):
+            raise ValueError(f'{unit}: invalid audio manifest key')
+        if slug in keys:
+            raise ValueError(f'{unit}: audio manifest key collision: {slug}')
+        keys.add(slug)
+        prior_path = data / f'{slug}.json'
+        legacy = fm.get('audio_manifest') or (unit.parent.name if unit.name == 'index.md' else unit.stem)
+        previous = prior_path if prior_path.exists() else data / f'{legacy}.json'
+        existing_list = json.loads(previous.read_text()) if previous.exists() else []
+        existing = {e.get('file', '').rsplit('/', 1)[-1]: e for e in existing_list}
+        segments = extract_segments(body)
+        if not segments:
+            print(f'::error::{unit}: no speech segments; existing recordings preserved', file=sys.stderr)
+            failed += 1
             continue
-        if ONLY and ONLY != (uf.parent.name if uf.name == 'index.md' else uf.stem):
-            continue
-        # For leaf bundles (index.md in a per-unit folder, e.g. efl) the
-        # stable key is the FOLDER name (== Hugo's .File.ContentBaseName);
-        # for single-file units it's the filename stem.
-        slug = uf.parent.name if uf.name == 'index.md' else uf.stem
-        prior_path = DATA / f"{slug}.json"
-        existing = {e.get("file", "").rsplit("/", 1)[-1]: e
-                    for e in (json.loads(prior_path.read_text(encoding="utf-8"))
-                              if prior_path.exists() else [])}
-        # Skip separate exam pages (assessment); voice the teaching units.
-        if slug.endswith('-exam') or slug.endswith('_exam'):
-            continue
-        segs = extract_segments(body)
-        if not segs: continue
-        outdir = AUDIO / slug
+        outdir = repo / 'static/materials/audio' / slug
         outdir.mkdir(parents=True, exist_ok=True)
-        manifest = []
-        counters = {}
-        with tempfile.TemporaryDirectory() as td:
-            for kind, transcript, tts in segs:
+        manifest, prepared, counters = [], [], {}
+        unit_failed = False
+        with tempfile.TemporaryDirectory(prefix='.audio-', dir=outdir) as td:
+            stage = Path(td)
+            for kind, transcript, raw in segments:
                 counters[kind] = counters.get(kind, 0) + 1
                 n = counters[kind]
-                name = f"{kind}{n}.ogg"
-                ogg = outdir / name
-                voice = VOICE2 if (kind == 'dialogue' and n % 2 == 0) else VOICE
-                h = hashlib.sha1((tts + voice).encode()).hexdigest()[:10]
-                hashf = outdir / f".{name}.hash"
-                if ogg.exists() and hashf.exists() and hashf.read_text() == h:
-                    pass  # unchanged
-                else:
-                    # Per-segment temp name, so a failure cannot leave a
-                    # previous segment's wav behind to be picked up as this
-                    # one's. The unlink in synth() is the belt; this is braces.
-                    wav = Path(td) / f"{kind}{n}.wav"
-                    try:
-                        synth(normalise(tts, TTS_LANG), wav, voice)
-                        to_ogg(wav, ogg)
-                    except RuntimeError as e:
-                        # Loud, and NOT recorded: no .hash, so the next run
-                        # retries it, and no manifest entry, so no page renders
-                        # an <audio> element pointing at a file that is absent
-                        # or holds the wrong clip.
-                        print(f"::error::{slug}/{name}: {e}", file=sys.stderr)
-                        failed += 1
-                        continue
-                    hashf.write_text(h); made += 1
-                label = label_for(kind, LANG) + f' {n}'
-                # Never overwrite a curated human recording. lle has no voice
-                # at all and pfa may take hand-recorded clips for its classical
-                # strand; a regeneration must leave those alone.
+                name = f'{kind}{n}.ogg'
                 prior = existing.get(name, {})
-                if prior.get("source") == "human":
+                # The human recording is protected BEFORE synthesis or encoding.
+                if prior.get('source') == 'human':
                     manifest.append(prior)
                     continue
-                entry = {"file": f"/{SITE}/materials/audio/{slug}/{name}",
-                         "label": label, "transcript": transcript,
-                         "source": "tts"}
-                # The spoken string, whenever it differs from the displayed one.
-                # Without this a regeneration has to reconstruct it, and the one
-                # that did not reconstruct it rebuilt 560 vocabulary drills as
-                # run-on sentences.
-                if tts != transcript:
-                    entry["tts"] = tts
+                voice = voices[1] if kind == 'dialogue' and n % 2 == 0 else voices[0]
+                spoken = prepare_model_text(normalise(raw, a.lang), model_settings[voice])
+                digest = hashlib.sha256((spoken + model_hashes[voice] + config_hashes[voice] + str(a.speaker)).encode()).hexdigest()
+                ogg, hashf = outdir / name, outdir / f'.{name}.hash'
+                if not (ogg.is_file() and hashf.is_file() and hashf.read_text() == digest):
+                    wav, encoded = stage / f'{name}.wav', stage / name
+                    try:
+                        synth(spoken, wav, str(voice), a.speaker)
+                        to_ogg(wav, encoded)
+                    except (RuntimeError, OSError) as exc:
+                        print(f'::error::{slug}/{name}: {exc}', file=sys.stderr)
+                        unit_failed = True
+                        failed += 1
+                        break
+                    cached = stage / f'.{name}.hash'
+                    cached.write_text(digest)
+                    prepared.extend([(encoded, ogg), (cached, hashf)])
+                entry = {'file':f'/{code}/materials/audio/{slug}/{name}',
+                         'label':label_for(kind, a.lang) + f' {n}', 'transcript':transcript,
+                         'source':'tts', 'voice':voice.stem, 'model_sha256':model_hashes[voice],
+                         'config_sha256':config_hashes[voice], 'speaker_id':a.speaker}
+                if spoken != transcript: entry['tts'] = spoken
                 manifest.append(entry)
-        (DATA / f"{slug}.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=1), encoding='utf-8')
-        manifests += 1
-    print(f"audio: {made} clips synthesized, {manifests} unit manifests written"
-          + (f", {failed} FAILED and were not published" if failed else ""))
-    # A build that could not synthesise part of the corpus has not succeeded.
-    # Returning 0 here is what let a whole class of failure read as "done".
-    return 1 if failed else 0
+            if unit_failed: continue
+            # Human clips no longer found by extraction remain explicitly listed.
+            manifest.extend(e for e in existing_list if e.get('source') == 'human' and e not in manifest)
+            staged_manifest = stage / 'manifest.json'
+            staged_manifest.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n')
+            for source, destination in prepared: source.replace(destination)
+            staged_manifest.replace(prior_path)
+            unit.write_text(link_manifest(unit.read_text(), slug))
+            made += len(prepared) // 2
+            manifests += 1
+    print(f'audio: {made} clips synthesized; {manifests} manifests written; {failed} failures')
+    return int(bool(failed))
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     raise SystemExit(main())

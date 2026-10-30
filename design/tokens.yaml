@@ -40,12 +40,26 @@ colour:
     hub-hover:  { light: "#0B57D0", dark: "#A9CDF5", latex: blgaccenthover }
     fg:         { light: "#23272B", dark: "#E8EAED", latex: blgfg }
     fg-muted:   { light: "#6B7280", dark: "#9AA0A6", latex: blgmuted }
+    page-bg:    { light: "#FFFFFF", dark: "#212121" }
     surface:    { light: "#F7F8FA", dark: "#1C1F26", latex: blgsurface }
     # Opaque on both sides. These were rgba(0,0,0,0.12) and rgba(255,255,255,
     # 0.16), which composite unpredictably over a callout wash — the rule
     # changed colour depending on what sat behind it.
     rule:       { light: "#E4E7EB", dark: "#2A2E36", latex: blgrule }
     border:     { light: "#E0E3E7", dark: "#33373F" }
+
+  badge:
+    ink: { light: "#FFFFFF", dark: "#1C1F26" }
+    contrast-ink: { light: "#1C1F26", dark: "#1C1F26" }
+    oe: { light: "#506E89", dark: "#8AB4D6" }
+    cc: { light: "#2E7D32", dark: "#66BB6A" }
+    pd: { light: "#E6A817", dark: "#FFD54F" }
+    language: { light: "#626B73", dark: "#AAB0B6" }
+    a1: { alias: badge.cc }
+    a2: { light: "#00796B", dark: "#4DB6AC" }
+    b1: { light: "#1565C0", dark: "#64B5F6" }
+    b2: { light: "#6A1B9A", dark: "#BA68C8" }
+    c1: { light: "#B71C1C", dark: "#EF8886" }
 
   # ── CEFR band ─────────────────────────────────────────────────────────────
   # Shared across all courses and independent of the accent: a B1 badge means
@@ -124,6 +138,9 @@ accents:
 # font-size values across 41 declarations. The pt column is the print side of
 # the same step, so a caption is the same size on screen and on paper.
 type:
+  # hugo-coder uses a 10px root; web body tokens are based on 16px.
+  web_rem_factor: 1.6
+  web_min_rem: 1.2
   scale_ratio: 1.125
   root: { rem: 1.0, pt: 11 }
   steps:

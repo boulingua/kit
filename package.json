@@ -1,0 +1,13 @@
+{
+  "name": "@boulingua/kit",
+  "private": true,
+  "description": "Pinned build tools for Boulingua course sites",
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@playwright/test": "1.64.1",
+    "pagefind": "1.5.2"
+  }
+}

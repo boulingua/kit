@@ -1,134 +1,73 @@
 #!/usr/bin/env python3
-"""Gates A12 and A14 — the teaching shortcodes render, and render accessibly.
+"""Check rendered teaching shortcode accessibility, including minified HTML.
 
-    python scripts/verify_eqs.py BUILT_SITE
-
-Six shortcodes carry the educational standard, and each is four artefacts: the
-HTML, the LaTeX emitter, an accessibility contract, and this. The contract is
-the part that is cheap to write and expensive to retrofit, so it is checked in
-the built output rather than trusted from the template.
-
-What is checked, and why each one is the failure that actually happens:
-
-  vocab      Per-column `lang`. A vocabulary table is the one place on a page
-             where two languages sit in adjacent cells; without it a screen
-             reader reads the target terms in the chrome language's phonology,
-             which is unusable for exactly the learner who most needs audio.
-             Plus <th scope="col">, so a cell read out of order still says
-             which column it is in.
-
-  niveau     The letter must be TEXT. A coloured chip alone fails anyone who
-             cannot see it — and colour is the only thing distinguishing G from
-             M from E at a glance.
-
-  gap        An aria-label. This is the one where the naive version is actively
-             hostile: an empty bordered span is read as a sentence with a word
-             missing, so the learner never learns a task was there.
-
-  recycles   Must resolve. An unresolved reference renders visibly rather than
-             as a broken link, and this fails on it — a dead link that looks
-             like a link is worse than one that announces itself.
-
-  extension  <details>, so it is keyboard-reachable with no script, and its
-             summary is a real heading in the document outline.
-
-  tl         A lang attribute on every run (gate C12, checked here too).
+Pedagogical step ordering, task quality and progression need content review.
 """
-from __future__ import annotations
-
-import re
-import sys
 from pathlib import Path
+import sys
+from html_tree import Element, parse
 
-# Attribute matches, not substring matches. `'lang=' in tag` is True for
-# data-lang=, aria-labelledby= satisfies a naive 'aria-label' test, and both
-# would let a malformed fixture through — which is exactly what happened when
-# this gate was first tested against one.
-LANG_ATTR = re.compile(r'(?:^|\s)lang\s*=')
-ARIA_LABEL_ATTR = re.compile(r'(?:^|\s)aria-label\s*=')
-
-RECYCLES_RE = re.compile(r'<aside class="recycles".*?</aside>', re.S)
-VOCAB_RE = re.compile(r'<table class="vocab">.*?</table>', re.S)
-GAP_RE = re.compile(r'<span class="gap"[^>]*>')
-NIVEAU_RE = re.compile(r'<div class="niveau[^"]*"[^>]*>.*?</div>', re.S)
-TL_RE = re.compile(r'<(?:span|div) class="tl"[^>]*>')
+CONTRACTS = {'vocab', 'niveau', 'gap', 'recycles', 'extension', 'tl'}
 
 
 def check(html: str, rel: str) -> list[str]:
-    bad: list[str] = []
-
-    for t in VOCAB_RE.findall(html):
-        langs = set(re.findall(r'(?:^|\s)lang="([a-zA-Z-]+)"', t))
-        if len(langs) < 2:
-            bad.append(f"{rel}: vocab table carries {len(langs)} distinct lang "
-                       f"attribute(s); the term and gloss columns must differ, or a "
-                       f"screen reader reads the target language in the wrong voice")
-        if not re.search(r'<th[^>]*scope="col"', t):
-            bad.append(f"{rel}: vocab table has no <th scope=\"col\">")
-
-    for n in NIVEAU_RE.findall(html):
-        if not ARIA_LABEL_ATTR.search(n):
-            bad.append(f"{rel}: niveau block has no aria-label naming the level in full")
-        if 'visually-hidden' not in n and 'aria-label' not in n:
-            bad.append(f"{rel}: niveau letter is presented without a text equivalent")
-
-    for g in GAP_RE.findall(html):
-        if not ARIA_LABEL_ATTR.search(g):
-            bad.append(f"{rel}: a gap has no aria-label — it will be read as a "
-                       f"sentence with a word missing and the task will be invisible")
-
-    for a in RECYCLES_RE.findall(html):
-        if 'recycles-unresolved' in a:
-            unit = re.search(r'data-unit="([^"]*)"', a)
-            bad.append(f"{rel}: recycles references unit_slug "
-                       f"{unit.group(1) if unit else '?'!r}, which no page carries")
-
-    for d in re.findall(r'<details class="extension">.*?</summary>', html, re.S):
-        if '<summary>' not in d:
-            bad.append(f"{rel}: extension is not a <details>/<summary>")
-
-    for t in TL_RE.findall(html):
-        if not LANG_ATTR.search(t):
-            bad.append(f"{rel}: a tl run carries no lang attribute")
-
+    bad = []
+    for node in parse(html).walk():
+        classes, attrs = node.classes, node.attrs
+        if 'vocab' in classes:
+            cells = [n for n in node.walk() if n.tag in ('th', 'td')]
+            headers = [n for n in cells if n.tag == 'th']
+            if node.tag != 'table' or not headers:
+                bad.append(f'{rel}: vocab must be a table with column headers')
+            if any(n.attrs.get('scope') != 'col' for n in headers):
+                bad.append(f'{rel}: every vocab header needs scope="col"')
+            # DaF can use German for both target and explanation.
+            if any(not (n.attrs.get('lang') or '').strip() for n in cells):
+                bad.append(f'{rel}: every vocabulary cell needs a language')
+        if 'niveau' in classes:
+            if not (attrs.get('aria-label') or '').strip():
+                bad.append(f'{rel}: niveau has no accessible level name')
+            badges = [n for n in node.walk() if 'niveau-badge' in n.classes]
+            if not badges or not any(n.text.strip() in ('G', 'M', 'E') for n in badges):
+                bad.append(f'{rel}: niveau must show its G, M or E letter as text')
+        if 'gap' in classes and not (attrs.get('aria-label') or '').strip():
+            bad.append(f'{rel}: a gap has no accessible label')
+        if 'recycles' in classes:
+            if any('recycles-unresolved' in n.classes for n in node.walk()):
+                bad.append(f'{rel}: recycles references an unresolved unit')
+        if 'extension' in classes:
+            summaries = [n for n in node.children if isinstance(n, Element) and n.tag == 'summary']
+            if node.tag != 'details' or not summaries or not summaries[0].text.strip():
+                bad.append(f'{rel}: extension needs details with a nonempty summary')
+        if 'tl' in classes:
+            language = (attrs.get('lang') or '').strip()
+            if not language:
+                bad.append(f'{rel}: target-language passage has no lang attribute')
+            if language.split('-')[0] in {'ar', 'fa', 'he', 'ur'} and attrs.get('dir') != 'rtl':
+                bad.append(f'{rel}: right-to-left passage needs dir="rtl"')
     return bad
 
 
 def main() -> int:
-    root = Path(sys.argv[1] if len(sys.argv) > 1 else "public")
-    if not root.exists():
-        print(f"::error::{root} does not exist — build the site first", file=sys.stderr)
+    root = Path(sys.argv[1] if len(sys.argv) > 1 else 'public')
+    pages = sorted(root.rglob('*.html')) if root.is_dir() else []
+    if not pages:
+        print(f'::error::{root}: no built HTML pages; build the site first')
         return 1
     bad, seen = [], 0
-    for f in sorted(root.rglob("index.html")):
-        html = f.read_text(encoding="utf-8", errors="replace")
-        if not any(k in html for k in ('class="vocab"', 'class="niveau',
-                                       'class="gap"', 'class="recycles"',
-                                       'class="extension"', 'class="tl"')):
-            continue
-        seen += 1
-        bad += check(html, str(f.relative_to(root)))
-    # Zero pages examined is a finding, not a pass. daf uses none of these
-    # shortcodes today, so this gate walked its whole built site, matched
-    # nothing and printed OK — indistinguishable from a course whose contracts
-    # are all met. Every gate in this org that could not fail started exactly
-    # here.
-    if seen == 0:
-        pages = sum(1 for _ in root.rglob("index.html"))
-        print(f"::warning::0 of {pages} built page(s) use any teaching shortcode. "
-              f"This gate examined nothing, so its OK means only that there was "
-              f"nothing to check — not that the contracts are met. For a course "
-              f"that has adopted the kit's shortcodes, this is a defect.")
-
-    for b in bad:
-        print(f"::error::{b}")
-    if bad:
-        print(f"\nA12/A14 FAIL — {len(bad)} violation(s) across {seen} page(s)",
-              file=sys.stderr)
-        return 1
-    print(f"A12/A14 OK — {seen} page(s) using teaching shortcodes, all contracts met")
-    return 0
+    for path in pages:
+        html = path.read_text(encoding='utf-8')
+        if any(n.classes & CONTRACTS for n in parse(html).walk()):
+            seen += 1
+            bad.extend(check(html, str(path.relative_to(root))))
+    for finding in bad:
+        print(f'::error::{finding}')
+    if not seen:
+        print(f'A12/A14/C12 n/a — scanned {len(pages)} HTML pages; no teaching components present')
+    else:
+        print(f'A12/A14/C12 {"FAIL" if bad else "OK"} — {seen} component pages, {len(bad)} violations')
+    return int(bool(bad))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     raise SystemExit(main())

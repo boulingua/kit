@@ -36,3 +36,9 @@ build/
 # (pruned to the faces fonts.yaml names) so the build is reproducible offline.
 design/fonts/src/*.zip
 design/fonts/src/__MACOSX/
+
+# Audition WAVs and downloaded models are local review artifacts.
+/audio/preview-output/
+*.onnx
+*.onnx.json
+.audio-venv/

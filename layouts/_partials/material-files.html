@@ -1,0 +1,18 @@
+{{/* Read only the project's committed material directory. fileExists also
+     searches imported modules, whereas readDir only reads the project. */}}
+{{- $dir := "." -}}
+{{- $exists := true -}}
+{{- range (slice "static" "materials" (printf "%ss" .)) -}}
+  {{- $part := . -}}
+  {{- if $exists -}}
+    {{- $found := false -}}
+    {{- range readDir $dir -}}
+      {{- if and .IsDir (eq .Name $part) -}}{{- $found = true -}}{{- end -}}
+    {{- end -}}
+    {{- $exists = $found -}}
+    {{- $dir = printf "%s/%s" $dir $part -}}
+  {{- end -}}
+{{- end -}}
+{{- $files := slice -}}
+{{- if $exists -}}{{- $files = readDir $dir -}}{{- end -}}
+{{- return $files -}}

@@ -92,6 +92,8 @@ def main() -> int:
         if bands:
             total = int(mt.group(1)) if mt else max(b for _, b, _ in bands)
             covered = sorted((lo, hi) for lo, hi, _ in bands)
+            if any(lo > hi or lo < 0 or hi > total for lo, hi in covered):
+                bad.append(f"{rel}: grading band is reversed or outside 0–{total}")
             if covered[0][0] != 0:
                 bad.append(f"{rel}: the grading scale starts at {covered[0][0]}, "
                            f"not 0 — a pupil below that has no grade")
@@ -137,9 +139,9 @@ def main() -> int:
     # add up and said so in a warning while returning OK. A blocking gate that
     # passes on zero is the failure mode this whole battery was built to remove;
     # it does not get an exception for being the one counting marks.
-    if not checked and no_data:
-        print(f"\nA13 FAIL — {len(no_data)} exam page(s) and not one carries "
-              f"assessment data, so nothing was verified. This is not the same as "
+    if no_data:
+        print(f"\nA13 FAIL — {len(no_data)} exam page(s) carry no "
+              f"assessment data and could not be verified. This is not the same as "
               f"having no exams: it is a marking scheme that exists only in the "
               f"author's head, on every paper in the course.", file=sys.stderr)
         return 1

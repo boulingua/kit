@@ -12,7 +12,7 @@
   has no voice upstream at all, jfl and tfl have exactly one each and both are
   NonCommercial, and afl's is unstated — and for them the transcript IS the
   material. */ -}}
-{{- $key := .File.ContentBaseName -}}
+{{- $key := .Params.audio_manifest | default .File.ContentBaseName -}}
 {{- with (index hugo.Data.audio $key) }}
 <section class="audio-block" aria-labelledby="audio-{{ $key }}">
   <h2 id="audio-{{ $key }}">{{ i18n "listen" | default "Listen" }}</h2>

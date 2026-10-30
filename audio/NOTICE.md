@@ -1,30 +1,34 @@
-# Voice attribution
+# Voice provenance and attribution
 
-Piper voice models used to synthesise the audio in these courses, and the
-attribution their licences require.
+The registry in `voices.yml` records candidate models and their upstream dataset
+licence statements at a pinned model-repository revision. Candidates are not
+approved teaching voices. Existing clips require their own model provenance;
+changing the registry does not retrospectively identify old recordings.
 
-Audio synthesised from a model inherits the licence of that model's training
-dataset. A CC BY or CC BY-SA voice therefore places an attribution obligation
-on every clip generated from it — an obligation none of these were carrying,
-because nothing recorded which voices needed one.
+As a project distribution policy, only models whose recorded terms meet the
+registry's allowlist may enter the audition pipeline. We preserve the upstream
+model card, source URL and file hashes with each preview, including for models
+whose cards say CC0 or public domain. This is an evidence and attribution policy,
+not a claim that every model's training-data licence automatically determines
+the copyright status or licence of every synthesized output.
 
-CC0 and public-domain voices impose no obligation and are not listed. The full
-registry, including the voices rejected on licence grounds and why, is
-`audio/voices.yml`.
+The current attribution-bearing candidates are:
 
-| Course | Model | Licence | Source |
+| Courses | Models | Dataset identified by upstream | Recorded licence |
 |---|---|---|---|
-| `efl` | `en_GB-alba-medium` | https://creativecommons.org/licenses/by/4.0/ | [rhasspy/piper-voices](https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/alba/medium) |
-| `fle` | `fr_FR-siwis-medium` | CC-BY 4.0 | [rhasspy/piper-voices](https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/siwis/medium) |
-| `ils` | `it_IT-serena-medium` | CC-BY-4.0 | [rhasspy/piper-voices](https://huggingface.co/rhasspy/piper-voices/resolve/main/it/it_IT/serena/medium) |
+| French, German, Dutch | `fr_FR-mls-medium`, `de_DE-mls-medium`, `nl_NL-mls-medium` | [Multilingual LibriSpeech](https://openslr.org/94/) | CC BY 4.0 |
+| Italian | `it_IT-serena-medium` | [Serena synthetic Italian dataset](https://huggingface.co/datasets/committa/serena-synthetic-it-27h) | CC BY 4.0 |
 
-## Not used, and why
+The generated preview directory contains a copy of each selected model card.
+Retain it and the receipt when distributing recordings. The content transcript
+and the synthesis/model provenance are separate records.
 
-Four courses ship transcript-only. This is a licence outcome, not a quality
-one, and in three of the four the language has exactly one voice in the entire
-catalogue:
+Historical attribution for `en_GB-alba-medium` (CSTR Edinburgh, CC BY 4.0) and
+`fr_FR-siwis-medium` (SIWIS, CC BY 4.0) must be retained where recordings actually
+use those models. Neither is the current selected candidate. Unidentified
+historical clips must be resolved or replaced before a provenance-complete release.
 
-- **afl** — ar_JO-kareem MODEL_CARD says 'License: See URL' and the URL carries no licence statement. The ROADMAP called it 'MIT-compatible OFL data' — wrong twice: no statement is not permission, and OFL is a font licence with no application to a speech dataset. Gated pending a written determination.
-- **jfl** — ja_JA-hi_fi_captain-medium is the only Japanese voice and is CC BY-NC-SA 4.0. Note the catalogue tag is ja_JA, not the ja_JP written in the ROADMAP. Transcript-only.
-- **lle** — No Latin voice exists upstream — 0 of 174. Approximating with an Italian or Spanish voice is rejected: never a neighbouring language's voice.
-- **tfl** — tr_TR-dfki-medium is the only Turkish voice in the catalogue and is CC BY-NC-SA 4.0. A NonCommercial model cannot ship inside CC BY-SA 4.0 content. Transcript-only; the blocker is licence, not quality.
+Arabic, Japanese, Latin and Turkish currently have no selected model. See each
+registry row for the dated decision and candidate limitations. Human recordings
+with documented permission remain an alternative; a neighbouring language's
+voice is not an acceptable substitute for pronunciation instruction.

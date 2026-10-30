@@ -1,0 +1,23 @@
+/* Essential controls also apply to sites with their own visual stylesheet. */
+.visually-hidden{display:block!important;visibility:visible!important;position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+:focus-visible{outline:3px solid currentColor;outline-offset:4px}
+.navigation #menu-toggle:focus-visible~.menu-button{outline:3px solid currentColor;outline-offset:4px}
+.skip-link{position:absolute;inset-inline-start:1rem;top:-10rem;z-index:1000;background:Canvas;color:CanvasText;padding:1rem}
+.skip-link:focus{top:1rem}
+.navigation-parent{cursor:pointer;list-style:none}
+.navigation-parent::-webkit-details-marker{display:none}
+.navigation-dropdown:not([open])>.navigation-submenu{display:none!important}
+.navigation-dropdown[open]>.navigation-submenu{display:block}
+
+/* The palette is measured against white, matching the documented light surface. */
+body.colorscheme-light{background:var(--boulingua-page-bg)}
+@media(prefers-color-scheme:light){body.colorscheme-auto{background:var(--boulingua-page-bg)}}
+@media(max-width:768px){.navigation #menu-toggle{display:block!important;visibility:visible!important;position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}}
+/* A collapsed mobile menu must not paint or receive focus over the article. */
+@media(max-width:768px){
+  .navigation #menu-toggle:not(:checked)~.navigation-list{display:none!important}
+  .navigation #menu-toggle:checked~.navigation-list{display:block!important;visibility:visible;opacity:1;max-height:none;position:static;float:none;clear:both}
+  .navigation{height:auto;min-height:6rem}
+  .navigation .container{min-height:6rem}
+  .navigation-dropdown[open]>.navigation-submenu{position:static}
+}

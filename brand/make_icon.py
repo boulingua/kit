@@ -155,7 +155,13 @@ def emit_all(root: Path) -> list[Path]:
         write_pdf(pdf, colour)
         svg = root / "brand" / "icons" / f"{code}.svg"
         svg.write_text(svg_for(colour), encoding="utf-8")
-        out += [pdf, svg]
+        web = root / 'static/brand' / f'{code}.svg'
+        web.parent.mkdir(parents=True, exist_ok=True)
+        web.write_text(svg_for(colour), encoding='utf-8')
+        out += [pdf, svg, web]
+    hub = root / 'static/brand/hub.svg'
+    hub.write_text(svg_for('#1A73E8'), encoding='utf-8')
+    out.append(hub)
     return out
 
 
@@ -196,6 +202,11 @@ def main() -> int:
                 bad += 1
             elif not filecmp.cmp(gen, live, shallow=False):
                 print(f"::error::brand/icons/{gen.name} differs from what tokens produce")
+                bad += 1
+        for gen in (tmp / 'static/brand').glob('*.svg'):
+            live = ROOT / 'static/brand' / gen.name
+            if not live.is_file() or live.read_bytes() != gen.read_bytes():
+                print(f'::error::static/brand/{gen.name} differs from the authoritative icon')
                 bad += 1
         if bad:
             print(f"\nFAIL — {bad} icon(s) do not match data/accents.yaml.", file=sys.stderr)

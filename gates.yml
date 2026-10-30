@@ -13,7 +13,7 @@
 # itself, so a gate that drifts from its description fails something.
 #
 # FIELDS
-#   id        A1–A19 source · B1–B4 build · C1–C15 rendered · D1–D6 artefacts
+#   id        A1–A19 source · B1–B4 build · C1–C16 rendered · D1–D6 artefacts
 #             · E1 deploy. IDs are permanent and never reused. A withdrawn
 #             gate becomes status: withdrawn and keeps its number.
 #   owner     which repo holds the implementation: kit, .github, curriculum
@@ -189,6 +189,7 @@ gates:
   title: contrast and accent separation
   owner: kit
   scripts: [scripts/verify_contrast.py]
+  scope: kit
   needs: source
   severity: blocking
   status: live
@@ -299,7 +300,7 @@ gates:
   owner: curriculum
   scripts: [scripts/conformance_audit.py]
   needs: source
-  severity: warn
+  severity: blocking
   ramp: >-
     Follows A2's milestone. Its thresholds are read from the pinned framework
     checkout and never from a constant, because F8 re-derives two scales and
@@ -589,30 +590,24 @@ gates:
   note: lychee --offline. External links are advisory and weekly, never here.
 
 - id: C14
-  title: accessibility sweep
+  title: representative browser accessibility and workflows
   owner: kit
-  scripts: []
+  scripts: [scripts/verify_browser.py]
+  argument: repo
   needs: built
   severity: blocking
-  status: planned
-  booked: P3.1
-  note: >-
-    scripts/pa11y.json exists and is correct, but a config is not a gate until
-    something runs it — nothing does yet.
-  staging: >-
-    Two sweeps, staged deliberately. The one with ignore:[color-contrast] is
-    blocking on adoption. The one with ignore:[] is warn until one release
-    after BOTH S5 and F2, then blocking — because those two changes move every
-    accent, the surface, the rule colour and the callout wash at once, and
-    flipping contrast at the same moment produces a wall of violations with no
-    way to separate a token bug from a content bug. The flip date is recorded
-    in docs/release-policy.md so it is a commitment.
-  battery: false
+  status: partial
+  gap: >-
+    Automated WCAG 2.1 AA checks, keyboard controls, mobile overflow and key
+    search/discovery paths cover representative pages. They do not establish
+    complete manual accessibility or native-language correctness of all content.
+  battery: true
 
 - id: C15
   title: JavaScript budget
   owner: kit
   scripts: [scripts/verify_js_budget.py]
+  argument: repo
   needs: built
   severity: blocking
   status: live
@@ -687,7 +682,7 @@ gates:
 - id: D6
   title: audio manifest and voice audition
   owner: kit
-  scripts: [scripts/verify_voices.py]
+  scripts: [scripts/verify_voices.py, scripts/verify_audio_manifests.py]
   needs: source
   severity: blocking
   status: partial
@@ -797,3 +792,24 @@ gates:
     course-build.yml — main only, upload-pages-artifact@v3 into deploy-pages@v4.
     Pull requests run A+B+C+D and deploy nothing. Enforced by the workflow's own
     structure and by the org audit's no-write rule, not by a script.
+
+- id: C16
+  title: local links and assets
+  owner: kit
+  scripts: [scripts/verify_site_links.py]
+  needs: built
+  argument: repo
+  severity: blocking
+  status: live
+  battery: true
+  note: Checks the built public tree, project-site prefixes and HTML fragment targets.
+
+- id: A22
+  title: catalogue source and discovery integrity
+  owner: kit
+  scripts: [scripts/verify_catalogue.py]
+  needs: source
+  severity: blocking
+  status: live
+  battery: true
+  note: Applies to kind catalogue; other repository roles report not applicable.

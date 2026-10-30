@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """kit — the boulingua platform CLI.
 
+    kit build [REPO]           build HTML and configured search index
     kit check [REPO] [--ci]     run the whole gate battery
                                 --owner-root NAME=PATH where CI puts them
     kit design [--check]        regenerate tokens and icons, or verify them
@@ -31,6 +32,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -77,6 +79,35 @@ def root_env(roots: dict[str, Path]) -> dict[str, str]:
         if owner != "kit":
             env["BLG_" + owner.strip(".").upper().replace("-", "_")] = str(path)
     return env
+
+
+def cmd_build(a) -> int:
+    """Build HTML and the configured search index with the same tools as CI."""
+    repo = Path(a.repo).resolve() if a.repo else Path.cwd()
+    if not (repo / 'hugo.toml').is_file():
+        print(f'::error::{repo}: hugo.toml is missing', file=sys.stderr)
+        return 2
+    cfg = load_cfg(repo)
+    command = ['hugo', '--minify', '--gc', '--panicOnWarning', '--cleanDestinationDir']
+    if a.base_url:
+        command += ['--baseURL', a.base_url]
+    try:
+        result = _echo(command, repo)
+        if result:
+            return result
+        if cfg.get('kind', 'course') == 'course' and cfg.get('gates', {}).get('network_graph'):
+            result = _echo([PY, str(SCRIPTS / 'build_network.py'), str(repo)], repo)
+            if result: return result
+        if cfg.get('gates', {}).get('pagefind'):
+            pagefind = KIT / 'node_modules/.bin/pagefind'
+            if not pagefind.is_file():
+                print('::error::Pagefind is missing; run npm ci in the kit checkout', file=sys.stderr)
+                return 2
+            return _echo([str(pagefind), '--site', str(repo / 'public')], repo)
+    except FileNotFoundError as exc:
+        print(f'::error::required build tool is missing: {exc.filename}', file=sys.stderr)
+        return 2
+    return 0
 
 
 # ── the battery ─────────────────────────────────────────────────────────────
@@ -171,7 +202,7 @@ def battery(repo: Path, cfg: dict, roots: dict[str, Path]) -> tuple[list, list]:
                                  f"owner {g['owner']} has no checkout", "blocked"))
                     break
                 path = root / spec
-            arg = str(built) if g["needs"] == "built" else str(repo)
+            arg = str(KIT) if g.get("scope") == "kit" else (str(built) if g["needs"] == "built" and g.get("argument") != "repo" else str(repo))
             cmd = (PY, str(path), arg, *(g.get("args") or []))
             if cmd not in by_cmd:
                 by_cmd[cmd] = []
@@ -318,6 +349,31 @@ def cmd_sync(a) -> int:
     (dest / "brand" / "icons").mkdir(parents=True, exist_ok=True)
     (dest / "assets").mkdir(exist_ok=True)
 
+    # Check all existing vendored files BEFORE overwriting any of them.
+    # Untracked authoring work and edited copies must be preserved, not pruned.
+    previous = {}
+    lock_path = dest / "kit.lock"
+    if lock_path.exists():
+        for line in lock_path.read_text().splitlines():
+            if line and not line.startswith("#"):
+                digest, _, relative = line.partition("  ")
+                if not re.fullmatch(r"[a-f0-9]{64}", digest) or Path(relative).is_absolute() or ".." in Path(relative).parts:
+                    print("::error::invalid material lock entry", file=sys.stderr)
+                    return 1
+                previous[relative] = digest
+    problems = []
+    for existing in dest.rglob("*"):
+        if not existing.is_file() or existing == lock_path: continue
+        relative = existing.relative_to(dest).as_posix()
+        if relative not in previous:
+            problems.append(f"untracked material: {relative}")
+        elif hashlib.sha256(existing.read_bytes()).hexdigest() != previous[relative]:
+            problems.append(f"edited material: {relative}")
+    if problems:
+        for problem in problems: print("::error::" + problem, file=sys.stderr)
+        print("Preserve or migrate these files outside _materials before syncing; no existing file was changed.", file=sys.stderr)
+        return 1
+
     copied: list[Path] = []
     for src in sorted((KIT / "latex").glob("*.sty")):
         shutil.copy2(src, dest / src.name); copied.append(dest / src.name)
@@ -337,7 +393,7 @@ def cmd_sync(a) -> int:
     if logo.exists():
         shutil.copy2(logo, dest / "assets" / logo.name); copied.append(dest / "assets" / logo.name)
 
-    # PRUNE. Sync was additive, so a file the kit no longer ships stayed
+    # Retire only files verified against the previous lock above. Sync was additive, so a file the kit no longer ships stayed
     # vendored forever — and since it is not in the new lock, the next
     # `kit check` fails with "not in kit.lock: it did not come from kit sync",
     # which reads as a tampering warning about a file sync itself left behind.
@@ -413,15 +469,30 @@ def cmd_urlset(a) -> int:
 def cmd_materials(a) -> int:
     repo = Path(a.repo).resolve()
     if a.thumbs:
-        return _echo([PY, str(SCRIPTS / "render_thumbs.py")], repo)
-    return _echo([PY, str(SCRIPTS / "build_materials_latex.py")], repo)
+        return _echo([PY, str(SCRIPTS / "render_thumbs.py"), str(repo)], repo)
+    return _echo([PY, str(SCRIPTS / "build_materials_latex.py"), str(repo)], repo)
 
 
 def cmd_audio(a) -> int:
     if a.action == "audition":
-        return _echo([PY, str(KIT / "audio" / "audition.py"), "--code", a.code], KIT)
+        if not a.code:
+            print("::error::audio audition requires --code", file=sys.stderr)
+            return 2
+        command = [PY, str(KIT / "audio/audition.py"), "--code", a.code, "--speaker", str(a.speaker)]
+        for key in ["models", "output"]:
+            if getattr(a, key): command += ["--" + key, str(Path(getattr(a, key)).resolve())]
+        if a.check: command.append("--check")
+        return _echo(command, Path.cwd())
     repo = Path(a.repo).resolve() if a.repo else Path.cwd()
-    return _echo([PY, str(KIT / "audio" / "build_audio.py"), str(repo)], repo)
+    if not a.voice or not a.lang:
+        print("::error::audio build requires --voice MODEL.onnx and --lang LANGUAGE", file=sys.stderr)
+        return 2
+    command = [PY, str(KIT / "audio/build_audio.py"), str(repo), str(Path(a.voice).resolve()), a.lang, a.units_glob]
+    if a.voice2: command.append(str(Path(a.voice2).resolve()))
+    command += ["--speaker", str(a.speaker)]
+    if a.all: command.append("--all")
+    if a.only: command += ["--only", a.only]
+    return _echo(command, repo)
 
 
 def cmd_vgwort(a) -> int:
@@ -446,94 +517,9 @@ def cmd_vgwort(a) -> int:
 
 
 def cmd_new(a) -> int:
-    import yaml
-    accents = yaml.safe_load((KIT / "data" / "accents.yaml").read_text(encoding="utf-8"))
-    if a.code not in {x["code"] for x in accents}:
-        print(f"::error::{a.code} is not in data/accents.yaml — add the accent row "
-              f"first, so the course has a colour before it has content.",
-              file=sys.stderr)
-        return 1
-    dest = Path(a.into or a.code).resolve()
-    # A scaffold is not an obstacle. All fifteen queued languages already exist
-    # as repos holding LICENSE, README.md, ROADMAP.md and a brand mark, and the
-    # ROADMAP is real authored work — several hundred lines of language-specific
-    # decisions that Stage 1 reads rather than replaces. Refusing a non-empty
-    # directory meant the one command that creates a course could not be run on
-    # any of the courses waiting to be created.
-    #
-    # What is still refused is OVERWRITING. Anything already present is left
-    # exactly as it is and reported, so a second run adds what is missing and
-    # changes nothing else.
-    dest.mkdir(parents=True, exist_ok=True)
-    existing = sorted(q.relative_to(dest).as_posix() for q in dest.rglob("*")
-                      if q.is_file() and ".git" not in q.parts)
-    kept = []
-
-    def put(rel: str, text: str | None = None, copy_from: Path | None = None):
-        q = dest / rel
-        if q.exists():
-            kept.append(rel)
-            return False
-        q.parent.mkdir(parents=True, exist_ok=True)
-        if copy_from is not None:
-            shutil.copy2(copy_from, q)
-        else:
-            q.write_text(text or "", encoding="utf-8")
-        return True
-    (dest / "content").mkdir(parents=True, exist_ok=True)
-    cfg = (KIT / "templates" / "boulingua.yml").read_text(encoding="utf-8")
-    put("boulingua.yml", cfg.replace("code: template", f"code: {a.code}"))
-    hugo = (KIT / "hugo.defaults.toml").read_text(encoding="utf-8")
-    hugo = hugo.replace('code = "template"', f'code = "{a.code}"')
-    hugo = hugo.replace("https://boulingua.github.io/CHANGEME/",
-                        f"https://boulingua.github.io/{a.code}/")
-    put("hugo.toml", hugo)
-    put("go.mod", f"module github.com/boulingua/{a.code}\n\ngo 1.26.1\n")
-    put(".github/workflows/deploy.yml",
-        copy_from=KIT / "templates" / "deploy.yml")
-    # Course-owned data files are COPIED, never inherited from the module. A
-    # data file the kit ships and a course also owns makes Hugo warn about
-    # shadowing, and --panicOnWarning turns that warning into a failed build on
-    # the day the course adopts the module.
-    src = KIT / "templates" / "course-data"
-    if src.is_dir():
-        for f in sorted(src.glob("*.yaml")):
-            put(f"data/{f.name}", copy_from=f)
-
-    # The statutory pages. An Impressum under § 5 DDG and a
-    # Datenschutzerklärung under Art. 13 DSGVO are not optional for a site
-    # published from Germany, and they are the one real legal exposure here.
-    #
-    # They carry the author's actual details — the same author for every course
-    # in this organisation — so they are INHERITED rather than scaffolded as
-    # blanks. A blank that must be filled before publishing is a blank that
-    # gets published: the kit's own example still carries its ⟨…⟩ and needs a
-    # declared exception to stop A5 failing on it.
-    lic = "CC BY-SA 4.0"
-    cfgf = dest / "boulingua.yml"
-    if cfgf.exists():
-        import yaml as _y
-        lic = (_y.safe_load(cfgf.read_text(encoding="utf-8")) or {}).get(
-            "content_licence", lic)
-    legal = KIT / "templates" / "course-content"
-    if legal.is_dir():
-        for f in sorted(legal.glob("*.md")):
-            if f.name == "README.md":
-                continue
-            put(f"content/{f.name}",
-                f.read_text(encoding="utf-8").replace("{{CONTENT_LICENCE}}", lic))
-
-    # A landing page, so the course has a home before it has units.
-    put("content/_index.md",
-        f"---\npage_type: section\ntitle: \"{a.code}\"\n---\n\n"
-        f"This course has no published units yet.\n")
-    if kept:
-        print(f"  {len(kept)} file(s) already present and left untouched: "
-              + ", ".join(kept[:6]) + (" …" if len(kept) > 6 else ""))
-    print(f"  {dest.name}/ scaffolded — boulingua.yml, hugo.toml, go.mod, "
-          f"content/, data/, deploy.yml")
-    print("  no layouts/, no assets/, no scripts/: those arrive as a Hugo module.")
-    return 0
+    command = [PY, str(SCRIPTS / "new_course.py"), a.code]
+    if a.into: command += ["--into", str(Path(a.into).resolve())]
+    return _echo(command, Path.cwd())
 
 
 def cmd_bundles(a) -> int:
@@ -566,6 +552,9 @@ def main() -> int:
                    help="where a non-kit gate owner is checked out. Required in "
                         "CI, where `.github` and `curriculum` are not siblings "
                         "of the kit. Repeatable.")
+    build = sub.add_parser('build', help='strict Hugo build plus configured search index')
+    build.add_argument('repo', nargs='?')
+    build.add_argument('--base-url')
     d = sub.add_parser("design"); d.add_argument("--check", action="store_true")
     s = sub.add_parser("sync"); s.add_argument("repo")
     u = sub.add_parser("urldiff"); u.add_argument("repo"); u.add_argument("--built")
@@ -575,6 +564,11 @@ def main() -> int:
     m = sub.add_parser("materials"); m.add_argument("repo"); m.add_argument("--thumbs", action="store_true")
     au = sub.add_parser("audio"); au.add_argument("action", choices=["build", "audition"])
     au.add_argument("repo", nargs="?"); au.add_argument("--code")
+    au.add_argument("--check", action="store_true"); au.add_argument("--models"); au.add_argument("--output")
+    au.add_argument("--voice"); au.add_argument("--voice2"); au.add_argument("--lang")
+    au.add_argument("--speaker", type=int, default=0)
+    au.add_argument("--units-glob", default="content/**/index.md")
+    au.add_argument("--all", action="store_true"); au.add_argument("--only")
     v = sub.add_parser("vgwort"); v.add_argument("action", choices=["lock", "assign", "reconcile", "rekey"])
     v.add_argument("--apply", action="store_true")
     v.add_argument("repo"); v.add_argument("--built")
@@ -585,7 +579,7 @@ def main() -> int:
     sub.add_parser("menu")
 
     a = ap.parse_args()
-    return {"check": cmd_check, "design": cmd_design, "sync": cmd_sync,
+    return {"build": cmd_build, "check": cmd_check, "design": cmd_design, "sync": cmd_sync,
             "urldiff": cmd_urldiff, "urlset": cmd_urlset,
             "materials": cmd_materials, "audio": cmd_audio,
             "vgwort": cmd_vgwort, "new": cmd_new, "menu": cmd_menu,
