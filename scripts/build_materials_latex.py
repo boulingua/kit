@@ -324,13 +324,31 @@ SEC = {
     "vocab":      ("vocabulary", "wortschatz", "vocabulaire", "wörter", "worter"),
     "practise":   ("practise", "practice", "üben", "uben", "s'entraîner",
                    "s'entrainer", "entraîner", "entrainer"),
-    "produce":    ("produce", "anwenden", "produire", "produktion"),
+    "produce":    ("produce", "apply", "anwenden", "produire", "produktion"),
     "reflect":    ("reflect", "reflexion", "réfléchir", "reflechir"),
     "solutions":  ("solutions", "lösungen", "losungen", "corrigé", "corrige"),
 }
 
 def find_sec(secs, *names):
+    # Explicit step identifiers survive translation and renamed visible titles.
+    # The shared callers pass these alias groups; unanchored legacy headings
+    # remain supported through the existing title fallback.
+    step = next((anchor for key, anchor in (("input", "input"),
+                 ("practise", "practise"), ("produce", "apply"),
+                 ("reflect", "reflect")) if tuple(names) == SEC[key]), None)
+    if step:
+        matches = [body for title, body in secs if getattr(title, "anchor", None) == step]
+        if len(matches) > 1:
+            raise ValueError(f'duplicate material step anchor: {step}')
+        if matches:
+            return strip_callouts(matches[0])
     for t, body in secs:
+        # An explicit different teaching/key role must not win by title alone.
+        anchor = getattr(t, "anchor", None)
+        if anchor in {"solutions", "key", "teacher-notes", "exam"}:
+            continue
+        if step and anchor in {"activate", "input", "practise", "apply", "reflect"} and anchor != step:
+            continue
         n = norm(t)
         if any(k in n for k in names): return strip_callouts(body)
     return ""
@@ -421,10 +439,12 @@ def answer_keys(md, secs):
             else:
                 collect(node['children'])
     for title, body in secs:
-        if re.search(r'exam|prüfung|prufung|épreuve|epreuve|évaluation|evaluation', norm(title)):
+        anchor = getattr(title, 'anchor', None)
+        title_is_exam = re.search(r'\bexam(?:ination|en)?s?\b|prüfung|prufung|épreuve|epreuve|évaluation|evaluation', norm(title))
+        if anchor == 'exam' or (anchor not in {'key', 'solutions'} and title_is_exam):
             continue
         nodes = callout_tree(body)
-        if any(key in norm(title) for key in SEC['solutions']):
+        if anchor in {'solutions', 'key'} or any(key in norm(title) for key in SEC['solutions']):
             dedicated = unwrap_callouts(nodes).strip()
             if dedicated: out.append(dedicated)
         else:

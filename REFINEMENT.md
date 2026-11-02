@@ -1,7 +1,8 @@
 # Refinement record — 30 October 2026
 
-This is a local engineering candidate on `refine/2026-10-30`. No hosted CI,
-published release or production deployment of these changes has been observed.
+This is an engineering candidate on `refine/2026-10-30`. Hosted checkpoint
+evidence and later local changes are distinguished below. No release tag or
+production deployment is claimed.
 The suite strategy and integration order live in the organisation repository,
 `docs/refinement-2026-10-30.md` and `docs/release-candidate-2026-10-30.md`.
 
@@ -220,3 +221,38 @@ pass, and the audition index contains a pending record for every clip. These
 technical results do not replace native listening approval. The production audio
 has not been replaced. Source-content, timing, mapping and educational review
 gaps remain explicit in the suite handover.
+
+
+## Final parser and browser review — 2 November 2026
+
+The Hello World authoring pilot exposed a missing canonical Apply section in
+print exports. Explicit step anchors now take precedence over translated or
+renamed titles; legacy Produce/Apply headings remain supported. Private key,
+teacher and exam anchors cannot enter learner output by a misleading heading.
+Dedicated key anchors reach the teacher copy, and “Example answers” is not
+misclassified as an exam. Eight regression groups and independent adverse probes
+cover these boundaries. All 396 current unit sources produce byte-identical
+1,188 TeX documents before/after this change: existing published PDFs and their
+actual prior producer receipts remain unchanged. The revised pilot is rendered
+separately and does not silently replace a published lesson.
+
+A fresh source copy with npm installation passed all nine platform commands and
+156 unit tests. Source/code checks and the strict example build pass; the
+producer retains executable mode. The earlier hosted platform checkpoint
+`85c338fd` passed [run 41473214190](https://github.com/boulingua/kit/actions/runs/41473214190);
+that result is not a hosted claim for these subsequent edits.
+
+Browser journeys now use declared site identity instead of checkout-folder names,
+so hosted checkouts named `course` retain EFL/FLE/catalogue-specific coverage. An
+actual renamed EFL checkout exercised all five pages with no findings. Full-page
+light/dark scans and download hover checks wait for finite CSS transitions.
+Shared badge/network ink and two consumer token rules fix observed contrast
+failures. Final local runs passed all 17 noncore configured batteries (83 browser
+pages); the three core batteries fail only historical-audio D6 and pass their
+five-page browser journeys. The additional WCAG 2.1 A tag is included alongside
+WCAG 2 A/AA and 2.1 AA; its subsequent local/hosted runs are recorded separately.
+
+No style token or print-template change was made by these browser repairs. The
+1,064 candidate audio clips remain technically verified with all review decisions
+pending. Teaching-content deficits, native review, accepted mappings, classroom
+timing and compatible foundation publication remain explicit release work.

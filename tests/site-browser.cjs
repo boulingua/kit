@@ -18,15 +18,41 @@ function serve(root, prefix) {
   return new Promise(resolve=>server.listen(0,'127.0.0.1',()=>resolve(server)));
 }
 function walk(root) {return fs.readdirSync(root,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(path.join(root,e.name)):[path.join(root,e.name)]);}
+function siteCode(repo, config) {
+  const manifest=path.join(repo,'boulingua.yml');
+  let declared;
+  if(fs.existsSync(manifest)) {
+    const match=fs.readFileSync(manifest,'utf8').match(/^code:\s*(?:"([^"]+)"|'([^']+)'|([^\s#]+))(?:\s*(?:#.*)?)$/m);
+    assert.ok(match,'boulingua.yml must declare a simple site code');
+    declared=match[1]||match[2]||match[3];
+    assert.match(declared,/^[a-z][a-z0-9-]*$/,'invalid site code');
+  }
+  const url=config.match(/^baseURL\s*=\s*"([^"]+)"/m);
+  assert.ok(url,'hugo.toml must declare baseURL');
+  const publication=new URL(url[1]).pathname.split('/').filter(Boolean).at(-1);
+  // Hub/product identity comes from its public route; checkout folders are
+  // arbitrary (candidate CI uses "course") and cannot select test coverage.
+  const code=declared&&declared!=='hub'?declared:publication||declared;
+  assert.match(code||'',/^[a-z][a-z0-9-]*$/,'declare a site code or product publication path');
+  return code;
+}
+async function settleTransitions(page) {
+  await page.evaluate(async()=>{
+    // Media changes must reach style/layout before collecting their transitions.
+    await new Promise(requestAnimationFrame);await new Promise(requestAnimationFrame);
+    await Promise.all(document.getAnimations().filter(animation=>animation.effect.getTiming().iterations!==Infinity)
+      .map(animation=>animation.finished.catch(()=>{})));
+  });
+}
 (async()=>{
   const repos=process.argv.slice(2).map(x=>path.resolve(x));assert.ok(repos.length,'Give at least one built course repository');
   const output=process.env.BROWSER_ARTIFACTS||path.resolve('build/browser');fs.mkdirSync(output,{recursive:true});
   const browser=await chromium.launch({headless:true,channel:'chromium'});const results=[];
   try {
     for(const repo of repos) {
-      const code=path.basename(repo), root=process.env.BROWSER_BUILT_ROOT
-        ? path.resolve(process.env.BROWSER_BUILT_ROOT,code) : path.join(repo,'public');
       const config=fs.readFileSync(path.join(repo,'hugo.toml'),'utf8');
+      const code=siteCode(repo,config), root=process.env.BROWSER_BUILT_ROOT
+        ? path.resolve(process.env.BROWSER_BUILT_ROOT,code) : path.join(repo,'public');
       const prefix=new URL(config.match(/^baseURL\s*=\s*"([^"]+)"/m)[1]).pathname;
       const server=await serve(root,prefix), origin=`http://127.0.0.1:${server.address().port}`, base=origin+prefix;
       const context=await browser.newContext({viewport:{width:1440,height:1000}}),page=await context.newPage();
@@ -119,18 +145,25 @@ function walk(root) {return fs.readdirSync(root,{withFileTypes:true}).flatMap(e=
             await page.getByRole('button',{name:'Afficher le réseau',exact:true}).click();
             await expect(page.locator('#network-graph canvas').first()).toBeVisible();
           }
-          const report=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
+          const report=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze();
           violations.push(...report.violations.map(v=>({page:destination,id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))})));
+          await page.emulateMedia({colorScheme:'dark'});
+          await settleTransitions(page);
+          const darkReport=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze();
+          violations.push(...darkReport.violations.map(v=>({page:destination,scheme:'dark',id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))})));
+          await page.emulateMedia({colorScheme:'light'});
+          await settleTransitions(page);
           if(await page.locator('.material-links .download-btn').count()) {
             for(const [scheme,hover] of [['light',true],['dark',false],['dark',true]]) {
               await page.emulateMedia({colorScheme:scheme});
               if(hover)await page.locator('.material-links .download-btn').first().hover();
               else await page.mouse.move(0,0);
-              await page.evaluate(()=>Promise.all(document.getAnimations().map(animation=>animation.finished.catch(()=>{}))));
-              const themed=await new AxeBuilder({page}).include('.material-links').withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
+              await settleTransitions(page);
+              const themed=await new AxeBuilder({page}).include('.material-links').withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze();
               violations.push(...themed.violations.map(v=>({page:destination,scheme,hover,id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))})));
             }
             await page.emulateMedia({colorScheme:'light'});await page.mouse.move(0,0);
+            await settleTransitions(page);
           }
           if(destination==='search/') {
             const query={efl:'hello',fle:'bonjour',daf:'Name'}[code]||'language';
