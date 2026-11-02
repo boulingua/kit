@@ -9,9 +9,10 @@
 */}}
 {{- /* The default is a translated key, not the German word it used to
        be: a details block with no title on a Greek course said "Mehr". */ -}}
-{{- $title := or (.Get "title") (i18n "details_more") -}}
+{{- $title := or (.Get "title") (.Get "summary") (i18n "details_more") -}}
 {{- $type := or (.Get "type") "tip" -}}
-<details class="callout callout-{{ $type }}">
+{{- $key := or (eq (.Get "role") "key") (gt (len (findRE `(?i)l.sung|answer\s*key|solution|corrig|barème|notenschlüssel` $title)) 0) -}}
+<details class="callout callout-{{ $type }}"{{ if $key }} data-role="key"{{ end }}>
   <summary>{{ $title }}</summary>
   {{ .Inner | .Page.RenderString (dict "display" "block") }}
 </details>

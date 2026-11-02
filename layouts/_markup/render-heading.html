@@ -1,0 +1,8 @@
+{{- $key := .Anchor -}}
+{{- $aliases := index (.Page.Params.anchor_aliases | default dict) $key | default slice -}}
+{{- range $aliases -}}
+  {{- if and (ne . $key) (ne . "downloads") -}}
+<span id="{{ . }}" class="heading-alias" aria-hidden="true"></span>
+  {{- end -}}
+{{- end -}}
+<h{{ .Level }} id="{{ $key }}">{{ .Text | safeHTML }}<a class="heading-link" href="#{{ $key }}" aria-label="{{ i18n "link_to_heading" | default "Link to heading" }}">#</a></h{{ .Level }}>

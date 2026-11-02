@@ -70,6 +70,8 @@ Open `http://127.0.0.1:1317/nsf/`. A development server may instead use
 ## Materials, audio and release evidence
 
 XeLaTeX and the documented TeX packages are needed only for PDF generation.
+See [assessment review PDFs](docs/assessment-materials.md) for prerequisites,
+source-preserving staging, separate learner/teacher copies and publication checks.
 Piper, voice models and FFmpeg are needed only for audio generation; see
 [audio/README.md](audio/README.md) for the isolated setup and review workflow.
 Human recordings are retained. A preview or successful synthesis is not a

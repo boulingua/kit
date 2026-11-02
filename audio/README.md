@@ -51,6 +51,50 @@ permission. Keep the source recording; encode a mono OGG derivative at no more
 than 64 kb/s for course delivery. The course manifest identifies it as human,
 not as a synthesis-model output.
 
+Each human manifest segment must also name `human_provenance`, a JSON filename
+relative to the course's `data/audio-provenance/`. The record contains:
+
+```json
+{
+  "performer": "<actual name or documented performer identifier>",
+  "recorded_on": "<YYYY-MM-DD>",
+  "source_recording": {"path": "<retained source path>", "sha256": "<source SHA-256>"},
+  "permission": {
+    "path": "<retained permission or licence record>",
+    "sha256": "<record SHA-256>",
+    "scope": "<actual permitted use, including the intended distribution>"
+  },
+  "review": {
+    "reviewer": "<actual reviewer>",
+    "date": "<YYYY-MM-DD>",
+    "verdict": "<pass, hold or fail>",
+    "notes": "<observed transcript, pronunciation and recording-quality findings>",
+    "recording_sha256": "<delivered OGG SHA-256>",
+    "transcript_sha256": "<SHA-256 of the exact UTF-8 manifest transcript>"
+  }
+}
+```
+
+This is a schema example, not permission or approval. Fill it only from genuine
+records. D6 rejects missing evidence, placeholders, future dates, held reviews
+and any changed source, permission, delivery clip or transcript digest. It cannot
+determine the truth of an asserted permission; release review must check that
+the real record covers the actual use. A reviewed TTS clip must not be relabelled
+human to bypass the voice audition.
+
+Source/permission paths resolve relative to the course by default. Keep personal
+consent records and source recordings outside a public Git repository where
+appropriate; point `--evidence-root /private/course-evidence` or
+`BOULINGUA_AUDIO_EVIDENCE_ROOT` at the retained evidence directory when running
+D6/`kit check`. Files must remain inside that directory. The gate verifies them
+in place and does not copy them into the website. CI needs authorized read access
+to that evidence; a missing private record is a blocked check, not a waiver.
+
+For speech extraction, italics and bold are spoken text. Only a whole
+parenthesized aside, optionally italicized, is treated as a stage direction
+(for example `*(The door opens.)*`). Directions stay in the displayed transcript;
+bold speaker labels followed by italic utterances retain their spoken turns.
+
 ## Generate course clips
 
 Install FFmpeg with the `libopus` encoder in addition to the Python environment:
@@ -70,3 +114,44 @@ recording/provenance gate and a passed audition for the actual selected voice.
 Existing historical recordings have incomplete provenance. Do not assign the
 current candidate's identity to them without evidence; regenerate or document
 their true source. See [NOTICE.md](NOTICE.md) for attribution policy.
+
+
+## Extraction scope and batch preparation
+
+Only pages declared `page_type: unit` are eligible, even when a broad glob also
+matches legal or exam bundles. Speech comes from the opening learner story and
+Input sections: blockquote dialogues/readings, explicitly named vocabulary
+tables, English italic vocabulary lists/reading passages, and plain opening
+stories. Recognized answer wrappers, teacher notes, exam tasks, grammar tables,
+assessment criteria and explicitly foreign-language mediation headings are
+excluded. This is a selected listening corpus, not a spoken copy of every lesson
+line. Short excerpts, unrecognized formats and foreign mediation source texts
+need deliberate authoring/review before a recording is added.
+
+Every synthesized entry records its source path, exact source-body digest,
+extraction policy, model/configuration digests, speaker and synthesis backend.
+Normalization changes only the separate `tts` field; the transcript retains the
+selected written stimulus. Review both, especially stage directions and names.
+
+For a large staged build, the direct generator supports `--persistent-model`:
+
+```sh
+python audio/build_audio.py /path/to/copied-course /path/to/voice.onnx en \
+  'content/**/index.md' --all --speaker 0 --persistent-model
+```
+
+This optional mode uses the installed Piper Python API, retaining one model
+session per selected voice with one CPU inference thread. It rejects unmapped
+phonemes and synthesis failures before publishing a unit. The CLI backend
+remains the default; backend changes invalidate synthesis caches. A successful
+batch, waveform decode or source-text comparison does not establish native
+pronunciation quality, factual accuracy or listening approval. Keep staged
+candidates separate until those reviews pass.
+
+The learner-input-v3 policy selects target-language vocabulary columns from
+supported headers, including parallel target columns. Ratings, grammatical
+person labels and foreign-source translation columns are withheld. Explicit
+foreign-language names and uppercase ISO labels such as `(original, DE)` also
+withhold a section; mixed-language openings must carry that explicit source
+label. Each generated manifest records `withheld_foreign_sections`. This is a
+selected target-language audio corpus, not a voiced copy of every source line.

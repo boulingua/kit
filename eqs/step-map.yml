@@ -1,0 +1,29 @@
+version: 1
+# Labels do not establish a step. The explicit anchor does.
+# Course chrome may remain German while target-language content labels differ.
+steps:
+  activate:
+    en: {label: Activate, synonyms: ["1. Activate"]}
+    fr: {label: Activer, synonyms: ["1. Activer"]}
+    de: {label: Aktivieren, synonyms: ["1. Aktivieren"]}
+  input:
+    en: {label: Input, synonyms: ["2. Input"]}
+    fr: {label: Apporter, synonyms: ["2. Apporter"]}
+    de: {label: Input, synonyms: ["2. Input"]}
+  practise:
+    en: {label: Practise, synonyms: ["3. Practise", Practice]}
+    fr: {label: "S'entraîner", synonyms: ["3. S'entraîner", "S’entraîner", "3. S’entraîner"]}
+    de: {label: Üben, synonyms: ["3. Üben"]}
+  apply:
+    en: {label: Produce, synonyms: ["4. Produce", Apply]}
+    fr: {label: Produire, synonyms: ["4. Produire"]}
+    de: {label: Anwenden, synonyms: ["4. Anwenden"]}
+  reflect:
+    en: {label: Reflect, synonyms: ["5. Reflect"]}
+    fr: {label: Réfléchir, synonyms: ["5. Réfléchir"]}
+    de: {label: Reflexion, synonyms: ["5. Reflexion", Reflektieren]}
+fallback:
+  scaffold_instruction_language: de
+  unreviewed_target_language_labels: forbidden
+# Extend labels only with reviewed language text; all fifteen new courses currently
+# use German instructions. No fabricated translations are needed to key their steps.

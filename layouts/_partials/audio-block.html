@@ -1,4 +1,4 @@
-{{- /* Native-voice audio for a unit, driven by data/audio/<slug>.json.
+{{- /* Audio and transcripts for a unit, driven by data/audio/<slug>.json.
 
   ONE partial, not one per language. audiogen/templates/ carried .de.html and
   .fr.html; daf's and fle's partials were byte-identical copies of them, and
@@ -16,7 +16,7 @@
 {{- with (index hugo.Data.audio $key) }}
 <section class="audio-block" aria-labelledby="audio-{{ $key }}">
   <h2 id="audio-{{ $key }}">{{ i18n "listen" | default "Listen" }}</h2>
-  <p class="audio-intro">{{ i18n "audio_intro" | default "Native-voice recordings of this unit's vocabulary, dialogues and texts." }}</p>
+  <p class="audio-intro">{{ i18n "audio_intro" | default "Audio and transcripts for this unit." }}</p>
   {{- range . }}
   <figure class="audio-clip">
     <figcaption>{{ .label }}</figcaption>

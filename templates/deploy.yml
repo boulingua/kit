@@ -5,9 +5,8 @@
 # added to this file instead of to the battery breaks that property and is
 # caught by the kit's own drift test.
 #
-# There is no `with:` block. Everything configurable lives in the course's
-# boulingua.yml, read by the scripts themselves — which keeps this file a
-# constant, and a constant is drift-gatable.
+# The explicit org commit must match the workflow ref and release-pins.json.
+# Foundation changes are applied to every shared caller as one release set.
 name: Build and deploy
 on:
   push: { branches: [main] }
@@ -20,4 +19,6 @@ permissions: { contents: read, pages: write, id-token: write }
 concurrency: { group: pages, cancel-in-progress: false }
 jobs:
   course:
-    uses: boulingua/.github/.github/workflows/course-build.yml@v1
+    uses: boulingua/.github/.github/workflows/course-build.yml@e4650352c8084b5857cf1dc32fecf3c347826aa0
+    with:
+      org_ref: e4650352c8084b5857cf1dc32fecf3c347826aa0

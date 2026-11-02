@@ -130,6 +130,21 @@
     --boulingua-topic-kommunikation: #C09778;
     --boulingua-elev-1: 0 4px 14px rgba(0, 0, 0, 0.50);
     --boulingua-elev-2: 0 6px 20px rgba(0, 0, 0, 0.60);
+    --boulingua-panel-border: var(--boulingua-border);
+    --boulingua-panel-border-hover: var(--boulingua-accent);
+    --boulingua-panel-shadow: var(--boulingua-elev-1);
+    --network-surface: var(--boulingua-surface);
+    --network-border: var(--boulingua-border);
+    --network-fg-mute: var(--boulingua-fg-muted);
+    --network-rail-bg: var(--boulingua-network-rail-bg);
+    --network-highlight: var(--boulingua-network-highlight);
+    --network-topic-alltag: var(--boulingua-topic-alltag);
+    --network-topic-arbeit: var(--boulingua-topic-arbeit);
+    --network-topic-gesellschaft: var(--boulingua-topic-gesellschaft);
+    --network-topic-kommunikation: var(--boulingua-topic-kommunikation);
+    --network-topic-kultur: var(--boulingua-topic-kultur);
+    --network-topic-umwelt: var(--boulingua-topic-umwelt);
+    --network-topic-wissenschaft: var(--boulingua-topic-wissenschaft);
   }
 }
 
@@ -172,4 +187,19 @@ body.colorscheme-dark {
   --boulingua-topic-kommunikation: #C09778;
   --boulingua-elev-1: 0 4px 14px rgba(0, 0, 0, 0.50);
   --boulingua-elev-2: 0 6px 20px rgba(0, 0, 0, 0.60);
+  --boulingua-panel-border: var(--boulingua-border);
+  --boulingua-panel-border-hover: var(--boulingua-accent);
+  --boulingua-panel-shadow: var(--boulingua-elev-1);
+  --network-surface: var(--boulingua-surface);
+  --network-border: var(--boulingua-border);
+  --network-fg-mute: var(--boulingua-fg-muted);
+  --network-rail-bg: var(--boulingua-network-rail-bg);
+  --network-highlight: var(--boulingua-network-highlight);
+  --network-topic-alltag: var(--boulingua-topic-alltag);
+  --network-topic-arbeit: var(--boulingua-topic-arbeit);
+  --network-topic-gesellschaft: var(--boulingua-topic-gesellschaft);
+  --network-topic-kommunikation: var(--boulingua-topic-kommunikation);
+  --network-topic-kultur: var(--boulingua-topic-kultur);
+  --network-topic-umwelt: var(--boulingua-topic-umwelt);
+  --network-topic-wissenschaft: var(--boulingua-topic-wissenschaft);
 }

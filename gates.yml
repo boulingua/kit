@@ -223,8 +223,9 @@ gates:
 - id: A12
   title: EQS structure
   owner: kit
-  scripts: [scripts/verify_eqs.py]
+  scripts: [scripts/verify_eqs.py, scripts/verify_eqs_structure.py]
   needs: built
+  argument: repo
   severity: warn
   ramp: >-
     Blocking per repo when that repo's EQS retrofit is content-complete, and
@@ -232,11 +233,10 @@ gates:
     retro-failed on a content gate.
   status: partial
   gap: >-
-    Checks the shortcode accessibility contracts. Does not yet check step order,
-    budgets, vocab row count, input flood, pitfalls, or Reflect-to-implements
-    correspondence. Those read heading ANCHORS, never heading text — efl, fle
-    and daf write their steps in three languages and a checker keyed on English
-    prose would reject two courses entirely.
+    Checks ordered keyed steps, exact legacy anchor targets, sibling exam pointers,
+    canonical learner word and rendered exam budgets, and shortcode accessibility.
+    Pedagogical quality, vocabulary/input selection and Reflect-to-implements
+    correspondence still require recorded task evidence and reviewer judgment.
   battery: true
 
 - id: A13
@@ -538,11 +538,11 @@ gates:
 - id: C9
   title: analytics domain matches params
   owner: kit
-  scripts: [scripts/verify_qa_basics.py]
+  scripts: [scripts/verify_analytics.py]
   needs: built
+  argument: repo
   severity: blocking
-  status: partial
-  gap: replaces five separate greps; the domain-vs-params comparison is not in it yet
+  status: live
   battery: true
 
 - id: C10
@@ -675,9 +675,12 @@ gates:
   booked: F5 follow-up
   battery: false
   note: >-
-    XeLaTeX prints "Missing character" and exits 0. The current builder checks
-    only that a file appeared, so it ships tofu as a success. Two halves:
-    pre-flight against the cmap, post-flight for glyph id 0 and U+FFFD.
+    Material and assessment builders reject missing-character and overfull-box
+    diagnostics even when XeLaTeX exits zero. Corpus verification separately
+    checks source/PDF text and authored controls; targeted symbol proofs use
+    two independent text extractors. This standalone battery gate remains
+    planned: complete pre-flight cmap and post-flight glyph-id-0/U+FFFD checks
+    must be implemented before D5 itself can be marked passed.
 
 - id: D6
   title: audio manifest and voice audition

@@ -8,7 +8,8 @@
     kit sync REPO               write _materials/ and kit.lock into a course
     kit urldiff REPO            has anything moved a URL that carries a mark?
     kit urlset REPO|BUILT       the published file set — what A3 cannot see
-    kit materials REPO ...      build decks, worksheets, thumbnails
+    kit materials REPO ...      build decks, learner/teacher worksheets, thumbnails
+                                --output-root DIR stages without course edits
     kit audio REPO ...          fetch, audition, synthesise
     kit vgwort REPO ...         the mark ledger
     kit new CODE                instantiate a course from the kit
@@ -89,6 +90,8 @@ def cmd_build(a) -> int:
         return 2
     cfg = load_cfg(repo)
     command = ['hugo', '--minify', '--gc', '--panicOnWarning', '--cleanDestinationDir']
+    if getattr(a, 'drafts', False):
+        command.append('--buildDrafts')
     if a.base_url:
         command += ['--baseURL', a.base_url]
     try:
@@ -162,6 +165,8 @@ def battery(repo: Path, cfg: dict, roots: dict[str, Path]) -> tuple[list, list]:
     by_cmd: dict[tuple, list] = {}
     skip = []
     for g in register():
+        if g['id'] == 'A12' and (cfg.get('code') not in {'efl', 'fle', 'daf'} or (cfg.get('eqs') or {}).get('status') == 'adopted'):
+            g = {**g, 'severity': 'blocking'}
         if not g.get("battery"):
             # NOT silently. This `continue` sat above every skip branch, so a
             # battery:false gate vanished from `kit check` and from `--list`
@@ -469,8 +474,16 @@ def cmd_urlset(a) -> int:
 def cmd_materials(a) -> int:
     repo = Path(a.repo).resolve()
     if a.thumbs:
+        if a.output_root or a.only or a.limit or a.keep_tex:
+            print('::error::--thumbs cannot be combined with material-generation options', file=sys.stderr)
+            return 2
         return _echo([PY, str(SCRIPTS / "render_thumbs.py"), str(repo)], repo)
-    return _echo([PY, str(SCRIPTS / "build_materials_latex.py"), str(repo)], repo)
+    command = [PY, str(SCRIPTS / 'build_materials_latex.py'), str(repo)]
+    if a.output_root: command += ['--output-root', str(Path(a.output_root).resolve())]
+    if a.only: command += ['--only', a.only]
+    if a.limit: command += ['--limit', str(a.limit)]
+    if a.keep_tex: command.append('--keep-tex')
+    return _echo(command, repo)
 
 
 def cmd_audio(a) -> int:
@@ -492,6 +505,7 @@ def cmd_audio(a) -> int:
     command += ["--speaker", str(a.speaker)]
     if a.all: command.append("--all")
     if a.only: command += ["--only", a.only]
+    if a.persistent_model: command.append("--persistent-model")
     return _echo(command, repo)
 
 
@@ -555,18 +569,27 @@ def main() -> int:
     build = sub.add_parser('build', help='strict Hugo build plus configured search index')
     build.add_argument('repo', nargs='?')
     build.add_argument('--base-url')
+    build.add_argument('--drafts', action='store_true', help='include unpublished teaching drafts for local review')
     d = sub.add_parser("design"); d.add_argument("--check", action="store_true")
     s = sub.add_parser("sync"); s.add_argument("repo")
     u = sub.add_parser("urldiff"); u.add_argument("repo"); u.add_argument("--built")
     us = sub.add_parser("urlset"); us.add_argument("repo", nargs="?")
     us.add_argument("--out"); us.add_argument("--diff", nargs=2, metavar=("BASE", "NOW"))
     us.add_argument("--allow-removed", action="append")
-    m = sub.add_parser("materials"); m.add_argument("repo"); m.add_argument("--thumbs", action="store_true")
+    m = sub.add_parser('materials', help='build a complete learner/teacher material set',
+                       description='Build course PDFs and update their download links, or stage them outside the course for review.')
+    m.add_argument('repo')
+    m.add_argument('--thumbs', action='store_true', help='render thumbnails only; cannot combine with generation options')
+    m.add_argument('--output-root', help='external staging directory; leave course files unchanged')
+    m.add_argument('--only', default='', help='select units by path substring')
+    m.add_argument('--limit', type=int, default=0, help='maximum matching units (0 means all)')
+    m.add_argument('--keep-tex', action='store_true', help='retain generated TeX and compiler logs')
     au = sub.add_parser("audio"); au.add_argument("action", choices=["build", "audition"])
     au.add_argument("repo", nargs="?"); au.add_argument("--code")
     au.add_argument("--check", action="store_true"); au.add_argument("--models"); au.add_argument("--output")
     au.add_argument("--voice"); au.add_argument("--voice2"); au.add_argument("--lang")
     au.add_argument("--speaker", type=int, default=0)
+    au.add_argument("--persistent-model", action="store_true", help="reuse a one-thread Piper session for batch builds")
     au.add_argument("--units-glob", default="content/**/index.md")
     au.add_argument("--all", action="store_true"); au.add_argument("--only")
     v = sub.add_parser("vgwort"); v.add_argument("action", choices=["lock", "assign", "reconcile", "rekey"])

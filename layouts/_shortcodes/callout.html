@@ -24,9 +24,11 @@
 {{- $collapse := and $title (eq (.Get "collapse") "true") -}}
 {{- $icon := ne (.Get "icon") "false" -}}
 {{- $body := .Inner | .Page.RenderString (dict "display" "block") -}}
-<div class="callout callout-{{ $type }}{{ if $icon }} has-icon{{ end }}">
+{{- $key := or (eq (.Get "role") "key") (gt (len (findRE `(?i)l.sung|answer\s*key|solution|corrig|barème|notenschlüssel` ($title | default ""))) 0) -}}
+{{- if $key -}}{{- $collapse = true -}}{{- $title = or $title (i18n "answer_key") -}}{{- end -}}
+<div class="callout callout-{{ $type }}{{ if $icon }} has-icon{{ end }}"{{ if $key }} data-role="key"{{ end }}>
 {{- if $collapse -}}
-  <details class="callout-collapsible">
+  <details class="callout-collapsible"{{ if $key }} data-role="key"{{ end }}>
     <summary class="callout-title">{{ $title | safeHTML }}</summary>
     <div class="callout-body">{{ $body }}</div>
   </details>

@@ -1,0 +1,34 @@
+[
+  {
+    "fixture": "paths/efl/content/track-e/kl09/units/unit06-interview-and-portrait/index.md",
+    "source": "https://github.com/boulingua/efl/blob/a190db99d19f3042368a987e31d0ff1a5194f026/content/track-e/kl09/units/unit06-interview-and-portrait/index.md"
+  },
+  {
+    "fixture": "paths/fle/content/track_gm_kl10/units/unit01_transition-formation-emploi/index.md",
+    "source": "https://github.com/boulingua/fle/blob/115fe5d36c76d7d3c2c2547b019a8cc93bfdc58b/content/track_gm_kl10/units/unit01_transition-formation-emploi/index.md"
+  },
+  {
+    "fixture": "paths/daf/content/kurs_b2/units/unit09_bildungsdebatten/index.md",
+    "source": "https://github.com/boulingua/daf/blob/582a14942ce9e2ff0c08eaff22492dabc1b390ae/content/kurs_b2/units/unit09_bildungsdebatten/index.md"
+  },
+  {
+    "fixture": "lessons/scotland.md",
+    "source": "https://github.com/boulingua/efl/blob/a190db99d19f3042368a987e31d0ff1a5194f026/content/track-e/kl07/units/unit04-a-trip-to-scotland/index.md"
+  },
+  {
+    "fixture": "lessons/growing-up.md",
+    "source": "https://github.com/boulingua/efl/blob/a190db99d19f3042368a987e31d0ff1a5194f026/content/track-e/kl07/units/unit02-growing-up/index.md"
+  },
+  {
+    "fixture": "lessons/salutations.md",
+    "source": "https://github.com/boulingua/fle/blob/115fe5d36c76d7d3c2c2547b019a8cc93bfdc58b/content/track_e_kl06/units/unit01_salutations-et-prenoms-e/index.md"
+  },
+  {
+    "fixture": "lessons/weather.md",
+    "source": "https://github.com/boulingua/fle/blob/115fe5d36c76d7d3c2c2547b019a8cc93bfdc58b/content/track_gm_kl06/units/unit08_la-meteo-et-les-saisons/index.md"
+  },
+  {
+    "fixture": "lessons/letter.md",
+    "source": "https://github.com/boulingua/fle/blob/115fe5d36c76d7d3c2c2547b019a8cc93bfdc58b/content/track_gm_kl09/units/unit02_lettre-de-motivation/index.md"
+  }
+]

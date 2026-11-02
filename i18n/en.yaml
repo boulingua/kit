@@ -2,11 +2,15 @@
 # every other language file, or gate A9 fails.
 
 audio_intro:
-  other: Native-voice audio for this unit.
+  other: Audio and transcripts for this unit.
 audio_unsupported: Your browser does not support audio playback.
+table: Table
+assessment: Assessment
+assessment_teacher: Assessment with answers for teachers
 built_with: Built with Hugo.
 contact: Contact
 details_more: More
+answer_key: Answer key
 download:
   other: Download
 downloads_heading: Downloads
@@ -33,6 +37,8 @@ vocab_gloss: Meaning
 vocab_term: Term
 worksheet:
   other: Worksheet
+worksheet_teacher: Teacher worksheet with answers
+link_to_heading: Link to heading
 worksheets:
   other: Worksheets
 

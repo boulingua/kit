@@ -3,6 +3,7 @@ audio_unsupported: Votre navigateur ne prend pas en charge la lecture audio.
 built_with: Créé avec Hugo.
 contact: Contact
 details_more: En savoir plus
+answer_key: Corrigé
 download: Télécharger
 downloads_heading: Téléchargements
 exam: Évaluation
@@ -23,6 +24,8 @@ vocab_example: Exemple
 vocab_gloss: Sens
 vocab_term: Terme
 worksheet: Fiche de travail
+worksheet_teacher: Fiche pour l’enseignant avec corrigé
+link_to_heading: Lien vers cette section
 worksheets: Fiches de travail
 
 search: Recherche
@@ -30,3 +33,6 @@ search_intro: Rechercher dans le texte intégral du cours.
 search_no_js: Activez JavaScript pour rechercher, ou parcourez le cours à partir du
   menu.
 skip_content: Aller au contenu
+table: Tableau
+assessment: Évaluation
+assessment_teacher: Évaluation avec corrigé pour les enseignants

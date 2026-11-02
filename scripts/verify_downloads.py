@@ -116,7 +116,7 @@ def main() -> int:
             if not exam.exists():
                 missing.append((rel, str(exam.relative_to(REPO))))
 
-        for key in ("presentation", "worksheet"):
+        for key in ("presentation", "worksheet", "worksheet_teacher", "assessment", "assessment_teacher"):
             block = fm.get(key) or {}
             for sub in ("file", "thumbnail"):
                 v = block.get(sub)

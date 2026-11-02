@@ -1,8 +1,8 @@
 # Front-matter standard
 
 Every course page declares a `page_type` and follows the superset schema below.
-Fill only the fields relevant to the type. See the worked examples in
-`content/level-a1/`.
+Fill only the fields relevant to the type. Start from `archetypes/unit.md` or
+`archetypes/exam.md`; `example/` exercises the shared rendering contract.
 
 ## Content model
 
@@ -20,7 +20,9 @@ content/
 
 The bundle **directory name** is the canonical slug and the URL — do **not** set
 a front-matter `slug:` (Hugo would use it for the URL and collide the exam with
-its unit). A unit and its exam are linked by a shared `unit_nr`.
+its unit). A unit names its exact sibling exam through `exam.page`; a shared
+`unit_nr` alone is not an unambiguous cross-level link. Existing DaF `_exam`
+bundle names are retained; new courses use `-exam`.
 
 ## Fields
 
@@ -31,14 +33,18 @@ its unit). A unit and its exam are linked by a shared `unit_nr`.
 | `author` | all | `S. Le Boulanger` |
 | `date` | all | `YYYY-MM-DD` |
 | `description` | all | used for `<meta>` + list leads |
-| `unit_nr` | unit, exam | links a unit to its sibling exam |
+| `unit_nr` | unit, exam | number within the course level/track |
 | `tags` | all | derive from structured fields where possible |
 | `materials_status` | unit, exam | `draft` \| `ready` |
 | `skills_focus` | unit, exam | CEFR-skill enum (below) |
 | `topic` | unit, exam | discovery/topic key |
-| `presentation` / `worksheet` | unit | `{ file, thumbnail }` |
-| `exam` | exam | `{ file }` — PDF under `static/downloads/<level>/` |
-| `duration_min` / `total_points` / `notenschluessel` | exam | exam-only |
+| `presentation` / `worksheet` / `worksheet_teacher` | unit | Distinct `{ file, thumbnail }` downloads |
+| `assessment` / `assessment_teacher` | exam | Distinct `{ file, thumbnail }` review-paper downloads |
+| `steps` | unit | Ordered `activate`, `input`, `practise`, `apply`, `reflect`; matching H2 IDs required |
+| `exam` | unit | `{ page, format, duration_minutes, points, skills }`; unknown timing/points stay `null` |
+| `duration_min` / `total_points` | exam | Declared metadata; scoring rules must also be explicit in the actual paper |
+| `draft` / `review_status` | unit, exam | Draft visibility and actual review state, not automatic approval |
+| `assessment_review` | exam | Pending until a genuine pedagogical/source review is recorded |
 | `curriculum` | unit, exam | polymorphic block (below) |
 | `vgwort_pixel` | any | optional; usually registered in `data/vgwort.yaml` |
 
@@ -49,19 +55,17 @@ its unit). A unit and its exam are linked by a shared `unit_nr`.
 
 ### Polymorphic `curriculum` block
 
-Choose one `framework`; fill only its fields.
-
-```yaml
-
-## `curriculum:` — one framework, zero or more anchors
+Use the canonical framework plus applicable secondary syllabus anchors.
 
 ```yaml
 curriculum:
   framework: boulingua-curriculum       # const — not a choice
   level: B1
-  implements:                           # REQUIRED on unit and exam, 3-6 entries
+  implements:                           # reviewed or explicitly proposed task mappings
     - B1.INT.conversation.02
     - B1.REC.reading-for-information-and-argument.01
+  implements_basis: proposed
+  level_basis: proposed
   can_do:                               # optional, bound to an id
     - { id: B1.INT.conversation.02, text: "Ich kann ..." }
   bildungsplan:                         # efl and fle only
@@ -97,9 +101,6 @@ wearing a unit's clothes.
 
 ### The requirement ramps, and the ramp is declared
 
-Zero pages carry an id today, and for efl and fle there is no field to rename —
-roughly 672 pages need 3-6 ids each, which is about 14 author-weeks. Requiring
-it on the day the schema lands would red two live sites for months. So
 `milestone:` in `boulingua.yml` sets the level: **M0** warns, **M1** requires it
 on pages a PR touches, **M2** requires it repo-wide, **M3** adds coverage.
 
@@ -109,6 +110,11 @@ a diff somebody signs.
 
 An id that is *present* must be correct at every milestone. Only the
 *requirement* ramps.
+
+The current refinement candidate has proposed mappings; they do not count as
+reviewed task-level coverage. Record genuine review evidence before changing
+their basis or claiming course conformance. The curriculum repository owns
+`schema/page-curriculum.yml`, the descriptor resolver and coverage audit.
 
 ### `skills_focus`
 

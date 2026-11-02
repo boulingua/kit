@@ -8,6 +8,10 @@
 .navigation-parent::-webkit-details-marker{display:none}
 .navigation-dropdown:not([open])>.navigation-submenu{display:none!important}
 .navigation-dropdown[open]>.navigation-submenu{display:block}
+/* Keep wide teaching tables readable and keyboard-scrollable on small screens. */
+.table-scroll{max-inline-size:100%;overflow-x:auto;margin-block:1em}
+.table-scroll table{margin-block:0}
+@media print{.table-scroll{overflow:visible}.table-scroll table{max-inline-size:100%}}
 
 /* The palette is measured against white, matching the documented light surface. */
 body.colorscheme-light{background:var(--boulingua-page-bg)}

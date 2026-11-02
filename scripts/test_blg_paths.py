@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Verify the path contract against all three live content models.
+"""Verify the path contract using committed real-content fixtures.
 
-    python scripts/test_blg_paths.py [../efl ../fle ../daf]
+    python scripts/test_blg_paths.py
+    python scripts/test_blg_paths.py --org-root .. efl fle daf
 
 Two halves. The first is a fixture matrix of the four namespaces on real units
 from each repo. The second is the one that matters: run the accessors across
@@ -20,6 +21,7 @@ what is already deployed.
 from __future__ import annotations
 
 import csv
+import argparse
 import sys
 from pathlib import Path
 
@@ -134,9 +136,23 @@ def check_materials(org: Path, repos: list[str]) -> int:
 
 
 def main() -> int:
-    org = Path(__file__).resolve().parents[2]
-    repos = sys.argv[1:] or ["efl", "fle", "daf"]
-    bad = check_fixtures(org) + check_urls(org, repos) + check_materials(org, repos)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--org-root', type=Path, help='explicit checkout root for live integration checks')
+    parser.add_argument('repos', nargs='*', help='course directory names under --org-root')
+    args = parser.parse_args()
+    if args.repos and not args.org_root:
+        parser.error('course integration checks require --org-root')
+    fixtures = Path(__file__).resolve().parents[1] / 'tests/fixtures/paths'
+    bad = check_fixtures(fixtures)
+    if args.org_root:
+        org = args.org_root.resolve()
+        repos = args.repos or ['efl', 'fle', 'daf']
+        for repo in repos:
+            if not (org / repo / 'content').is_dir():
+                parser.error(f'missing integration checkout: {org / repo}')
+        bad += check_fixtures(org) + check_urls(org, repos) + check_materials(org, repos)
+    else:
+        print('Live URL/material integration not requested; use --org-root for course checkouts.')
     print("\n" + ("path contract verified against all three content models"
                   if not bad else f"{bad} check group(s) failed"))
     return 1 if bad else 0

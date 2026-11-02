@@ -492,6 +492,7 @@ details.callout summary {
   font-weight: 600;
   border: 1px solid var(--boulingua-accent);
   border-radius: 4px;
+  background: var(--boulingua-page-bg);
   color: var(--boulingua-accent);
   text-decoration: none;
   transition: background 0.12s ease, color 0.12s ease;
@@ -499,7 +500,7 @@ details.callout summary {
 
 .download-btn:hover {
   background: var(--boulingua-accent);
-  color: var(--boulingua-surface);
+  color: var(--boulingua-page-bg);
 }
 
 /* ── Per-article paired download block (under unit title) ─────── */

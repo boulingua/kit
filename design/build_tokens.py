@@ -128,11 +128,12 @@ def emit_css(t: dict, sha: str) -> str:
     # Panel aliases. custom.css named three roles the token set already had.
     # These are permanent: they read better at the call site than the token
     # they resolve to, and they cost one line each.
-    L += [
+    panel_alias = [
         f"  --{p}-panel-border: var(--{p}-border);",
         f"  --{p}-panel-border-hover: var(--{p}-accent);",
         f"  --{p}-panel-shadow: var(--{p}-elev-1);",
     ]
+    L += panel_alias
 
     # --network-* named the same roles as --boulingua-*. Aliased for one
     # release so the call sites migrate by tool, then deleted.
@@ -143,6 +144,10 @@ def emit_css(t: dict, sha: str) -> str:
         f"  --network-rail-bg: var(--{p}-network-rail-bg);",
         f"  --network-highlight: var(--{p}-network-highlight);",
     ] + [f"  --network-topic-{k}: var(--{p}-topic-{k});" for k in sorted(t["colour"]["topic"])]
+    # Custom-property references resolve on the element declaring the alias.
+    # Rebind at the dark-theme body scope; inherited :root aliases otherwise
+    # retain their light values even when their underlying tokens change.
+    D += ['  ' + declaration for declaration in panel_alias + alias]
 
     nl = "\n"
     return (

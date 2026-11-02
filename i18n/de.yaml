@@ -12,12 +12,12 @@
 # nothing — the page never looks broken, it just speaks the wrong language.
 
 audio_intro:
-  other: Wortschatz, Dialoge und Texte dieser Einheit als Audio, gesprochen von einer
-    muttersprachlichen Stimme. Der gesprochene Text steht jeweils darunter.
+  other: Audio und Transkripte zu dieser Einheit. Der Text steht jeweils unter dem Beitrag.
 audio_unsupported: Ihr Browser unterstützt kein Audio.
 built_with: Erstellt mit Hugo.
 contact: Kontakt
 details_more: Mehr
+answer_key: Lösungen
 download:
   other: Herunterladen
 downloads_heading: Downloads
@@ -44,6 +44,8 @@ vocab_gloss: Bedeutung
 vocab_term: Begriff
 worksheet:
   other: Arbeitsblatt
+worksheet_teacher: Arbeitsblatt für Lehrkräfte mit Lösungen
+link_to_heading: Link zu diesem Abschnitt
 worksheets:
   other: Arbeitsblätter
 
@@ -51,3 +53,6 @@ search: Suche
 search_intro: Den gesamten Kurs durchsuchen.
 search_no_js: Für die Suche JavaScript aktivieren oder den Kurs über das Menü öffnen.
 skip_content: Zum Inhalt springen
+table: Tabelle
+assessment: Prüfungsübung
+assessment_teacher: Prüfungsübung mit Lösungen für Lehrkräfte

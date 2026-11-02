@@ -81,13 +81,17 @@ def main() -> int:
                        f"below {MIN_CONTRAST}:1. It is used for links and rules, "
                        f"not decoration.")
     # The dark-theme pair has to work on the dark surface, not on white.
-    surf = (t.get("colour", {}).get("surface", {}) or {}).get("dark")
-    if surf:
+    brand = t.get("colour", {}).get("brand", {})
+    for background in ("surface", "page-bg"):
+        surf = (brand.get(background, {}) or {}).get("dark")
+        if not surf:
+            bad.append(f"missing dark {background} token")
+            continue
         for a in acc:
             c = contrast(a["dark"], surf)
             if c < MIN_CONTRAST:
                 bad.append(f"{a['code']}: dark accent {a['dark']} is {c:.2f}:1 on "
-                           f"the dark surface {surf}")
+                           f"the dark {background} {surf}")
 
     hues = {a["code"]: oklch(a["accent"]) for a in acc}
     for x, y in itertools.combinations(sorted(hues), 2):

@@ -38,8 +38,11 @@ body.colorscheme-dark{--boulingua-accent:{{ .dark }};--boulingua-accent-hover:{{
 {{- end }}
 <link rel="stylesheet" href="{{ "css/fonts.css" | relURL }}">
 {{- if and $p $p.domain }}
-<script defer data-domain="{{ $p.domain }}" src="{{ or $p.src "https://plausible.io/js/script.js" }}"></script>
+{{- if not $p.src }}{{ errorf "Plausible domain is enabled but params.plausible.src is missing; set the explicit reviewed analytics endpoint" }}{{ end }}
+<script defer data-domain="{{ $p.domain }}" src="{{ $p.src }}"></script>
 <script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
+{{- else if and $p $p.src }}
+{{- errorf "params.plausible.src is set without a domain; disable both fields or configure both explicitly" }}
 {{- end }}
 
 {{- /* Font preloads, declared per course rather than hard-coded.

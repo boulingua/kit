@@ -1,19 +1,41 @@
 {{- /* Paired download cards: presentation (left) + worksheet (right). */ -}}
 {{- $pres := .Params.presentation -}}
 {{- $work := .Params.worksheet -}}
-{{- if or $pres $work -}}
+{{- $teacher := .Params.worksheet_teacher -}}
+{{- $assessment := .Params.assessment -}}
+{{- $assessmentTeacher := .Params.assessment_teacher -}}
+{{- if or $pres $work $teacher $assessment $assessmentTeacher -}}
 <div class="material-links">
   {{- with $pres }}
-  <div class="material-card">
+  <div class="material-card" data-material-role="presentation">
     {{- with .thumbnail }}<a href="{{ $pres.file | relURL }}" download><img src="{{ . | relURL }}" alt="{{ i18n "preview_presentation" }}" loading="lazy"></a>{{ end -}}
     <div class="material-card-title">{{ i18n "presentation" }}</div>
     <a class="download-btn" href="{{ .file | relURL }}" download>{{ i18n "download" }} .pdf</a>
   </div>
   {{- end -}}
   {{- with $work }}
-  <div class="material-card">
+  <div class="material-card" data-material-role="learner">
     {{- with .thumbnail }}<a href="{{ $work.file | relURL }}" download><img src="{{ . | relURL }}" alt="{{ i18n "preview_worksheet" }}" loading="lazy"></a>{{ end -}}
     <div class="material-card-title">{{ i18n "worksheet" }}</div>
+    <a class="download-btn" href="{{ .file | relURL }}" download>{{ i18n "download" }} .pdf</a>
+  </div>
+  {{- end -}}
+  {{- with $teacher }}
+  <div class="material-card" data-material-role="teacher">
+    <div class="material-card-title">{{ i18n "worksheet_teacher" | default "Teacher worksheet with answers" }}</div>
+    <a class="download-btn" href="{{ .file | relURL }}" download>{{ i18n "download" }} .pdf</a>
+  </div>
+  {{- end -}}
+  {{- with $assessment }}
+  <div class="material-card" data-material-role="assessment-learner">
+    {{- with .thumbnail }}<a href="{{ $assessment.file | relURL }}" download><img src="{{ . | relURL }}" alt="{{ i18n "assessment" }}" loading="lazy"></a>{{ end -}}
+    <div class="material-card-title">{{ i18n "assessment" }}</div>
+    <a class="download-btn" href="{{ .file | relURL }}" download>{{ i18n "download" }} .pdf</a>
+  </div>
+  {{- end -}}
+  {{- with $assessmentTeacher }}
+  <div class="material-card" data-material-role="assessment-teacher">
+    <div class="material-card-title">{{ i18n "assessment_teacher" }}</div>
     <a class="download-btn" href="{{ .file | relURL }}" download>{{ i18n "download" }} .pdf</a>
   </div>
   {{- end -}}

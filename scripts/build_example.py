@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import sys
 from new_course import scaffold
+from html_tree import parse
 
 KIT=Path(__file__).resolve().parents[1]
 def main():
@@ -17,5 +18,15 @@ def main():
     env={**os.environ,'HUGO_MODULE_WORKSPACE':str(root/'go.work')}
     subprocess.run([sys.executable,str(KIT/'bin/kit'),'build',str(root)],env=env,check=True)
     subprocess.run([sys.executable,str(KIT/'scripts/verify_eqs.py'),str(root/'public')],env=env,check=True)
+    page=parse((root/'public/appendices/rendering-contract/index.html').read_text())
+    for anchor in ['activate','previous-activation-heading']:
+        matches=[n for n in page.walk() if n.attrs.get('id')==anchor]
+        if len(matches)!=1: raise RuntimeError(f'heading contract lost or duplicated {anchor}')
+    keys=[n for n in page.walk() if n.tag=='details' and n.attrs.get('data-role')=='key']
+    if len(keys)!=3 or any('open' in n.attrs for n in keys):
+        raise RuntimeError('the three answer forms must render as closed, marked keys')
+    summaries=[n.text for key in keys for n in key.walk() if n.tag=='summary']
+    if not all(summaries) or 'Solutions' not in summaries:
+        raise RuntimeError('the summary parameter or translated answer label was lost')
     return 0
 if __name__=='__main__':raise SystemExit(main())

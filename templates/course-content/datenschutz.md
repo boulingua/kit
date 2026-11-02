@@ -3,6 +3,9 @@ page_type: legal
 title: Datenschutzerklärung
 author: S. Le Boulanger
 date: 2026-08-26
+analytics_policy: disabled
+analytics_notice_language: de
+analytics_notice_path: /datenschutz/
 ---
 
 ## 1. Verantwortlicher
@@ -60,18 +63,12 @@ Vorgang auf:
 
 ### Empfänger und Übermittlung in Drittländer
 
-Hosting der Website-Auslieferung erfolgt durch GitHub, Inc.
-(siehe Abschnitt 3 *Server-Log-Dateien*); damit ist eine
-Verarbeitung personenbezogener Daten in den USA möglich.
-Schriftarten werden über Google Fonts (siehe Abschnitt 5)
-ausgeliefert; auch hier ist eine Übermittlung in die USA möglich.
-Beide Übermittlungen erfolgen auf Grundlage des EU-US Data
-Privacy Framework bzw. der Standardvertragsklauseln.
-
-Eine darüber hinausgehende Übermittlung in Drittländer findet
-**nicht** statt. Die Reichweitenmessung mittels Plausible
-Analytics erfolgt auf einer **selbst gehosteten Instanz auf einem
-Server in Deutschland**; siehe Abschnitt 4.
+Die Website wird über GitHub Pages ausgeliefert. Beim Abruf verarbeitet
+GitHub technische Verbindungsdaten; dabei ist eine Verarbeitung in den USA
+möglich. Einzelheiten stehen in der verlinkten Datenschutzerklärung von GitHub.
+Die Schriftdateien werden von dieser Website selbst ausgeliefert.
+Der aktuelle Einsatz von Plausible Analytics ist im Abschnitt zur
+Reichweitenmessung beschrieben; Angaben zu weiteren Diensten stehen gesondert.
 
 ### Widerruf Ihrer Einwilligung zur Datenverarbeitung
 
@@ -177,37 +174,13 @@ Diese Daten werden nicht ohne Ihre Einwilligung weitergegeben.
 
 ## 4. Analyse-Tools und Tools von Drittanbietern
 
-### Plausible Analytics (selbst gehostet)
+### Plausible Analytics
 
-Diese Website verwendet **Plausible Analytics** zur statistischen
-Reichweitenmessung. Plausible wird als **selbst gehostete
-Instanz** unter `analytics.hellebo.de` betrieben; der Server
-steht in **Deutschland**. Eine Übermittlung der Messdaten an die
-Plausible Insights OÜ (Tartu, Estland) oder an andere
-Drittanbieter findet **nicht** statt.
-
-Plausible ist **cookielos** und erhebt **keine
-personenbezogenen Daten** im engeren Sinn. IP-Adressen werden
-nicht gespeichert; zur Sitzungserkennung wird täglich rotierend
-ein gesalzener Hash gebildet. Eine seitenübergreifende
-Wiedererkennung von Nutzerinnen und Nutzern findet nicht statt.
-
-Erhoben und ausgewertet werden insbesondere:
-
-- aufgerufene Seiten-URL,
-- Verweisquelle (Referrer),
-- grobe Geolokation auf Länderebene,
-- Gerätetyp, Browser, Betriebssystem (anhand User-Agent).
-
-Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes
-Interesse an einer datensparsamen, anonymen
-Reichweitenmessung). Eine Einwilligung nach § 25 TDDDG ist
-nicht erforderlich, da kein Zugriff auf bzw. keine Speicherung
-von Informationen im Endgerät stattfindet, die nicht unbedingt
-erforderlich sind.
-
-Weitere Informationen:
-<https://plausible.io/data-policy>
+Auf dieser Website ist Plausible Analytics deaktiviert.
+Es wird kein Plausible-Analyseskript geladen. Seitenaufrufe, Dateidownloads
+und Klicks auf externe Links werden nicht an einen Plausible-Endpunkt gemeldet.
+Die Angaben zu Hosting und gegebenenfalls anderen Diensten stehen in den
+jeweiligen Abschnitten dieser Erklärung.
 
 ### VG Wort Zählpixel (Standard)
 

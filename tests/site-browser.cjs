@@ -24,7 +24,8 @@ function walk(root) {return fs.readdirSync(root,{withFileTypes:true}).flatMap(e=
   const browser=await chromium.launch({headless:true,channel:'chromium'});const results=[];
   try {
     for(const repo of repos) {
-      const code=path.basename(repo), root=path.join(repo,'public');
+      const code=path.basename(repo), root=process.env.BROWSER_BUILT_ROOT
+        ? path.resolve(process.env.BROWSER_BUILT_ROOT,code) : path.join(repo,'public');
       const config=fs.readFileSync(path.join(repo,'hugo.toml'),'utf8');
       const prefix=new URL(config.match(/^baseURL\s*=\s*"([^"]+)"/m)[1]).pathname;
       const server=await serve(root,prefix), origin=`http://127.0.0.1:${server.address().port}`, base=origin+prefix;
@@ -39,11 +40,45 @@ function walk(root) {return fs.readdirSync(root,{withFileTypes:true}).flatMap(e=
         const candidates=[start];
         const unit=walk(root).find(p=>/\/units\/[^/]+\/index.html$/.test(p)&&!/_exam|[-]exam/.test(p));
         if(unit)candidates.push(path.relative(root,path.dirname(unit)).split(path.sep).join('/')+'/');
+        const exam=walk(root).find(p=>/\/units\/[^/]+[-_]exam\/index.html$/.test(p));
+        if(exam)candidates.push(path.relative(root,path.dirname(exam)).split(path.sep).join('/')+'/');
+        if(process.env.BROWSER_PRONUNCIATION==='1') {
+          for(const file of walk(root).filter(p=>/\/aussprache\/[^/]+\/index.html$/.test(p)))
+            candidates.push(path.relative(root,path.dirname(file)).split(path.sep).join('/')+'/');
+        }
         for(const name of ['search','materials','materiel'])if(fs.existsSync(path.join(root,name,'index.html')))candidates.push(name+'/');
         if(code==='ressources') candidates.push('de/overview/','en/overview/','fr/overview/');
         for(const destination of candidates) {
           await page.goto(base+destination);await page.evaluate(()=>document.fonts.ready);
           await expect(page.locator('#main-content')).toHaveCount(1);
+          if (destination.includes('/units/')) {
+            const keyed = page.locator('h2#activate');
+            if (await keyed.count()) {
+              for (const key of ['activate','input','practise','apply','reflect']) await expect(page.locator(`h2#${key}`)).toHaveCount(1);
+              const duplicates = await page.evaluate(()=>{
+                const ids=[...document.querySelectorAll('[id]')].map(n=>n.id);
+                return ids.filter((id,i)=>ids.indexOf(id)!==i);
+              });
+              assert.deepEqual(duplicates, [], 'heading migration introduced duplicate targets');
+            }
+            const teacher = page.locator('[data-material-role="teacher"] a[download]');
+            if (await teacher.count()) {
+              const learner = page.locator('[data-material-role="learner"] a.download-btn');
+              await expect(teacher).toHaveCount(1); await expect(learner).toHaveCount(1);
+              const teacherURL=await teacher.getAttribute('href'), learnerURL=await learner.getAttribute('href');
+              assert.notEqual(teacherURL, learnerURL, 'learner and teacher copies must be distinct');
+              for (const url of [teacherURL,learnerURL]) assert.equal((await context.request.get(new URL(url,base).href)).status(),200);
+            }
+            for (const key of await page.locator('details[data-role="key"]').all()) assert.equal(await key.evaluate(n=>n.open),false);
+            const examTeacher=page.locator('[data-material-role="assessment-teacher"] a[download]');
+            if(await examTeacher.count()) {
+              const examLearner=page.locator('[data-material-role="assessment-learner"] a.download-btn');
+              await expect(examTeacher).toHaveCount(1);await expect(examLearner).toHaveCount(1);
+              const teacherURL=await examTeacher.getAttribute('href'),learnerURL=await examLearner.getAttribute('href');
+              assert.notEqual(teacherURL,learnerURL);
+              for(const url of [teacherURL,learnerURL])assert.equal((await context.request.get(new URL(url,base).href)).status(),200);
+            }
+          }
           if(code==='ressources' && destination.endsWith('/overview/')) {
             const cards=page.locator('#ov-list .ov-card');
             await expect(cards.first()).toBeVisible();
@@ -86,6 +121,17 @@ function walk(root) {return fs.readdirSync(root,{withFileTypes:true}).flatMap(e=
           }
           const report=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
           violations.push(...report.violations.map(v=>({page:destination,id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))})));
+          if(await page.locator('.material-links .download-btn').count()) {
+            for(const [scheme,hover] of [['light',true],['dark',false],['dark',true]]) {
+              await page.emulateMedia({colorScheme:scheme});
+              if(hover)await page.locator('.material-links .download-btn').first().hover();
+              else await page.mouse.move(0,0);
+              await page.evaluate(()=>Promise.all(document.getAnimations().map(animation=>animation.finished.catch(()=>{}))));
+              const themed=await new AxeBuilder({page}).include('.material-links').withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
+              violations.push(...themed.violations.map(v=>({page:destination,scheme,hover,id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))})));
+            }
+            await page.emulateMedia({colorScheme:'light'});await page.mouse.move(0,0);
+          }
           if(destination==='search/') {
             const query={efl:'hello',fle:'bonjour',daf:'Name'}[code]||'language';
             await page.getByRole('searchbox').fill(query);
@@ -98,6 +144,13 @@ function walk(root) {return fs.readdirSync(root,{withFileTypes:true}).flatMap(e=
           const menu=page.locator('.navigation-list');
           if(await menu.count())await expect(menu).toBeHidden();
           assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,`${code}/${destination}: horizontal overflow`);
+          for(const table of await page.locator('.table-scroll').all()) {
+            if(await table.evaluate(n=>n.scrollWidth>n.clientWidth+1)) {
+              await table.focus();await page.keyboard.press('ArrowRight');
+              await expect.poll(()=>table.evaluate(n=>n.scrollLeft)).toBeGreaterThan(0);
+              await table.evaluate(n=>{n.scrollLeft=0;});
+            }
+          }
           await page.screenshot({path:path.join(output,`${code}-${destination.replaceAll('/','_')||'home'}-mobile.png`)});
           await page.setViewportSize({width:1440,height:1000});
         }

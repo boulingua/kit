@@ -7,13 +7,17 @@ from pathlib import Path
 import sys
 from html_tree import Element, parse
 
-CONTRACTS = {'vocab', 'niveau', 'gap', 'recycles', 'extension', 'tl'}
+CONTRACTS = {'vocab', 'niveau', 'gap', 'recycles', 'extension', 'tl', 'callout'}
 
 
 def check(html: str, rel: str) -> list[str]:
     bad = []
     for node in parse(html).walk():
         classes, attrs = node.classes, node.attrs
+        if attrs.get('data-role') == 'key':
+            containers = [n for n in node.walk() if n.tag == 'details']
+            if not containers or any('open' in n.attrs for n in containers):
+                bad.append(f'{rel}: answer key must use details closed by default')
         if 'vocab' in classes:
             cells = [n for n in node.walk() if n.tag in ('th', 'td')]
             headers = [n for n in cells if n.tag == 'th']
@@ -50,6 +54,8 @@ def check(html: str, rel: str) -> list[str]:
 
 def main() -> int:
     root = Path(sys.argv[1] if len(sys.argv) > 1 else 'public')
+    if (root / 'content').is_dir():
+        root = root / 'public'
     pages = sorted(root.rglob('*.html')) if root.is_dir() else []
     if not pages:
         print(f'::error::{root}: no built HTML pages; build the site first')

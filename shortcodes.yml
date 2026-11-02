@@ -29,6 +29,20 @@ version: 1
 
 shortcodes:
 
+  - name: relref
+    html: Hugo built-in relref
+    kind: furniture
+    owns: []
+    a11y: Resolves the href of a named Markdown navigation link.
+    latex_deferred: Assessment pointers are navigation; worksheets contain learner tasks and the standalone assessment is linked from the unit page.
+
+  - name: ref
+    html: Hugo built-in ref
+    kind: furniture
+    owns: []
+    a11y: Resolves the href of a named Markdown navigation link.
+    latex_deferred: Assessment pointers are navigation; worksheets contain learner tasks and the standalone assessment is linked from the unit page.
+
   # ── the EQS five ───────────────────────────────────────────────────────────
   - name: vocab
     html: layouts/_shortcodes/vocab.html

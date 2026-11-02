@@ -64,6 +64,28 @@ class SafeAuthoring(unittest.TestCase):
             self.assertEqual((out/'texte1.ogg').read_bytes(),b'human voice')
             self.assertEqual(json.loads((data/'lesson.json').read_text()),[human])
 
+    def test_broad_audio_glob_does_not_generate_legal_or_exam_pages(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td);data,out,model=self.fixture(root)
+            for kind in ['legal','exam','reference']:
+                page=root/'content'/kind/'index.md';page.parent.mkdir(parents=True)
+                page.write_text('---\npage_type: '+kind+'\nmaterial_slug: lesson\n---\nDo not synthesize this page.\n')
+            human={'file':'/efl/materials/audio/lesson/texte1.ogg','label':'Reader','transcript':'Teacher recording','source':'human'}
+            (data/'lesson.json').write_text(json.dumps([human]));(out/'texte1.ogg').write_bytes(b'human voice')
+            with patch.object(audio,'extract_segments',return_value=[('texte','Text','Text')]) as extract, patch.object(audio,'synth') as synth:
+                self.assertEqual(audio.main([str(root),str(model),'en','content/**/index.md','--all']),0)
+            self.assertEqual(extract.call_count,1);synth.assert_not_called()
+
+    def test_each_main_invocation_discards_prior_loaded_voice_sessions(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td);data,out,model=self.fixture(root)
+            for version in [b'first model',b'replaced model']:
+                model.write_bytes(version)
+                audio._PIPER_VOICES[str(model)]=object()
+                with patch.object(audio,'extract_segments',return_value=[]):
+                    self.assertEqual(audio.main([str(root),str(model),'en','content/**/index.md','--all']),1)
+                self.assertEqual(audio._PIPER_VOICES,{})
+
     def test_failed_generation_preserves_published_audio_and_manifest(self):
         with tempfile.TemporaryDirectory() as td:
             root=Path(td);data,out,model=self.fixture(root)
