@@ -256,3 +256,23 @@ No style token or print-template change was made by these browser repairs. The
 1,064 candidate audio clips remain technically verified with all review decisions
 pending. Teaching-content deficits, native review, accepted mappings, classroom
 timing and compatible foundation publication remain explicit release work.
+
+
+## Hosted checkout identity follow-up — 2 November 2026
+
+Hosted review checkouts are named `course`, so public counting-mark lock paths
+now derive their mount prefix from Hugo's declared baseURL. Root-relative locks
+remain supported; only consistently prefixed locks are normalized, using whole
+path boundaries. Seven regressions preserve rejection of missing, duplicated or
+wrong-page marks. Renamed copies of the current source/configuration against the
+existing EFL/FLE/DaF builds pass with 370/323/68 marks respectively. Their current
+locks were already root-relative; the prefixed-lock defect was reproduced in a
+separate fixture. The full kit suite now passes 163 tests. No material producer,
+PDF, audio or source-content bytes changed in this gate repair.
+
+The matching org A1 validator now verifies module/site/role/origin consistency,
+with explicit hub overrides and exact, retiring product compatibility copies.
+Its all-consumer and renamed-checkout evidence is recorded in the suite handover.
+The previous hosted kit checkpoint `8335e5f` passed
+[run 41479493994](https://github.com/boulingua/kit/actions/runs/41479493994);
+new hosted runs must identify this later gate revision separately.

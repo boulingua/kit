@@ -24,11 +24,51 @@ from __future__ import annotations
 import csv
 import re
 import sys
+import tomllib
+from urllib.parse import urlsplit
 
 ALIAS_RE = re.compile(r"""http-equiv\s*=\s*["']?refresh""", re.I)
 from pathlib import Path
 
 PIXEL_RE = re.compile(r"met\.vgwort\.de/na/([0-9a-f]{32})")
+
+
+
+def publication_prefix(repo: Path) -> str:
+    """Read the public mount path; a checkout directory is not a URL identity.
+
+    Older root-relative locks can still be checked without Hugo configuration.
+    When configuration exists, an invalid baseURL cannot authorize stripping.
+    """
+    config = repo / "hugo.toml"
+    if not config.is_file():
+        return ""
+    data = tomllib.loads(config.read_text(encoding="utf-8"))
+    url = urlsplit(data.get("baseURL", ""))
+    if url.scheme not in {"https", "http"} or not url.netloc or url.query or url.fragment:
+        raise ValueError("Hugo baseURL must be an absolute HTTP(S) publication URL")
+    path = url.path.rstrip("/")
+    if "//" in path or any(part in {".", ".."} for part in path.split("/")):
+        raise ValueError("Hugo baseURL must have a canonical publication path")
+    return path
+
+
+def lock_paths(rows, prefix):
+    """Support consistently site-relative or publication-prefixed lock rows.
+
+    Strip only a whole declared path prefix, and only when every row uses it.
+    A coincidental first folder name must never choose a different lock mode.
+    """
+    paths = []
+    for row in rows:
+        path = row["url"]
+        parsed = urlsplit(path)
+        if parsed.scheme or parsed.netloc or parsed.query or parsed.fragment:
+            raise ValueError("locked URLs must be paths without origin, query or fragment")
+        paths.append(path if path.startswith("/") else "/" + path)
+    if prefix and all(path == prefix or path.startswith(prefix + "/") for path in paths):
+        return [path[len(prefix):] or "/" for path in paths]
+    return paths
 
 
 def main() -> int:
@@ -98,16 +138,14 @@ def main() -> int:
         for c in set(PIXEL_RE.findall(txt)):
             rendered.setdefault(c, []).append(rel)
 
-    base = ""
-    first = next((r["url"] for r in rows), "")
-    for cand in (repo.name,):
-        if first.startswith(f"/{cand}/"):
-            base = f"/{cand}"
+    try:
+        expected_paths = lock_paths(rows, publication_prefix(repo))
+    except (OSError, ValueError, TypeError) as exc:
+        print(f"::error::cannot resolve locked publication paths: {exc}", file=sys.stderr)
+        return 2
 
     missing, wrong, dup = [], [], []
-    for r in rows:
-        want = r["url"] if r["url"].startswith("/") else "/" + r["url"]
-        want = want[len(base):] if base and want.startswith(base) else want
+    for r, want in zip(rows, expected_paths):
         where = rendered.get(r["code"], [])
         if not where:
             missing.append((r["code"], want))
