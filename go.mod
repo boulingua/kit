@@ -1,4 +1,4 @@
-module github.com/boulingua/kit
+module github.com/boulingua/kit/v2
 
 go 1.26.1
 

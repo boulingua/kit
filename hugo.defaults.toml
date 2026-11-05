@@ -152,6 +152,6 @@ enableRobotsTXT = true
   # The kit was missing from this template entirely, so every course scaffolded
   # from it would have been created without the platform.
   [[module.imports]]
-    path = "github.com/boulingua/kit"
+    path = "github.com/boulingua/kit/v2"
   [[module.imports]]
     path = "github.com/luizdepra/hugo-coder"

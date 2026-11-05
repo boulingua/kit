@@ -53,7 +53,7 @@ class NewCourse(unittest.TestCase):
             release={'schema_version':1,'state':'published','org':{'repository':'boulingua/.github','commit':commit},'kit':{'repository':'boulingua/kit','commit':'b'*40,'version':'2.3.0'},'curriculum':{'repository':'boulingua/curriculum','commit':'c'*40,'version':'1.4.0'},'curriculum_schema_sha256':hashlib.sha256(schema.encode()).hexdigest(),'curriculum_schema_text':schema,'go_version':'1.27.2','caller':caller,'caller_sha256':hashlib.sha256(caller.encode()).hexdigest(),'kit_sum':'h1:'+'A'*43+'=','kit_go_mod_sum':'h1:'+'A'*43+'='}
             path=root/'release.json';path.write_text(json.dumps(release));scaffold('nsf',dest,path)
             valid=json.loads(json.dumps(release))
-            self.assertIn('kit v2.3.0',(dest/'go.mod').read_text())
+            self.assertIn('kit/v2 v2.3.0',(dest/'go.mod').read_text())
             self.assertIn('go 1.27.2',(dest/'go.mod').read_text())
             self.assertEqual(tomllib.loads((dest/'hugo.toml').read_text())['params']['navTitle'],'Norwegisch (Bokmål)')
             self.assertEqual(yaml.safe_load((dest/'curriculum.yml').read_text())['framework_version'],'1.4.0')

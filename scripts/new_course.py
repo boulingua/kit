@@ -63,6 +63,8 @@ def scaffold(code, destination, release_manifest=None):
         p.parent.mkdir(parents=True, exist_ok=True); p.write_text(text.rstrip() + '\n', encoding='utf-8'); written.append(relative)
     def page(relative, title, body, **front):
         put('content/'+relative, '---\n'+yaml.safe_dump({'title': title, 'page_type': 'section', **front}, allow_unicode=True, sort_keys=False)+'---\n\n'+body+'\n')
+    major=int(release['kit']['version'].split('.')[0])
+    module_path='github.com/boulingua/kit'+(f'/v{major}' if major>=2 else '')
     config = f'''baseURL = "https://boulingua.github.io/{code}/"
 title = "{name} — Boulingua"
 languageCode = "de"
@@ -124,7 +126,7 @@ enableRobotsTXT = true
   weight = 93
 [module]
   [[module.imports]]
-    path = "github.com/boulingua/kit"
+    path = "{module_path}"
   [[module.imports]]
     path = "github.com/luizdepra/hugo-coder"
 '''
@@ -142,13 +144,13 @@ enableRobotsTXT = true
 go {go_version}
 
 require (
-    github.com/boulingua/kit v{release['kit']['version']} // indirect
+    {module_path} v{release['kit']['version']} // indirect
     github.com/luizdepra/hugo-coder v0.0.0-20260305123245-3d3bbd75d7bb // indirect
 )
 ''')
     put('.github/workflows/deploy.yml', release.get('caller') or (KIT/'templates/deploy.yml').read_text())
     if release_manifest:
-        prefix='github.com/boulingua/kit v'+release['kit']['version']
+        prefix=module_path+' v'+release['kit']['version']
         put('go.sum', prefix+' '+release['kit_sum']+'\n'+prefix+'/go.mod '+release['kit_go_mod_sum']+'\n')
     put('.gitignore', '/public/\n/resources/\n/node_modules/\n/build/\n/go.work\n/go.work.sum\n.hugo_build.lock\n__pycache__/\n*.pyc\n.venv/\n.DS_Store\n_materials/build/\n')
     put('.gitattributes', '*.pdf binary\n')

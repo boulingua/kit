@@ -2,6 +2,7 @@
 """Build the shared teaching examples with the current kit checkout."""
 from pathlib import Path
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -13,6 +14,14 @@ def main():
     root=KIT/'build/example'
     scaffold('daf',root)
     shutil.copytree(KIT/'example',root/'content',dirs_exist_ok=True)
+    # Match the development workspace's module identity across major releases.
+    module=(KIT/'go.mod').read_text().splitlines()[0].split()[1]
+    major=module.rsplit('/v',1)[1] if '/v' in module else '1'
+    for name in ['go.mod','hugo.toml']:
+        path=root/name
+        text=re.sub(r'github\.com/boulingua/kit(?:/v[0-9]+)?',module,path.read_text())
+        if name=='go.mod':text=re.sub(re.escape(module)+r' v[^\s]+',module+' v'+major+'.0.0',text)
+        path.write_text(text)
     # Exercise the current module, not the last published release.
     (root/'go.work').write_text('go 1.26.1\nuse '+str(KIT)+'\n')
     env={**os.environ,'HUGO_MODULE_WORKSPACE':str(root/'go.work')}
