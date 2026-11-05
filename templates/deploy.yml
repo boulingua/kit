@@ -19,6 +19,6 @@ permissions: { contents: read, pages: write, id-token: write }
 concurrency: { group: pages, cancel-in-progress: false }
 jobs:
   course:
-    uses: boulingua/.github/.github/workflows/course-build.yml@663317bd1996315e4b5ac730142da3f18777b9b4
+    uses: boulingua/.github/.github/workflows/course-build.yml@654c70d7a52ee6281b9394d59e762654d1df9f7f
     with:
-      org_ref: 663317bd1996315e4b5ac730142da3f18777b9b4
+      org_ref: 654c70d7a52ee6281b9394d59e762654d1df9f7f
