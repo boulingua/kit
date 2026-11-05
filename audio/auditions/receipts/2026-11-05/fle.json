@@ -1,0 +1,54 @@
+{
+  "code": "fle",
+  "voice": "fr_FR-mls-medium",
+  "speaker_id": 0,
+  "generated_at": "2026-11-05T11:14:51.198184+00:00",
+  "url": "https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/fr/fr_FR/mls/medium/fr_FR-mls-medium.onnx",
+  "model_sha256": "0ed223f78466917f2bae05ee90096ce69ab1fdeb251f55590d0e7422d234e162",
+  "config_sha256": "252b0b0a6e4cc4949e23eccb956f9c779986c32f934f2f7e2191e5fdc2edca61",
+  "model_card_sha256": "443ca90f1ed8e57d9fb802da6dc19c302d5d9b51ddbfbf27a17f3fb5c37ad154",
+  "licence": "CC BY 4.0",
+  "piper_version": "1.8.0",
+  "listening_verdict": "pending",
+  "samples": {
+    "dialogue": {
+      "file": "fle-dialogue.wav",
+      "sha256": "be8a05a77b9c6b36533a566b6494b6e06e560ad7840596bc825a5bf8e32dae08",
+      "transcript": "Bonjour, est-ce que cette place est libre ? Oui, bien sûr. Vous allez à Lyon ? Non, je descends à Dijon. Le train arrive à quelle heure ? À onze heures vingt. Merci beaucoup. Je vous en prie, bon voyage !",
+      "speech_input": "Bonjour, est-ce que cette place est libre ? Oui, bien sûr. Vous allez à Lyon ? Non, je descends à Dijon. Le train arrive à quelle heure ? À onze heures vingt. Merci beaucoup. Je vous en prie, bon voyage !",
+      "warnings": [],
+      "transcript_sha256": "b6eb7570d36f7a5ac30c5432e15c4f8da69f234520acf1ce9be53c3d579a5a7c",
+      "sample_rate": 22050,
+      "channels": 1,
+      "seconds": 26.552,
+      "rms": 0.100497,
+      "clipped_fraction": 1.4e-05
+    },
+    "vocabulary": {
+      "file": "fle-vocabulary.wav",
+      "sha256": "3d02a99dec95b74a7a56f2d8be38fe4977244a62832ca5c73235ba89ecd9e181",
+      "transcript": "Un élève, une école, la fenêtre, une fête, un garçon, ma sœur. Dessus, dessous. Le pain, le vin, le vent. Deux amis, les enfants. Un, onze, vingt et un, quatre-vingts.",
+      "speech_input": "Un élève, une école, la fenêtre, une fête, un garçon, ma sœur. Dessus, dessous. Le pain, le vin, le vent. Deux amis, les enfants. Un, onze, vingt et un, quatre-vingts.",
+      "warnings": [],
+      "transcript_sha256": "48b6cd231bf36facfbb1006179215c1ef718ef32d776a3eb4652a44fdd430ea1",
+      "sample_rate": 22050,
+      "channels": 1,
+      "seconds": 15.534,
+      "rms": 0.109123,
+      "clipped_fraction": 1.5e-05
+    },
+    "continuous": {
+      "file": "fle-continuous.wav",
+      "sha256": "eec19ad10977b1d1fae5252b484ca41d9f6d2166723569cc573d18d9c11b8617",
+      "transcript": "Ce matin, Léa prépare une visite au musée avec sa classe. Elle met un carnet et un crayon dans son sac, puis elle rejoint ses amis devant l'école. Leur professeur explique le programme de la journée. Ils vont d'abord regarder les tableaux, puis travailler en petits groupes. À midi, ils mangeront dans le jardin si le temps le permet. Léa espère découvrir une œuvre qu'elle pourra présenter à sa sœur en rentrant chez elle.",
+      "speech_input": "Ce matin, Léa prépare une visite au musée avec sa classe. Elle met un carnet et un crayon dans son sac, puis elle rejoint ses amis devant l'école. Leur professeur explique le programme de la journée. Ils vont d'abord regarder les tableaux, puis travailler en petits groupes. À midi, ils mangeront dans le jardin si le temps le permet. Léa espère découvrir une œuvre qu'elle pourra présenter à sa sœur en rentrant chez elle.",
+      "warnings": [],
+      "transcript_sha256": "0e1c03b64a2ebd3e30ce662714e47dfb90b0360820095f29e0d6896eab9917f4",
+      "sample_rate": 22050,
+      "channels": 1,
+      "seconds": 26.285,
+      "rms": 0.136669,
+      "clipped_fraction": 1e-05
+    }
+  }
+}

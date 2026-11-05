@@ -1,0 +1,54 @@
+{
+  "code": "efl",
+  "voice": "en_GB-cori-medium",
+  "speaker_id": 0,
+  "generated_at": "2026-11-05T11:14:46.577992+00:00",
+  "url": "https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/en/en_GB/cori/medium/en_GB-cori-medium.onnx",
+  "model_sha256": "1899f98e5fb8310154f3c2973f4b8a929ba7245e722b3d3a85680b833d95f10d",
+  "config_sha256": "e262c16d7f192f69d4edd6b4ef8a5915379e67495fcc402f1ab15eeb33da3d36",
+  "model_card_sha256": "38d76dfde845837b184668f8bab1c6426ad740b1af0fcebc349037822739e536",
+  "licence": "public domain",
+  "piper_version": "1.8.0",
+  "listening_verdict": "pending",
+  "samples": {
+    "dialogue": {
+      "file": "efl-dialogue.wav",
+      "sha256": "1c2e7225e74919c0a0468dae77db81bc37fbea829fe94dd18d37f7c9a23bc4ec",
+      "transcript": "Good morning. Is this the bus to the museum? Yes, it is. How much is a return ticket? Three pounds fifty, please. Thank you. Does the museum open at half past nine? No, it opens at ten on Thursdays. Then I have time for breakfast.",
+      "speech_input": "Good morning. Is this the bus to the museum? Yes, it is. How much is a return ticket? Three pounds fifty, please. Thank you. Does the museum open at half past nine? No, it opens at ten on Thursdays. Then I have time for breakfast.",
+      "warnings": [],
+      "transcript_sha256": "070d9490a0fe21fb4f000965d7ccb1d56b2f26a0b8e076b20dc4f055fb9f8708",
+      "sample_rate": 22050,
+      "channels": 1,
+      "seconds": 15.987,
+      "rms": 0.197379,
+      "clipped_fraction": 2.6e-05
+    },
+    "vocabulary": {
+      "file": "efl-vocabulary.wav",
+      "sha256": "7184f3a841cf58e1947ec3eb38a10328af4e3f27e8a0c19819bc23527ff226c6",
+      "transcript": "Ship, sheep, thin, this, thought, though, through. Read yesterday, read tomorrow. A present, to present. A photograph, a photographer. One, thirteen, thirty, one hundred.",
+      "speech_input": "Ship, sheep, thin, this, thought, though, through. Read yesterday, read tomorrow. A present, to present. A photograph, a photographer. One, thirteen, thirty, one hundred.",
+      "warnings": [],
+      "transcript_sha256": "292db6db9aaee3918c73aa0e8deaf8ba6f8528ccf83b855a19501518b0e807d0",
+      "sample_rate": 22050,
+      "channels": 1,
+      "seconds": 13.653,
+      "rms": 0.152528,
+      "clipped_fraction": 1.7e-05
+    },
+    "continuous": {
+      "file": "efl-continuous.wav",
+      "sha256": "ee05f5225f66e4708ffb0f76f992cd31126e94e949bc81ce6ab127d9fad7f663",
+      "transcript": "On Saturday, Maya and her brother walk to the library. It has been raining all morning, but now the clouds are moving away. At the entrance, they meet their neighbour, who is returning a book about gardens. Maya chooses a story about a journey across the sea. Her brother asks the librarian for a book about trains. Before going home, they sit by the window and read the first few pages.",
+      "speech_input": "On Saturday, Maya and her brother walk to the library. It has been raining all morning, but now the clouds are moving away. At the entrance, they meet their neighbour, who is returning a book about gardens. Maya chooses a story about a journey across the sea. Her brother asks the librarian for a book about trains. Before going home, they sit by the window and read the first few pages.",
+      "warnings": [],
+      "transcript_sha256": "b5d1fd03fa56c6b1bf77abdc714aba6ddca9726976759189951ba242d9778127",
+      "sample_rate": 22050,
+      "channels": 1,
+      "seconds": 22.721,
+      "rms": 0.191237,
+      "clipped_fraction": 1.2e-05
+    }
+  }
+}

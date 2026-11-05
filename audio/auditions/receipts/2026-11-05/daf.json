@@ -1,0 +1,54 @@
+{
+  "code": "daf",
+  "voice": "de_DE-mls-medium",
+  "speaker_id": 0,
+  "generated_at": "2026-11-05T11:14:36.832685+00:00",
+  "url": "https://huggingface.co/rhasspy/piper-voices/resolve/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/de/de_DE/mls/medium/de_DE-mls-medium.onnx",
+  "model_sha256": "69cd1d2aa5a35839a518966fcc4924b5f93e5f8c948ed0752b1a616ad53f65bf",
+  "config_sha256": "b0af1c89ddfdc72d32e015729b0e89b99eec13c2c8caa1db7488d98e9e570b40",
+  "model_card_sha256": "ca1bf03a3c287fb6968acfa010e1917f85f0aa59db0f371efc3a2857f4035ffd",
+  "licence": "CC BY 4.0",
+  "piper_version": "1.8.0",
+  "listening_verdict": "pending",
+  "samples": {
+    "dialogue": {
+      "file": "daf-dialogue.wav",
+      "sha256": "1155df7579e00c905a1231738083352667ac9242c35c0ef41efe748c02b81805",
+      "transcript": "Guten Tag. Fährt dieser Zug nach Köln? Ja, aber Sie müssen in Düsseldorf umsteigen. Wie viel Zeit habe ich dort? Zwölf Minuten. Reicht das? Normalerweise schon. Bitte achten Sie auf die Durchsagen. Vielen Dank für Ihre Hilfe.",
+      "speech_input": "Guten Tag. Fährt dieser Zug nach Köln? Ja, aber Sie müssen in Düsseldorf umsteigen. Wie viel Zeit habe ich dort? Zwölf Minuten. Reicht das? Normalerweise schon. Bitte achten Sie auf die Durchsagen. Vielen Dank für Ihre Hilfe.",
+      "warnings": [],
+      "transcript_sha256": "8348ad4ca8d47b675a2951aaf30e2a157c4654897b32284eb7c4515bc7ba3996",
+      "sample_rate": 22050,
+      "channels": 1,
+      "seconds": 45.116,
+      "rms": 0.111101,
+      "clipped_fraction": 9e-06
+    },
+    "vocabulary": {
+      "file": "daf-vocabulary.wav",
+      "sha256": "7a98c4c8ca1f8bc713aaf6b82689ecc985f8b74fa1351528c233db4fcaaa4f29",
+      "transcript": "Äpfel, schön, grün, Straße. Die Stadt, der Staat. Ofen, offen. Kirche, Kirsche. Ein Buch, viele Bücher. Sechzehn, sechzig, einundzwanzig. Eine E-Mail, zwei Fahrräder.",
+      "speech_input": "Äpfel, schön, grün, Straße. Die Stadt, der Staat. Ofen, offen. Kirche, Kirsche. Ein Buch, viele Bücher. Sechzehn, sechzig, einundzwanzig. Eine E-Mail, zwei Fahrräder.",
+      "warnings": [],
+      "transcript_sha256": "4caa023918bd6448ff29a1b470e91f0f0de4cf06e3471f653cb1b4aa44a47b9a",
+      "sample_rate": 22050,
+      "channels": 1,
+      "seconds": 34.667,
+      "rms": 0.099124,
+      "clipped_fraction": 9e-06
+    },
+    "continuous": {
+      "file": "daf-continuous.wav",
+      "sha256": "f8627d6a88ebdff04ffa9f9ac17bfcea4b694fd6699068824680f4498279abf3",
+      "transcript": "Am Freitag besucht Amir seine Großmutter. Sie wohnt in einem kleinen Dorf am Fluss. Gemeinsam gehen sie zum Markt und kaufen frisches Gemüse für das Abendessen. Auf dem Rückweg beginnt es zu regnen. Zum Glück haben beide einen Schirm dabei. Zu Hause kochen sie eine Suppe und erzählen sich von ihrer Woche. Später zeigt die Großmutter alte Fotos. Amir erkennt den Garten wieder, aber das Haus auf dem Bild sieht ganz anders aus als heute.",
+      "speech_input": "Am Freitag besucht Amir seine Großmutter. Sie wohnt in einem kleinen Dorf am Fluss. Gemeinsam gehen sie zum Markt und kaufen frisches Gemüse für das Abendessen. Auf dem Rückweg beginnt es zu regnen. Zum Glück haben beide einen Schirm dabei. Zu Hause kochen sie eine Suppe und erzählen sich von ihrer Woche. Später zeigt die Großmutter alte Fotos. Amir erkennt den Garten wieder, aber das Haus auf dem Bild sieht ganz anders aus als heute.",
+      "warnings": [],
+      "transcript_sha256": "af70ae17f2549407476aa22a22eafaacf874fad15cae7009bcaf9a1245a24864",
+      "sample_rate": 22050,
+      "channels": 1,
+      "seconds": 49.517,
+      "rms": 0.112855,
+      "clipped_fraction": 7e-06
+    }
+  }
+}

@@ -16,7 +16,7 @@ languages:
 - code: efl
   language: English (United Kingdom)
   iso: en
-  status: candidate   # re-audition required: the voice changed
+  status: ready   # listening review confirmed 2026-11-05
   quality: medium
   num_speakers: 1
   licence: public domain
@@ -234,7 +234,7 @@ languages:
 - code: fle
   language: French
   iso: fr
-  status: candidate   # re-audition required: the voice changed
+  status: ready   # listening review confirmed 2026-11-05
   quality: medium
   num_speakers: 125
   licence: CC BY 4.0
@@ -306,7 +306,7 @@ languages:
 - code: daf
   language: German
   iso: de
-  status: candidate   # re-audition required: the voice changed
+  status: ready   # listening review confirmed 2026-11-05
   quality: medium
   num_speakers: 236
   licence: CC BY 4.0
